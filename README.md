@@ -29,7 +29,7 @@
 
 # Dockerfile
     
-    git clone -b refactor https://github.com/manuel-io/minicloud.git minicloud_docker
+    git clone https://github.com/manuel-io/minicloud.git minicloud_docker
     docker build -t minicloud .
     docker run -d -p 8080:80 --name minicloud minicloud:latest
 

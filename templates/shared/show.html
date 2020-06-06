@@ -1,21 +1,21 @@
 {% extends "layout.html" %}
 {% from "_macros.html" import aside with context %}
-  {% block body %}
-     {{ super() }}
-     {{ aside() }}
-  {% endblock %}
-  {% block nav %}
-  {% endblock %}
-  {% block header %}
-    {{ super() }}
-  {% endblock %}
-  {% block main %}
-    {{ super() }}
-    <section id="cloud">
-      {% for user in shared %}
-        <div class="nav">
-          <p>{{ user.username }}</p>
-        </div>
+{% block aside %}
+  {{ aside() }}
+{% endblock %}
+
+{% block nav %}
+{% endblock %}
+
+{% block header %}
+{% endblock %}
+
+{% block section %}
+  <section id="cloud">
+    {% for user in shared %}
+    <div class="nav">
+      <p>{{ user.username }}</p>
+    </div>
         <div class="cloud">
           {% for file in user.files %}
             <div class="view">
@@ -91,9 +91,5 @@
         </div>
       {% endfor %}
     </section>
-  {% endblock %}
-
-  {% block footer %}
-    {{ super() }}
   {% endblock %}
 

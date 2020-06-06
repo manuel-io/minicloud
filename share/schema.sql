@@ -1,117 +1,129 @@
 CREATE TABLE minicloud_users (
-id SERIAL UNIQUE PRIMARY KEY,
+id BiGSERIAL UNIQUE PRIMARY KEY,
+uuid VARCHAR(32) NOT NULL UNIQUE DEFAULT lpad(md5(random()::text), 32),
 name TEXT UNIQUE NOT NULL,
 email TEXT UNIQUE NOT NULL,
 password TEXT NOT NULL,
 admin BOOLEAN NOT NULL DEFAULT false,
 disabled BOOLEAN NOT NULL DEFAULT false,
-activation_key TEXT DEFAULT '0',
+media TEXT,
+activation_key VARCHAR(32),
 created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-updated_at TIMESTAMP NOT NULL,
-last_login TIMESTAMP
+updated_at TIMESTAMP NOT NULL
 );
 
-CREATE TABLE minicloud_files (
-id SERIAL UNIQUE PRIMARY KEY,
-uid TEXT NOT NULL DEFAULT lpad(md5(random()::text), 16),
-user_id INT NOT NULL REFERENCES minicloud_users(id) ON DELETE CASCADE,
-category TEXT NOT NULL DEFAULT 'Default',
+CREATE INDEX minicloud_users_uuid_idx ON minicloud_users (uuid);
+CREATE INDEX minicloud_users_name_idx ON minicloud_users (name);
+
+CREATE TABLE minicloud_uploads (
+id BIGSERIAL UNIQUE PRIMARY KEY,
+uid VARCHAR(16) NOT NULL DEFAULT lpad(md5(random()::text), 16),
+user_id BIGINT NOT NULL REFERENCES minicloud_users(id) ON DELETE CASCADE,
+reference BIGINT REFERENCES minicloud_uploads(id),
+backref BIGINT REFERENCES minicloud_uploads(id),
+lo OID,
+type INT NOT NULL,
 title TEXT NOT NULL,
-description TEXT,
-data_size INT NOT NULL,
-data_mime TEXT NOT NULL,
-thumbnail_mime TEXT,
-thumbnail bytea,
+size BIGINT NOT NULL,
+mime TEXT NOT NULL,
 created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 updated_at TIMESTAMP NOT NULL,
-UNIQUE (user_id, title, category),
+UNIQUE (user_id, title, reference),
 UNIQUE (user_id, uid)
 ) WITH OIDS;
 
-CREATE INDEX minicloud_files_uid_idx ON minicloud_files (user_id, uid);
-CREATE INDEX minicloud_files_category_idx ON minicloud_files (lower(category));
+CREATE INDEX minicloud_uploads_uid_idx ON minicloud_uploads (uid);
+CREATE INDEX minicloud_uploads_user_id_idx ON minicloud_uploads (user_id);
+CREATE INDEX minicloud_uploads_reference_idx ON minicloud_uploads (reference);
+CREATE INDEX minicloud_uploads_uid_reference_idx ON minicloud_uploads (uid, reference);
+CREATE INDEX minicloud_uploads_type_idx ON minicloud_uploads (type);
 
-CREATE TABLE minicloud_shared (
-id SERIAL UNIQUE PRIMARY KEY,
-uid TEXT NOT NULL DEFAULT lpad(md5(random()::text), 16),
-user_id INT NOT NULL REFERENCES minicloud_users(id) ON DELETE CASCADE,
-file_id INT NOT NULL REFERENCES minicloud_files(id) ON DELETE CASCADE,
-file_uid TEXT NOT NULL,
-shared_id INT REFERENCES minicloud_users(id),
-shared_type INT NOT NULL,
-UNIQUE (file_id, shared_type, shared_id),
+CREATE TABLE minicloud_gallery (
+id BIGSERIAL UNIQUE PRIMARY KEY,
+uid VARCHAR(16) NOT NULL DEFAULT lpad(md5(random()::text), 16),
+user_id BIGINT NOT NULL REFERENCES minicloud_users(id) ON DELETE CASCADE,
+uploads_id BIGINT NOT NULL REFERENCES minicloud_uploads(id) ON DELETE CASCADE,
+category TEXT NOT NULL DEFAULT 'Default',
+title TEXT NOT NULL,
+description TEXT,
+thumbnail_data bytea NOT NULL,
+thumbnail_size BIGINT NOT NULL,
+thumbnail_mime TEXT NOT NULL,
+created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+updated_at TIMESTAMP NOT NULL,
+UNIQUE (user_id, title, category),
+UNIQUE (uploads_id, title, category),
 UNIQUE (user_id, uid)
 );
 
-CREATE INDEX minicloud_shared_uid_idx ON minicloud_shared (user_id, uid);
+CREATE INDEX minicloud_gallery_uid_idx ON minicloud_gallery (uid);
+CREATE INDEX minicloud_gallery_user_id_idx ON minicloud_gallery (user_id);
+CREATE INDEX minicloud_gallery_category_idx ON minicloud_gallery (lower(category));
 
 CREATE TABLE minicloud_tasks (
-id SERIAL UNIQUE PRIMARY KEY,
-user_id INT NOT NULL REFERENCES minicloud_users(id) ON DELETE CASCADE,
+id BIGSERIAL UNIQUE PRIMARY KEY,
+uid VARCHAR(16) NOT NULL DEFAULT lpad(md5(random()::text), 16),
+user_id BIGINT NOT NULL REFERENCES minicloud_users(id) ON DELETE CASCADE,
 status TEXT NOT NULL DEFAULT 'pending',
-uid TEXT NOT NULL DEFAULT lpad(md5(random()::text), 16),
-entry TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, 
-description TEXT NOT NULL,
+title TEXT NOT NULL,
+description TEXT,
 category TEXT NOT NULL DEFAULT 'Default',
 due TIMESTAMP,
 done TIMESTAMP,
 process TIMESTAMP,
-annotation TEXT,
-modified TIMESTAMP,
-UNIQUE (user_id, description, category),
-UNIQUE (user_id, uid)
-);
-
-CREATE INDEX minicloud_tasks_uid_idx ON minicloud_tasks (user_id, uid);
-
-CREATE TABLE minicloud_diashow (
-id SERIAL UNIQUE PRIMARY KEY,
-user_id INT NOT NULL REFERENCES minicloud_users(id) ON DELETE CASCADE,
-uid TEXT NOT NULL DEFAULT lpad(md5(random()::text), 16),
-uuid TEXT NOT NULL UNIQUE DEFAULT lpad(md5(random()::text), 16),
-type TEXT NOT NULL,
-category TEXT NOT NULL,
-title TEXT NOT NULL,
-description TEXT NOT NULL,
 created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 updated_at TIMESTAMP NOT NULL,
 UNIQUE (user_id, title, category),
 UNIQUE (user_id, uid)
 );
 
-CREATE INDEX minicloud_diashow_uid_idx ON minicloud_diashow (user_id, uid);
+CREATE INDEX minicloud_tasks_uid_idx ON minicloud_tasks (uid);
+CREATE INDEX minicloud_tasks_user_id_idx ON minicloud_tasks (user_id);
+CREATE INDEX minicloud_tasks_category_idx ON minicloud_tasks (lower(category));
+
+CREATE TABLE minicloud_diashow (
+id BIGSERIAL UNIQUE PRIMARY KEY,
+uid VARCHAR(16) NOT NULL DEFAULT lpad(md5(random()::text), 16),
+uuid VARCHAR(32) NOT NULL UNIQUE DEFAULT lpad(md5(random()::text), 32),
+user_id BIGINT NOT NULL REFERENCES minicloud_users(id) ON DELETE CASCADE,
+category TEXT NOT NULL,
+created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+updated_at TIMESTAMP NOT NULL,
+UNIQUE (user_id, title, category),
+UNIQUE (user_id, uid)
+);
+
+CREATE INDEX minicloud_diashow_uid_idx ON minicloud_diashow (uid);
+CREATE INDEX minicloud_diashow_user_id_idx ON minicloud_diashow (user_id);
 CREATE INDEX minicloud_diashow_uuid_idx ON minicloud_diashow (uuid);
 CREATE INDEX minicloud_diashow_category_idx ON minicloud_diashow (lower(category));
 
 CREATE TABLE minicloud_multimedia (
-id SERIAL UNIQUE PRIMARY KEY,
-uuid TEXT NOT NULL UNIQUE DEFAULT lpad(md5(random()::text), 16),
+id BIGSERIAL UNIQUE PRIMARY KEY,
+uuid VARCHAR(32) NOT NULL UNIQUE DEFAULT lpad(md5(random()::text), 32),
 type TEXT NOT NULL,
 category TEXT NOT NULL,
 title TEXT NOT NULL,
 description TEXT,
 path TEXT NOT NULL UNIQUE,
 mime TEXT NOT NULL,
-size INT NOT NULL,
+size BIGINT NOT NULL,
 director TEXT NOT NULL DEFAULT 'Generic',
 actors TEXT[],
 year INT NOT NULL,
+capture TEXT,
 created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 updated_at TIMESTAMP NOT NULL,
-UNIQUE (title, mime),
+UNIQUE (title, year, mime),
 UNIQUE (path, mime)
 );
 
-CREATE INDEX minicloud_diashows_multimedia_category_idx ON minicloud_multimedia (lower(category));
-CREATE INDEX minicloud_diashows_multimedia_type_idx ON minicloud_multimedia (lower(type));
-
-CREATE OR REPLACE FUNCTION minicloud_modified_task()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.modified = now();
-  RETURN NEW;
-END;
-$$ language 'plpgsql';
+CREATE INDEX minicloud_multimedia_category_idx ON minicloud_multimedia (lower(category));
+CREATE INDEX minicloud_multimedia_type_idx ON minicloud_multimedia (lower(type));
+CREATE INDEX minicloud_multimedia_uuid_idx ON minicloud_multimedia (uuid);
+CREATE INDEX minicloud_multimedia_director_idx ON minicloud_multimedia (director);
+CREATE INDEX minicloud_multimedia_title_idx ON minicloud_multimedia (title);
+CREATE INDEX minicloud_multimedia_year_idx ON minicloud_multimedia (year);
 
 CREATE OR REPLACE FUNCTION minicloud_updated_at_task()
 RETURNS TRIGGER AS $$
@@ -121,23 +133,27 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
-CREATE TRIGGER minicloud_modified_tasks_trigger BEFORE
-INSERT OR UPDATE ON minicloud_tasks
-FOR EACH ROW EXECUTE PROCEDURE minicloud_modified_task();
+CREATE TRIGGER minicloud_updated_at_task_trigger BEFORE
+INSERT OR UPDATE ON minicloud_uploads
+FOR EACH ROW EXECUTE PROCEDURE minicloud_updated_at_task();
 
-CREATE TRIGGER minicloud_modified_users_trigger BEFORE
+CREATE TRIGGER minicloud_updated_at_task_trigger BEFORE
+INSERT OR UPDATE ON minicloud_tasks
+FOR EACH ROW EXECUTE PROCEDURE minicloud_updated_at_task();
+
+CREATE TRIGGER minicloud_updated_at_task_trigger BEFORE
 INSERT OR UPDATE ON minicloud_users
 FOR EACH ROW EXECUTE PROCEDURE minicloud_updated_at_task();
 
-CREATE TRIGGER minicloud_modified_files_trigger BEFORE
-INSERT OR UPDATE ON minicloud_files
+CREATE TRIGGER minicloud_updated_at_task_trigger BEFORE
+INSERT OR UPDATE ON minicloud_gallery
 FOR EACH ROW EXECUTE PROCEDURE minicloud_updated_at_task();
 
-CREATE TRIGGER minicloud_modified_diashow_trigger BEFORE
+CREATE TRIGGER minicloud_updated_at_task_trigger BEFORE
 INSERT OR UPDATE ON minicloud_diashow
 FOR EACH ROW EXECUTE PROCEDURE minicloud_updated_at_task();
 
-CREATE TRIGGER minicloud_modified_multimedia_trigger BEFORE
+CREATE TRIGGER minicloud_updated_at_task_trigger BEFORE
 INSERT OR UPDATE ON minicloud_multimedia
 FOR EACH ROW EXECUTE PROCEDURE minicloud_updated_at_task();
 

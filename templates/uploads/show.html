@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+{% from "_macros.html" import aside with context %}
+{% from "uploads/_macros.html" import nav, header with context %}
+
+{% block aside %}
+  {{ aside() }}
+{% endblock %}
+
+{% block nav %}
+  {{ nav("show") }}
+{% endblock %}
+
+{% block header %}
+  {{ header() }}
+{% endblock %}
+
+{% block section %}
+  <section id="uploads" class="show">
+    {% if parent %}
+      <h2 class="top"><a class="back" href="{{ url_for('uploads.show', parent = backref) }}">Zurück</a></h2>
+    {% endif %}
+
+    {% for child in directory.childs %}
+      <section class="item">
+        {% if child.type == 0 %}
+          {% set url = url_for('uploads.show', parent = child.id, backref = parent) %}
+        {% else %}
+          {% set url = url_for('uploads.download', uid = child.uid) %}
+        {% endif %}
+
+        <a href="{{ url }}">
+          <div>
+              <p title="{{ child.title }}">{{ child.title }}</p>
+          </div>
+        </a>
+
+        <div class="mime">
+          <p>{{ child.mime }}</p>
+        </div>
+
+        <div class="size">
+          {% if child.size > 0 %}
+            <p>{{ child.size }} KiB</p>
+          {% endif %}
+        </div>
+
+        <div class="action">
+          <form action="{{ url_for('uploads.delete', uid = child.uid) }}" method="post" onsubmit="handle_delete_check(event);">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="parent" value="{{ parent }}">
+            <input type="submit" value="Delete">
+          </form>
+        </div>
+      </section>
+    {% endfor %}
+  </section>
+{% endblock %}

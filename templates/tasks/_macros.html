@@ -1,54 +1,46 @@
 {% macro nav(target) %}
-  <section id="nav">
-    {% if target == "show" %}
-      <div><button onclick="toggle('headup');">New Task</button></div>
-    {% else %}
-      <div>
-        <form action="/tasks" method="get">
-          <button type="submit">Tasks</button>
-        </form>
-      </div>
-    {% endif %}
-    <div>
-      <form action="/logout" method="post">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-        <button type="submit">Exit</button>
-      </form>
-    </div>
-  </section>
+  {% if target == "show" %}
+    <button onclick="toggle('addtask');">New Task</button>
+  {% endif %}
 {% endmacro %}
 
 {% macro header() %}
-  <input class="menu" type="checkbox" name="headup" />
-  <section id="category">
+  <input class="toggle" type="checkbox" name="addtask" />
+  <section id="addtask">
     <form action="/tasks/add" method="post">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <h2>Today: {{ today }}</h2>
        
-      <fieldset>
-        <label>
-          <p>Description.</p>
-          <p class="smalltext">Week {{ week }}</p>
-        </label>
-        <input type="text" name="description" required />
-      </fieldset>
-
-      <fieldset>
-        <label>
-          <p>Deadline.</p>
-        </label>
-        <input type="date" name="due" />
-      </fieldset>
-
-      <fieldset>
-        <label>
-          <p>Annotations.</p>
-        </label>
-        <textarea name="annotation"></textarea>
-      </fieldset>
-
-      <fieldset>
-        <input type="submit" value="Create Task" />
-      </fieldset>
+      <div class="group">      
+        <fieldset>
+          <label>Title:</label>
+          <input type="text" name="title" required />
+        </fieldset>
+  
+        <fieldset>
+          <label>Deadline:</label>
+          <input type="date" name="due" />
+        </fieldset>
+        
+        <fieldset>
+          <label>Category:</label>
+          <input type="text" name="category" value="Week {{ week }}" required />
+          <select class="helper" onchange="handle_select_helper(event);">
+            <option value="0" selected disabled>Select category ...</option>
+            {% for option in categories %}
+              <option>{{ option.category }}</option>
+            {% endfor %}
+          </select>
+        </fieldset>
+  
+        <fieldset>
+          <label>Description:</label>
+          <textarea name="description"></textarea>
+        </fieldset>
+        
+        <fieldset>
+          <input type="submit" value="Create Task">
+        </fieldset>
+      </div>
     </form>
-  </section>
 {% endmacro %}

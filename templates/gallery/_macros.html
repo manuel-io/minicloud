@@ -1,0 +1,46 @@
+{% macro nav(target) %}
+  {% if target == 'show' %}
+    <form action="{{ url_for('gallery.diashow') }}" method="get">
+      <button type="submit">Diashow</button>
+    </form>
+  {% endif %}
+  {% if target == 'edit' %}
+  {% endif %}
+  {% if target == 'diashow' %}
+    <button onclick="toggle('adddiashow');">New Diashow</button>
+    <form action="{{ url_for('gallery.show') }}" method="get">
+      <button type="submit">Gallery</button>
+    </form>
+  {% endif %}
+{% endmacro %}
+
+{% macro header() %}   
+  <input class="toggle" type="checkbox" name="adddiashow">
+  <section id="adddiashow">
+    <form action="{{ url_for('gallery.diashow_add') }}" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+       
+      <div class="group">      
+        <fieldset>
+          <label>Title:</label>
+          <input type="text" name="title" required>
+        </fieldset>
+  
+        <fieldset>
+          <label>Category:</label>
+          <input type="text" name="category" required>
+          <select class="helper" onchange="handle_select_helper(event);">
+            <option value="0" selected disabled>Select category ...</option>
+            {% for option in categories %}
+              <option>{{ option.category }}</option>
+            {% endfor %}
+          </select>
+        </fieldset>
+        
+        <fieldset>
+          <input type="submit" value="Create Diashow">
+        </fieldset>
+      </div>
+    </form>
+  </section>
+{% endmacro %}

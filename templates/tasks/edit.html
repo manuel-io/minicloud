@@ -1,86 +1,86 @@
 {% extends "layout.html" %}
 {% from "_macros.html" import aside, tinymce with context %}
 {% from "tasks/_macros.html" import nav, header with context %}
-  {% block head %}
-     {{ super() }}
-     {{ tinymce() }}
-  {% endblock %}
-  {% block body %}
-     {{ aside() }}
-  {% endblock %}
-  {% block nav %}
-    {{ nav("edit") }}
-  {% endblock %}
-  {% block header %}
-    {{ header() }}
-  {% endblock %}
-  {% block main %}
-    {{ super() }}
-    <section id="last">
-      <p>Last: {{ task.modified }}</p>
-    </section>
-    <section id="edit_task">
-      <form action="/tasks/edit/{{ task.id }}" method="post">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-        <input type="hidden" name="task_status" value="{{ task.task_status }}" />
-        <input type="hidden" name="task_datetime" value="{{ task.task_datetime }}" />
+
+{% block head %}
+  {{ super() }}
+  {{ tinymce() }}
+{% endblock %}
+
+{% block aside %}
+  {{ aside() }}
+{% endblock %}
+
+{% block nav %}
+  {{ nav("edit") }}
+{% endblock %}
+
+{% block header %}
+  {{ header() }}
+{% endblock %}
+
+{% block section %}
+  <section id="tasks">
+    <h2 class="top"><a id="return" class="back" href="{{ url_for('tasks.show') }}">Zurück</a></h2>
+
+    <form action="/tasks/edit/{{ task.uid }}" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="task_status" value="{{ task.task_status }}">
+      <input type="hidden" name="task_datetime" value="{{ task.task_datetime }}">
          
+      <div class="group">      
         <fieldset>
-          <label>State.</label>
+          <label>State:</label>
           <select name="status" required>
             {% for state in config.tasks.states %}
-              <option value="{{state}}" {{ "selected" if task.status == state }}>{{state|title}}</option>
+              <option value="{{state}}" {{ "selected" if task.status == state }}>{{ state | title }}</option>
             {% endfor %}
           </select>
         </fieldset>
-
+        
         <fieldset>
-          <label>Description.</label>
-          <input type="text" name="description" value="{{ task.description }}" required />
+          <label>Deadline:</label>
+          <input type="date" name="due" value="{{ task.due }}">
         </fieldset>
-
+        
         <fieldset>
-          <label>Category.</label>
-          <input tpye="text" name="category" value="{{ task.category }}" required />
-          <select class="sub">
+          <label>Category:</label>
+          <input type="text" name="category" value="{{ task.category }}" required>
+          <select class="helper" onchange="handle_select_helper(event);">
             <option value="0" selected disabled>Select category ...</option>
             {% for option in categories %}
-              <option>{{ option.title }}</option>
+              <option>{{ option.category }}</option>
             {% endfor %}
           </select>
         </fieldset>
-
+  
         <fieldset>
-          <label>
-            <p>Deadline.</p>
-          </label>
-          <input type="date" name="due" value="{{task.due}}" />
+          <label>Title:</label>
+          <input type="text" name="title" value="{{ task.title }}" required>
         </fieldset>
-
+  
         <fieldset>
-          <label>
-            <p>Annotations.</p>
-          </label>
-          <textarea name="annotation">{{ task.annotation if task.annotation }}</textarea>
+          <label>Description:</label>
+          <textarea name="description">{{ task.description if task.description }}</textarea>
         </fieldset>
-
+        
         <fieldset>
-          <input type="submit" value="Edit Task" />
+          <input type="submit" value="Edit">
         </fieldset>
+      </div>
+    </form>
+
+    <nav>
+      <form action="/tasks/delete/{{task.uid}}" method="post" onsubmit="handle_delete_check(event);">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="submit" value="Delete">
       </form>
-    </section>
+    </nav>
+  </section>
 
-    <section id="delete_task">
-      <form action="/tasks/delete/{{task.uid}}" method="post">
-        <fieldset>
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-          <input type="submit" value="Delete" />
-        </fieldset>
-      </form>
-    </section>
-  {% endblock %}
-
-  {% block footer %}
-    {{ super() }}
-  {% endblock %}
-
+  <script>
+    let hash = window.location.hash.substr(1);
+    let ret = document.getElementById('return');
+    ret.href = ret.href + `#${hash}`;
+  </script>
+{% endblock %}

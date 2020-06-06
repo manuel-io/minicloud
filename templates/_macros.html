@@ -1,53 +1,73 @@
 {% macro aside() %}
-<input type="checkbox" name="sidebar" />
-<aside onclick="toggle('sidebar')">
   <div>
-    <section>
-      <p class="title">Minicloud</p>
-      <ul>
-        <a href="/files"><li>Files</li></a>
-        <a href="/shared"><li>Shared</li></a>
-        <a href="/tasks"><li>Tasks</li></a>
-      </ul>
-    </section>
+    {% if current_user.is_authenticated %}
+      <!--
+      <div class="infobox">
+        <p>Login: {{ current_user.name  }}</p>
+      </div>
+      -->
+    {% endif %}
 
-    <section>
-      <p class="title">Tools</p>
-      <ul>
-        <a href="/tools/multimedia"><li>Multimedia</li></a>
-        <a href="/tools/diashow"><li>Diashow</li></a>
-      </ul>
-    </section>
+    <fieldset>
+      <form action="/uploads" method="get">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="submit" value="Uploads">
+      </form>
+    </fieldset>
 
-    <section>
-      <p class="title">User Profile</p>
-      <ul>
-        <a href="/profile"><li>Profile</li></a>
-      </ul>
-    </section>
+    <fieldset>
+      <form action="/gallery" method="get">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="submit" value="Gallery">
+      </form>
+    </fieldset>
+    
+    <fieldset>
+      <form action="/tasks" method="get">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="submit" value="Tasks">
+      </form>
+    </fieldset>
+    
+    <fieldset>
+      <form action="/multimedia" method="get">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="submit" value="Multimedia">
+      </form>
+    </fieldset>
+    
+    <fieldset>
+      <form action="/profile" method="get">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="submit" value="Profile">
+      </form>
+    </fieldset>
 
     {% if current_user.admin %}
-    <section>
-      <p class="title">Administration</p>
-      <ul>
-        <a href="/users"><li>Users</li></a>
-      </ul>
-    </section>
+      <fieldset>
+        <form action="/users" method="get">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="submit" value="Users">
+        </form>
+      </fieldset>
     {% endif %}
+    
+    <fieldset>
+      <form action="/logout" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="submit" value="Logout">
+      </form>
+    </fieldset>
   </div>
-  <div>
-    <p></p>
-  </div>
-</aside>
 {% endmacro %}
 
 {% macro tinymce() %}
 <script src="{{url_for('static', filename='scripts/tinymce/tinymce.min.js')}}"></script>
 <script>
   tinymce.init({ selector: 'textarea'
-               , height: 300
+               , height: 150
                , visual: false
-               , plugins: ['autolink paste table lists link codesample fullscreen']
+               , plugins: ['autolink paste table lists link codesample']
                , menubar: 'edit format insert view'
                , toolbar: 'formatselect | bold italic | alignleft aligncenter alignright | bullist  | outdent indent'
                , menu: { edit: { title: "Edit", items: "undo redo" }

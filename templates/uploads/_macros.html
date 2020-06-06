@@ -1,0 +1,49 @@
+{% macro nav(target) %}
+  {% if target == 'show' %}
+    <button onclick="toggle('addfile');">New File</button>
+    <button onclick="toggle('adddir');">New Directory</button>
+  {% endif %}
+{% endmacro %}
+
+{% macro header() %}   
+  <input class="toggle" type="checkbox" name="addfile">
+  <section id="addfile">
+    <form action="/uploads/file/add" method="post" enctype="multipart/form-data" onsubmit="handle_uploads_form(event);">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="parent" value="{{ parent }}">
+      <input type="hidden" name="backref" value="{{ backref }}">
+       
+      <div class="group">      
+        <fieldset>
+          <label>Select a file</label>
+          <input name="uploads" type="file" multiple required>
+        </fieldset>
+        
+        <fieldset>
+          <input type="submit" value="Upload">
+        </fieldset>
+      </div>
+    </form>
+  </section>
+  
+  <input class="toggle" type="checkbox" name="adddir">
+  <section id="adddir">
+    <form action="/uploads/dir/add" method="post" enctype="multipart/form-data">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="parent" value="{{ parent }}">
+      <input type="hidden" name="backref" value="{{ backref }}">
+       
+      <div class="group">      
+        <fieldset>
+          <label>Title</label>
+          <input name="title" type="text" required>
+        </fieldset>
+        
+        <fieldset>
+          <input type="submit" value="Upload">
+        </fieldset>
+      </div>
+    </form>
+  </section>
+
+{% endmacro %}

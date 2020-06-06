@@ -1,0 +1,91 @@
+{% extends "layout.html" %}
+{% from "_macros.html" import aside, tinymce with context %}
+{% from "multimedia/_macros.html" import nav, popup with context %}
+
+{% block aside %}
+  {{ aside() }}
+{% endblock %}
+
+{% block nav %}
+  {{ nav("indexing") }}
+{% endblock %}
+
+{% block header %}
+{% endblock %}
+
+{% block section %}
+  <section id="multimedia" class="indexing">
+    <form action="/multimedia/add" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="size" value="">
+      <input type="hidden" name="url" value="">
+      <input type="hidden" name="mime" value="">
+
+      <fieldset>
+        <label>File:</label>
+        <select name="path" required>
+          {% for item in items %}
+            <option data-id="{{ item.id }}" data-mime="{{ item.mime }}" data-size="{{ item.size }}" data-url="{{ item.url }}">{{ item.path }}</option>
+          {% endfor %}
+        </select>
+      </fieldset>
+  
+      <div class="group">
+        <fieldset>
+          <label>Category:</label>
+          <input type="text" name="category" />
+        </fieldset>
+
+        <fieldset>
+          <label>Title:</label>
+          <input type="text" name="title" required />
+        </fieldset>
+        
+        <fieldset>
+          <label>Description:</label>
+          <textarea name="description"></textarea>
+        </fieldset>
+        
+        <fieldset>
+          <label>Type:</label>
+          <select name="type">
+            <option>Audiobook</option>
+            <option>Clip</option>
+            <option>Documentary</option>
+            <option>Movie</option>
+            <option>Music</option>
+            <option>Series</option>
+            <option>Tracks</option>
+          </select>
+        </fieldset>
+      
+        <fieldset>
+          <label>Director:</label>
+          <input type="text" name="director" />
+        </fieldset>
+        
+        <fieldset>
+          <label>Year:</label>
+          <input type="number" name="year" min="1900" max="2090" step="1" required />
+        </fieldset>
+      
+        <fieldset>
+          <input type="submit" value="New Media">
+        </fieldset>
+      </div>
+    </form>
+  </section>
+
+  <script type="module">
+    let select = document.querySelector('#multimedia.indexing select[name=path]');
+    let change = (target) => {
+      let option = target.options[target.selectedIndex];
+      document.querySelector('#multimedia.indexing input[name=size]').value = option.dataset.size;
+      document.querySelector('#multimedia.indexing input[name=url]').value = option.dataset.url;
+      document.querySelector('#multimedia.indexing input[name=mime]').value = option.dataset.mime;
+    }
+
+    select.onchange = (e) => change(e.target);
+    change(select);
+  </script>
+{% endblock %}

@@ -1,16 +1,19 @@
 {% extends "layout.html" %}
 {% from "_macros.html" import aside with context %}
-  {% block body %}
-     {{ super() }}
-     {{ aside() }}
-  {% endblock %}
-  {% block nav %}
-  {% endblock %}
-  {% block header %}
-  {% endblock %}
-  {% block main %}
-    {{ super() }}
-    <section id="edit_file">
+
+{% block aside %}
+  {{ aside() }}
+{% endblock %}
+
+{% block nav %}
+{% endblock %}
+
+{% block header %}
+{% endblock %}
+
+{% block section %}
+
+  <section id="edit_file">
       <div>
         <p>{{ shared.title }}</p>
       </div>
@@ -37,9 +40,6 @@
       </fieldset>
     </section>
 
-  {% endblock %}
+{% endblock %}
 
-  {% block footer %}
-    {{ super() }}
-  {% endblock %}
 

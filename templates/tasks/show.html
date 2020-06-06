@@ -1,68 +1,84 @@
 {% extends "layout.html" %}
 {% from "_macros.html" import aside, tinymce with context %}
 {% from "tasks/_macros.html" import nav, header with context %}
-  {% block head %}
-     {{ super() }}
-     {{ tinymce() }}
-  {% endblock %}
-  {% block body %}
-     {{ super() }}
-     {{ aside() }}
-  {% endblock %}
-  {% block nav %}
-    {{ nav("show") }}
-  {% endblock %}
-  {% block header %}
-    {{ header() }}
-  {% endblock %}
-  {% block main %}
-    {{ super() }}
-    <section id="today">
-      <p>Today: {{ today }}</p>
-    </section>
-    <section id="categories">
-      {% for category in categories %}
-        <div class="nav">
-          <p>{{ category.name }}</p>
-        </div>
+
+{% block head %}
+  {{ super() }}
+  {{ tinymce() }}
+{% endblock %}
+
+{% block aside %}
+  {{ aside() }}
+{% endblock %}
+
+{% block nav %}
+  {{ nav("show") }}
+{% endblock %}
+
+{% block header %}
+  {{ header() }}
+{% endblock %}
+
+{% block section %}
+  <section id="tasks">
+    {% for category in tasks %}
+      {% set index = loop.index %}
+
+      <h2>{{ category.name }}</h2>
+      <section id="tc{{ index }}" class="categories">
         {% for task in category.tasks %}
-          <div>
-            <table>
-              <tr>
-                <th>
-                  <a href="edit/{{task.id}}">
-                    <div class="{{ "delayed" if task.delayed else "ontime" }}">
-                      <p>{{ task.description }}</p>
-                    </div>
-                  </a>
-                </th>
-              </tr>
-              <tr class="userinfo">
-                <td>
-                  <ul>
-                    <li class="text-small">{{ task.status }}</li>
-                    {% if task.status == "completed" or task.status == "deleted" %}
-                      <li class="text-small">on {{ task.done }}</li>
-                    {% else %}
-                      {% if task.status == "processing" %}
-                        <li class="text-small">since {{task.process}}</li>
-                      {% endif %}
-                      {% if task.due %}
-                        <li class="text-small">due {{ task.due }}</li>
-                        <li class="text-small">{{ task.deadline }} days left</li>
-                      {% endif %}
-                    {% endif %}
-                  </ul>
-                </td>
-              </tr>
-            </table>
+
+          {% if task.status == 'completed' %}
+            {% set color = 'ontime' %}
+          {% elif task.status == 'deleted' %}
+            {% set color = 'deleted' %}
+          {% else %}
+            {% set color = 'pending' %}
+          {% endif %}
+
+          {% set color = 'delayed' if task.delayed else color %}
+
+          <div class="item {{ color }}">
+            <section>
+              <table class="{{ color }}">
+                <thead>
+                  <tr>
+                    <p>{{ task.title }}</p>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{{ task.status }}</td>
+                  </tr>
+                  
+                  {% if task.status == "completed" or task.status == "deleted" %}
+                    <tr>
+                      <td>done on {{ task.done }}</td>
+                    </tr>
+                  {% endif %}
+    
+                  {% if task.status == "processing" %}
+                    <tr>
+                      <td>processing since {{task.process}}</td>
+                    </tr>
+                  {% endif %}
+    
+                  {% if task.due %}
+                    <tr>
+                      <td>due {{ task.due }}, {{ task.deadline }} days left</td>
+                    </tr>
+                  {% endif %}
+                </tbody>
+              </table>
+            </section>
+            <nav>
+              <form action="{{ url_for('tasks.edit', uid = task.uid, _anchor = 'tc' ~ index) }}" method="get">
+                <input type="submit" value="Edit">
+              </form>
+            </nav>
           </div>
         {% endfor %}
-      {% endfor %}
-    </section>
-  {% endblock %}
-
-  {% block footer %}
-    {{ super() }}
-  {% endblock %}
-
+      </section>
+    {% endfor %}
+  </section>
+{% endblock %}

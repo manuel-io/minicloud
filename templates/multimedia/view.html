@@ -1,0 +1,171 @@
+{% extends "layout.html" %}
+{% from "_macros.html" import aside, tinymce  with context %}
+{% from "multimedia/_macros.html" import nav with context %}
+
+{% block aside %}
+  {{ aside() }}
+{% endblock %}
+
+{% block nav %}
+  {{ nav("view") }}
+{% endblock %}
+
+{% block header %}
+{% endblock %}
+
+{% block section %}
+  <section id="multimedia" class="view">
+    <h2 class="top"><a id="return" class="back" href="{{ url_for('multimedia.show') }}">Zurück</a></h2>
+    <h2>{{ media.title }}</h2>
+
+    <section class="media" style="position:relative;">
+      {% if media.mime in config["ftypes"]["audio"] %}
+        <audio id="audio" controls title="{{ media.title }}">
+          {% for source in sources %}
+            <source src="{{ source.url }}" type="{{ source.mime }}" />
+          {% endfor %}
+        </audio>
+
+      {% elif media.mime in config["ftypes"]["video"] %}
+
+        <video id="video" controls controlsList="fullscreen download" title="{{ media.title }}" data-uuid="{{ media.uuid }}" data-last="">
+          {% for source in sources %}
+            <source src="{{ source.url }}" type="{{ source.mime }}" />
+          {% endfor %}
+        </video>
+      {% endif %}
+
+      <input class="toggle" type="checkbox" name="capture">
+      <section id="capture" class="dialog">
+        <main>
+          <canvas class="capture" onclick="close_dialog('capture');"></canvas>
+          <form action="{{ url_for('multimedia.capture', uuid=media.uuid) }}" method="post" onsubmit="handle_capture_form(event);">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="canvas">
+            <input type="submit" value="Save">
+          </form>
+        </main>
+      </section>
+    </section>
+
+   <!--
+    <nav>
+      {% for source in sources %}
+        <form action="{{ source.url }}" method="get">
+          <input type="submit" value="Download">
+        </form>
+      {% endfor %}
+    </nav>
+    -->
+
+    {% if current_user.admin %}
+
+      {% if media.mime in config["ftypes"]["video"] %}
+        <nav>
+          <form method="post" onsubmit="capture(event);">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="submit" value="Caption">
+          </form>
+        </nav>
+      {% endif %}
+
+      <form action="{{ url_for('multimedia.edit', uuid = media.uuid) }}" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="type" value="{{ media.type }}">
+
+        <div class="group">
+          <fieldset>
+            <label>Category:</label>
+            <input type="text" name="category" value="{{ media.category }}" />
+          </fieldset>
+
+          <fieldset>
+            <label>Title:</label>
+            <input type="text" name="title" value="{{ media.title }}" required />
+          </fieldset>
+
+          <fieldset>
+            <label>Description:</label>
+            <textarea name="description"></textarea>
+          </fieldset>
+
+          <fieldset>
+            <label>Director:</label>
+            <input type="text" name="director" value="{{ media.director }}" />
+          </fieldset>
+
+          <fieldset>
+            <label>Cast:</label>
+            <div class="tags" onclick="tags_set_focus(event);">
+              <input type="hidden" name="tags">
+              {% if media.actors %}
+                {% for actor in media.actors %}
+                  <div class="tag">{{ actor }}</div>
+                {% endfor %}
+              {% endif %}
+              <div class="newtag">
+                <input type="text" name="tag" onkeydown="tags_prevent_submit(event)" onkeyup="tags_handle_input(event);">
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <label>Year:</label>
+            <input type="number" name="year" min="1900" max="2090" step="1" value="{{ media.year }}" required />
+          </fieldset>
+
+          <fieldset>
+            <input type="submit" value="Edit">
+          </fieldset>
+        </div>
+      </form>
+
+      <nav>
+        <form action="{{ url_for('multimedia.delete', uuid = media.uuid) }}" method="post" onsubmit="handle_delete_check(event);">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="submit" value="Delete">
+        </form>
+      </nav>
+    {% endif %}
+  </section>
+
+  <script>
+    let hash = window.location.hash.substr(1);
+    let video = document.getElementById('video');
+    let ret = document.getElementById('return');
+    ret.href = ret.href + `#${hash}`;
+
+    video.onloadeddata = (e) => {
+      let [type, uuid, current, duration] = '{{ media.status }}'.split('$');
+      if (uuid == '{{ media.uuid }}') {
+        video.dataset.last = current;
+        video.currentTime = current;
+      }
+    };
+
+    video.onpause = (e) => {
+      let last = video.dataset.last;
+      let current = parseInt(video.currentTime);
+
+      if (last) last = parseInt(last);
+      else last = .0;
+
+      if (last - 30 > current || last + 30 < current ) {
+        let value = 'video' + '$' + video.dataset.uuid + '$' + current + '$' + parseInt(video.duration);
+        let data = new FormData();
+        let url = '{{ url_for('users.set_media') }}';
+
+        video.dataset.last = current;
+        data.append('csrf_token', '{{ csrf_token() }}');
+        data.append('media', value);
+
+        upload(url, data);
+      }
+    };
+
+    window.onload = (e) => {
+      let target = document.querySelector('#multimedia .tags');
+      tags_set_input(target);
+    };
+  </script>
+{% endblock %}

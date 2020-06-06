@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+
+{% block aside %}
+{% endblock %}
+
+{% block section %}
+  <form action="/login/activation" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+    <fieldset>
+      <label>Username</label>
+      <input type="text" name="name" />
+      <label>Activation Key</label>
+      <input type="text" name="activation" />
+    </fieldset>
+
+    <fieldset>
+      <label>Password.</label>
+      <input type="password" name="password" minlength="6" required />
+      <label>Confirmation.</label>
+      <input type="password" name="confirmation" required />
+    </fieldset>
+
+    <fieldset>
+      <input type="submit" value="Activate" />
+    </fieldset>
+  </form>
+{% endblock %}
+

@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% from "_macros.html" import aside with context %}
+{% from "gallery/_macros.html" import nav, header with context %}
+
+{% block aside %}
+  {{ aside() }}
+{% endblock %}
+  
+{% block nav %}
+  {{ nav("diashow") }}
+{% endblock %}
+
+{% block header %}
+  {{ header() }}
+{% endblock %}
+
+{% block section %}
+  <section id="diashow" class="show">
+    {% for diashow in diashows %}
+      <section id="dc{{ loop.index }}" class="item">
+        <a href="{{ url_for('gallery.diashow_play', uuid = diashow.uuid) }}">
+          <div>
+              <p>{{ diashow.category }}</p>
+          </div>
+        </a>
+
+        <div class="action">
+          <form action="{{ url_for('gallery.diashow_delete', uid = diashow.uid) }}" method="post" onsubmit="handle_delete_check(event);">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="submit" value="Delete">
+          </form>
+        </div>
+      </section>
+    {% endfor %}
+  </section>
+{% endblock %}

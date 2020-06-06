@@ -1,0 +1,66 @@
+{% extends "layout.html" %}
+
+{% block aside %}
+{% endblock %}
+
+{% block nav %}
+  <button onclick="toggle('activation');">Activation / Reset</button>
+{% endblock %}
+
+{% block header %}
+  <input class="toggle" type="checkbox" name="activation" />
+  <section id="activation">
+    <form action="/register" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="group">      
+        <fieldset>
+          <label>E-Mail:</label>
+          <input type="email" name="email" autocomplete="email" required>
+        </fieldset>
+  
+        <fieldset>
+          <label>Activation code:</label>
+          <input type="text" name="code" autocomplete="one-time-code" required>
+        </fieldset>
+        
+        <fieldset>
+          <label>Password:</label>
+          <input type="password" name="password" autocomplete="new-password" minlength="6" required>
+        </fieldset>
+  
+        <fieldset>
+          <label>Confirmation:</label>
+          <input type="password" name="confirmation" autocomplete="new-password" required>
+        </fieldset>
+
+        <fieldset>
+          <input type="submit" value="Activate / Reset" />
+        </fieldset>
+      </div>
+    </form>
+  </section>
+{% endblock %}
+
+{% block section %}
+  <section id="login">
+    <form action="/login" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+  
+      <div class="group">
+        <fieldset>
+          <label>Username:</label>
+          <input type="text" name="username" autocomplete="username" required>
+        </fieldset>
+    
+        <fieldset>
+          <label>Password:</label>
+          <input type="password" name="password" autocomplete="current-password" required />
+        </fieldset>
+      </div>
+  
+      <fieldset>
+        <input type="submit" value="Login" />
+      </fieldset>
+    </form>
+  </section>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends "layout.html" %}
+{% from "_macros.html" import aside, tinymce with context %}
+{% from "multimedia/_macros.html" import nav, header, popup with context %}
+
+{% block aside %}
+  {{ aside() }}
+{% endblock %}
+
+{% block nav %}
+  {{ nav("show") }}
+{% endblock %}
+
+{% block header %}
+  {{ header() }}
+{% endblock %}
+
+{% block section %}
+  <section id="multimedia" class="show">
+    {% for category in multimedia %}
+      {% set index = loop.index %}
+      <section id="mc{{ loop.index }}" class="categories">
+        <h2 onclick="media_toogle(event, '{{ index }}')">{{ category.category }}</h2>
+        <div id="media{{ loop.index}}" class="media">
+          {% for media in category.media %}
+            <main>
+              <section class="describtion">
+                <table onclick="media_toogle(event, '{{ index }}')">
+                  <tr>
+                    <td>Title:</td>
+                    <td>{{ media.title }}</td>
+                  </tr>
+                  <tr>
+                    <td>Director:</td>
+                    <td>{{ media.director }}</td>
+                  </tr>
+                  <tr>
+                    <td>Year:</td>
+                    <td>{{ media.year }}</td>
+                  </tr>
+                </table>
+              </section>
+
+              {% if media.capture %}
+                <section class="capture" onclick="media_toogle(event, '{{ index }}')">
+                  <img data-src="{{ media.capture }}" alt="{{ media.title }}">
+                </section>
+              {% endif %}
+
+              {% if media.actors %}
+              <section class="describtion">
+                <table onclick="media_toogle(event, '{{ index }}')">
+                  <tr>
+                    <td></td>
+                    <td>
+                      {% for actor in media.actors %}
+                        <p>{{ actor }}</p>
+                      {% endfor %}
+                    </td>
+                  </tr>
+                </table>
+              </section>
+              {% endif %}
+
+              <section style="flex-grow:1;">
+              </section>
+
+              <section class="nav">
+                <form action="{{ url_for('multimedia.view', uuid = media.uuid, _anchor = 'mc' ~ index) }}" method="get">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                  <input type="submit" value="Play">
+                </form>
+              </section>
+            </main>
+          {% endfor %}
+        </div>
+      </section>
+    {% endfor %}
+  </section>
+
+  <script>
+    let hash = window.location.hash.substr(1);
+    window.onload = (e) => {
+      if (hash) { media_toogle(e, hash.split('mc').pop()); }
+    };
+  </script>
+{% endblock %}

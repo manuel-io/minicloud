@@ -1,0 +1,36 @@
+{% from "_page.html" import head, disclaimer with context %}
+{% block html %}
+<!Doctype html>
+<html>
+  <head>
+    {% block head %}
+      {{ head() }}
+    {% endblock%}
+  </head>
+
+  <body>
+    <main>
+      <header>
+        <nav>
+          {% block nav %}
+          {% endblock %}
+        </nav>
+        {% block header %}
+        {% endblock %}
+      </header>
+      
+      {% block section %}
+      {% endblock %}
+
+      <footer>
+        <section>
+          {% block footer %}
+          {% endblock %}
+        </section>
+        {{ disclaimer() }}
+      </footer>
+
+    </main>
+  </body>
+</html>
+{% endblock %}

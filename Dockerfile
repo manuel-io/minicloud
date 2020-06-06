@@ -9,7 +9,8 @@ RUN apt-get install -y libpq-dev \
 
 # SERVER TOOLS
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y postgresql \
-                                                      nginx-full
+                                                      nginx-full \
+                                                      minidlna
                                                       
 RUN mkdir /var/run/sshd
 RUN locale-gen de_DE.UTF-8 en_US.UTF-8 en_GB.UTF-8
@@ -18,6 +19,7 @@ RUN useradd -u 9001 -g 9001 -d /home/minicloud -m -s /bin/bash minicloud
 RUN service postgresql start && sleep 10 && su postgres -c 'createuser -w -d minicloud' && su postgres -c 'createdb -O minicloud minicloud'
 
 COPY share/pg_hba.conf /etc/postgresql/10/main/pg_hba.conf
+COPY share/minidlna.conf /etc/minidlna.conf
 COPY . /home/minicloud
 
 RUN chown -R minicloud:www-data /home/minicloud

@@ -1,80 +1,78 @@
 {% extends "layout.html" %}
 {% from "_macros.html" import nav, aside with context %}
 {% from "users/_macros.html" import nav, header with context %}
-  {% block body %}
-     {{ aside() }}
-  {% endblock %}
+  
+{% block aside %}
+  {{ aside() }}
+{% endblock %}
 
-  {% block nav %}
-    {{ nav("edit") }}
-  {% endblock %}
+{% block nav %}
+  {{ nav("edit") }}
+{% endblock %}
 
-  {% block header %}
-    {{ header() }}
-  {% endblock %}
+{% block header %}
+  {{ header() }}
+{% endblock %}
 
-  {% block main %}
-    {{ super() }}
-    <section id="edit_user">
-      <form action="/users/edit/{{ user.id }}" method="post">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+{% block section %}
+  <section id="users">
+    <h2 class="top"><a id="return" class="back" href="{{ url_for('users.show') }}">Zurück</a></h2>
+
+    <form action="{{ url_for('users.edit', uuid = user.uuid) }}" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
          
+      <div class="group">      
         <fieldset>
-          <label>Name.</label>
-          <input type="text" name="name" value="{{ user.name }}" required />
+          <label>Username:</label>
+          <input type="text" name="username" value="{{ user.name }}" autocomplete="username" required>
+        </fieldset>
+  
+        <fieldset>
+          <label>E-Mail:</label>
+          <input type="email" name="email" value="{{ user.email }}" autocomplete="email" required>
+        </fieldset>
+  
+        <fieldset>
+          <label class="checkbox">
+            <input type="checkbox" name="admin" {{ "checked" if user.admin }}>
+            <p>Give this user admin privileges</p>
+          </label>
+        </fieldset>
+        
+        <fieldset>
+          <label class="checkbox">
+            <input type="checkbox" name="disabled" {{ "checked" if user.disabled }}>
+            <p>Disable the account</p>
+          </label>
         </fieldset>
 
         <fieldset>
-          <label>Email.</label>
-          <input type="email" name="email" value="{{ user.email }}" required />
+          <input type="submit" value="Edit">
         </fieldset>
+      </div>
+    </form>
 
+    <nav>
+      {% if user.activation_key %}
         <fieldset>
-          <div class="checkbox">
-            <label class="checkbox">
-              <input type="checkbox" name="admin" {{ "checked" if user.admin }} />
-              <p>Give this user admin privileges</p>
-            </label>
-          </div>
-
-          <div class="checkbox">
-            <label class="checkbox">
-              <input type="checkbox" name="disabled" {{ "checked" if user.disabled }} />
-              <p>Disable the account</p>
-            </label>
-          </div>
+          Activation Key:
+          <input type="text" value="{{ user.activation_key }}" disabled>
         </fieldset>
+      {% endif %}
 
-        <fieldset>
-          <input type="submit" value="Edit User" />
-        </fieldset>
-      </form>
-    </section>
-
-    <section id="new_activation">
-      <form action="/users/reset/{{ user.id }}" method="post">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-
-        <fieldset>
-          <input type="submit" value="New activation key" />
-        </fieldset>
-      </form>
-    </section>
-   
-    {% if not user.admin %}
-      <section id="delete_user">
-        <form action="/users/delete/{{user.id}}" method="post">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-
-          <fieldset>
-            <input type="submit" value="Delete" />
-          </fieldset>
+      <fieldset>
+        <form action="{{ url_for('users.reset', uuid = user.uuid) }}" method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="submit" value="New activation key">
         </form>
-      </section>
-    {% endif %}
-  {% endblock %}
+      </fieldset>
+    </nav>
+  </section>
 
-  {% block footer %}
-    {{ super() }}
-  {% endblock %}
+  <script>
+    let hash = window.location.hash.substr(1);
+    let ret = document.getElementById('return');
+    ret.href = ret.href + `#${hash}`;
+  </script>
+{% endblock %}
 

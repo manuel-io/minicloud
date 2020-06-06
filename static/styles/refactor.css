@@ -1,0 +1,211 @@
+body > main > section > form {
+  display: block;
+}
+
+body > main > section > form:nth-child(even) {
+  box-sizing: border-box;
+}
+
+body > main > section#multimedia,
+body > main > section#login,
+body > main > section#tasks,
+body > main > section#files {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+button.slbCloseBtn {
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 50%;
+  line-height: 100%;
+  font-size: 20px;
+  width: 30px;
+  height: 30px;
+  top: 20px;
+}
+
+.slbLoadingText,
+.slbContent,
+.slbCaption,
+.slbImageWrap,
+.slbContentOuter,
+.slbWrap,
+.slbWrapOuter {
+  background-color: transparent;
+}
+
+#multimedia.show {
+  /*
+   * background-image: radial-gradient(circle, #000, #ccc, #fff);
+   */
+}
+
+#multimedia.show .categories {
+  border: 1px solid #888;
+  border-radius: 5px;
+  padding: 5px;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+#multimedia.show .media {
+  display: none;
+  flex-direction: row;
+  justify-content: flex-start;
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+#multimedia.show main {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 300px;
+  min-width: 300px;
+  margin: 5px;
+  padding: 5px;
+  box-sizing: border-box;
+  border: 1px solid #000;
+  border-radius: 5px;
+}
+
+#multimedia.show main section {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 5px 0 5px 0;
+}
+
+#multimedia.show main section table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#multimedia.show main section table tr {
+  border-top: 1px solid #000;
+  border-bottom: 1px solid #000;
+}
+
+#multimedia.show main section table tr:first-child {
+  border-top: 0;
+}
+
+#multimedia.show main section table tr:last-child {
+  border-bottom: 0;
+}
+
+#multimedia.show main section table td:first-child {
+  text-align: left;
+  vertical-align: top;
+}
+
+#multimedia.show main section table td:last-child {
+  text-align: right;
+  vertical-align: top;
+}
+
+section#users.show .item {
+  grid-template-columns: minmax(150px, 1fr) minmax(150px, 1fr) 100px;
+}
+
+section#uploads.show .item {
+  grid-template-columns: minmax(150px, 1fr) 150px 100px 100px;
+}
+
+section#diashow.show .item {
+  grid-template-columns: minmax(200px, 1fr) 100px;
+}
+
+section#diashow.show .item,
+section#users.show .item,
+section#uploads.show .item {
+  display: grid;
+  align-items: center;
+  border: 1px solid #000;
+  border-radius: 5px;
+  box-sizing: border-box;
+  margin: 5px 0 5px 0;
+  overflow-x: auto;
+}
+
+section#diashow.show .item:nth-child(even),
+section#users.show .item:nth-child(even),
+section#uploads.show .item:nth-child(even) {
+  background-color: rgba(200, 200, 255, .1);
+}
+
+section#diashow.show .item div,
+section#users.show .item div,
+section#uploads.show .item div {
+  background-color: transparent;
+  box-sizing: border-box;
+  padding: 5px;
+  text-overflow: ellipsis;
+}
+
+section#users.show .item div table {
+  display: block;
+  height: 29px;
+  overflow-y: auto; 
+}
+
+section#diashow.show .item div p,
+section#users.show .item div p,
+section#uploads.show .item div p {
+  box-sizing: border-box;
+  background-color: transparent;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+section#uploads.show .item div.mime p,
+section#uploads.show .item div.size p {
+  text-align: right;
+}
+
+section#diashow.show .item div.action,
+section#users.show .item div.action,
+section#uploads.show .item div.action {
+  justify-self: end;
+}
+
+.tags {
+  box-sizing: border-box;
+  border: 1px solid #000;
+  border-radius: 5px;
+  padding: 5px;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  flex-wrap: wrap;
+  cursor: pointer;
+}
+
+.tag {
+  box-sizing: border-box;
+  border: 1px solid #000;
+  border-radius: 5px;
+  background-color: rgba(200, 200, 255, .1);
+  padding: 5px;
+  margin: 5px;
+  color: #000;
+}
+
+.newtag {
+  box-sizing: border-box;
+  background-color: transparent;
+}
+
+input[name=tag]:valid {
+  border: 0;
+  outline: none;
+  font-size: 1em;
+  width: 15px;
+  font-weight: bold;
+  color: #000;
+  background-color: transparent;
+}

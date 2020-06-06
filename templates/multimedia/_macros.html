@@ -1,0 +1,25 @@
+{% macro nav(target) %}
+  {% if target == 'show' %}
+    <!--
+    <button onclick="filters">Filters</button>
+    -->
+    
+    {% if current_user.admin %}
+      <form action="/multimedia/indexing" method="get">
+        <button type="submit">Indexing</button>
+      </form>
+    {% endif %}
+  {% endif %}
+
+  {% if target == 'view' %}
+  {% endif %}
+  
+  {% if target == 'indexing' %}
+    <form action="/multimedia" method="get">
+      <button type="submit">Multimedia</button>
+    </form>
+  {% endif %}
+{% endmacro %}
+
+{% macro header() %}
+{% endmacro %}

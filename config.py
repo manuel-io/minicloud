@@ -2,7 +2,24 @@ import psycopg2, os
 from datetime import datetime
 from dateutil import tz
 
-SECRET_KEY = os.urandom(32)
+utczone = tz.gettz('UTC')
+dbzone = tz.gettz('UTC')
+zone = tz.gettz('Europa/Berlin')
+today = datetime.utcnow().replace(tzinfo = utczone).astimezone(zone)
+
+class Config:
+    VERSION = 0.9
+    SECRET_KEY = os.urandom(32)
+    MINIDLNA = ['http://192.168.178.42:8200']
+    PROXYPORT = 8290
+
+    def __init__():
+        print('Config')
+    
+    @staticmethod
+    def getUnixTimestamp():
+        return int(datetime.timestamp(datetime.utcnow().replace(tzinfo = tz.UTC)))
+
 
 def get_db():
     db = psycopg2.connect( host = os.environ["MINICLOUD_HOST"]
@@ -15,11 +32,6 @@ def get_db():
                            if "MINICLOUD_PWD" in os.environ else None
                          )
     return db
-
-utczone = tz.gettz('UTC')
-dbzone = tz.gettz('UTC')
-zone = tz.gettz('Europa/Berlin')
-today = datetime.utcnow().replace(tzinfo = utczone).astimezone(zone)
 
 MIME_SUFFIX = { 'text/plain': 'txt'
               , 'text/x-python': 'rb'
