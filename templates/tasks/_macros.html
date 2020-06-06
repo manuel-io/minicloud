@@ -1,0 +1,54 @@
+{% macro nav(target) %}
+  <section id="nav">
+    {% if target == "show" %}
+      <div><button onclick="toggle('headup');">New Task</button></div>
+    {% else %}
+      <div>
+        <form action="/tasks" method="get">
+          <button type="submit">Tasks</button>
+        </form>
+      </div>
+    {% endif %}
+    <div>
+      <form action="/logout" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <button type="submit">Exit</button>
+      </form>
+    </div>
+  </section>
+{% endmacro %}
+
+{% macro header() %}
+  <input class="menu" type="checkbox" name="headup" />
+  <section id="category">
+    <form action="/tasks/add" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+       
+      <fieldset>
+        <label>
+          <p>Description.</p>
+          <p class="smalltext">Week {{ week }}</p>
+        </label>
+        <input type="text" name="description" required />
+      </fieldset>
+
+      <fieldset>
+        <label>
+          <p>Deadline.</p>
+        </label>
+        <input type="date" name="due" />
+      </fieldset>
+
+      <fieldset>
+        <label>
+          <p>Annotations.</p>
+        </label>
+        <textarea name="annotation"></textarea>
+      </fieldset>
+
+      <fieldset>
+        <input type="submit" value="Create Task" />
+      </fieldset>
+    </form>
+  </section>
+{% endmacro %}

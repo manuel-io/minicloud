@@ -1,0 +1,99 @@
+{% extends "layout.html" %}
+{% from "_macros.html" import aside with context %}
+  {% block body %}
+     {{ super() }}
+     {{ aside() }}
+  {% endblock %}
+  {% block nav %}
+  {% endblock %}
+  {% block header %}
+    {{ super() }}
+  {% endblock %}
+  {% block main %}
+    {{ super() }}
+    <section id="cloud">
+      {% for user in shared %}
+        <div class="nav">
+          <p>{{ user.username }}</p>
+        </div>
+        <div class="cloud">
+          {% for file in user.files %}
+            <div class="view">
+              {% if file.type != 1 %}<a href="/shared/view/{{ file.uid }}">{% endif %}
+                {% if file.mime in config["ftypes"]["plain"] %}
+                <div class="item" style="background-image: url({{ url_for('static', filename='fontawesome/text.svg') }});">
+                  <p>{{ file.title }}</p>
+                  <p>{{ file.mime }}</p>
+                </div>
+                {% elif file.mime in config["ftypes"]["code"] %}
+                <div class="item" style="background-image: url({{ url_for('static', filename='fontawesome/computer.svg') }});">
+                  <p>{{ file.title }}</p>
+                  <p>{{ file.mime }}</p>
+                </div>
+                {% elif file.mime in config["ftypes"]["image"] %}
+                <div class="item" style="background-image: url('/shared/thumbnail/{{ file.uid }}');">
+                  <p>{{ file.title }}</p>
+                  <p>{{ file.mime }}</p>
+                </div>
+                {% elif file.mime in config["ftypes"]["markup"] %}
+                <div class="item" style="background-image: url({{ url_for('static', filename='fontawesome/markup.svg') }});">
+                  <p>{{ file.title }}</p>
+                  <p>{{ file.mime }}</p>
+                </div>
+                {% elif file.mime in config["ftypes"]["font"] %}
+                <div class="item" style="background-image: url({{ url_for('static', filename='fontawesome/font.svg') }});">
+                  <p>{{ file.title }}</p>
+                  <p>{{ file.mime }}</p>
+                </div>
+                {% elif file.mime in config["ftypes"]["archive"] %}
+                <div class="item" style="background-image: url({{ url_for('static', filename='fontawesome/archive.svg') }});">
+                  <p>{{ file.title }}</p>
+                  <p>{{ file.mime }}</p>
+                </div>
+                {% elif file.mime in config["ftypes"]["document"] %}
+                <div class="item" style="background-image: url({{ url_for('static', filename='fontawesome/document.svg') }});">
+                  <p>{{ file.title }}</p>
+                  <p>{{ file.mime }}</p>
+                </div>
+                {% elif file.mime in config["ftypes"]["audio"] %}
+                <div class="item" style="background-image: url({{ url_for('static', filename='fontawesome/audio.svg') }});">
+                  <p>{{ file.title }}</p>
+                  <p>{{ file.mime }}</p>
+                </div>
+                {% elif file.mime in config["ftypes"]["video"] %}
+                <div onclick="open_media('{{ file.mime }}', '{{ file.uid }}');" class="item" style="background-image: url({{ url_for('static', filename='fontawesome/video.svg') }});">
+                  <p>{{ file.title }}</p>
+                  <p>{{ file.mime }}</p>
+                </div>
+                {% else %}
+                <div class="item" style="background-image: url({{ url_for('static', filename='fontawesome/unknown.svg') }});">
+                  <p>{{ file.title }}</p>
+                  <p>{{ file.mime }}</p>
+                </div>
+                {% endif %}
+              {% if file.type != 1 %}</a>{% endif %}
+              
+                <div class="action">
+                  {% if file.type == 1 %}
+                    <form action="/shared/download/public/{{ file.uid }}" method="post">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                      <input type="submit" value="Download" />
+                    </form>
+                  {% else %}
+                    <form action="/shared/view/{{ file.uid }}" method="post">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                      <input type="submit" value="View" />
+                    </form>
+                  {% endif %}
+                </div>
+              </div>
+          {% endfor %}
+        </div>
+      {% endfor %}
+    </section>
+  {% endblock %}
+
+  {% block footer %}
+    {{ super() }}
+  {% endblock %}
+

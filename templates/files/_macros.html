@@ -1,0 +1,43 @@
+{% macro nav(target) %}
+<section id="nav">
+  {% if target == "show" %}
+    <div><button onclick="toggle('headup');">Upload</button></div>
+  {% else %}
+    <div>
+      <form action="/files" method="get">
+        <button type="submit">Files</button>
+      </form>
+    </div>
+  {% endif %}
+  <div>
+    <form action="/logout" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <button type="submit">Exit</button>
+    </form>
+  </div>
+</section>
+{% endmacro %}
+
+{% macro header() %}   
+  <input class="menu" type="checkbox" name="headup" />
+  <section id="upload">
+    <form action="/files/upload" method="post" enctype="multipart/form-data">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+       
+      <fieldset>
+        <label>Select a file <span class="nospace">(*.jpg, *.mp3, etc.)</span>
+        <span class="nospace">from your computer.</span></label>
+        <input id="upload_file" name="file" type="file" required />
+      </fieldset>
+
+      <fieldset>
+        <label>Give a description.</label>
+        <input type="text" name="name" required />
+      </fieldset>
+
+      <fieldset>
+        <input type="submit" value="Upload" />
+      </fieldset>
+    </form>
+  </section>
+{% endmacro %}

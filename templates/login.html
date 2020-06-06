@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+  {% block body %}
+     {{ super() }}
+  {% endblock %}
+
+  {% block header %}
+    <section id="login">
+      <form action="/login" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+        <fieldset>
+          <label>Username</label>
+          <input type="text" name="username" />
+        </fieldset>
+
+        <fieldset>
+          <label>Password</label>
+          <input type="password" name="password" />
+        </fieldset>
+
+        <fieldset>
+          <input type="submit" value="Login" />
+        </fieldset>
+
+      </form>
+    </section>
+
+    <section id="new_activation">
+      <form action="/login/activation" method="get">
+
+        <fieldset>
+          <input type="submit" value="Activation/Reset" />
+        </fieldset>
+
+      </form>
+    </section>
+  {% endblock %}
+
+  {% block main %}
+    {{ super() }}
+  {% endblock %}
+
+  {% block footer %}
+    {{ super() }}
+  {% endblock %}
+

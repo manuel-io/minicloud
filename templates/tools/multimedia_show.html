@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+{% from "_macros.html" import aside, tinymce with context %}
+{% from "tools/_multimedia_macros.html" import nav, header, popup with context %}
+  {% block head %}
+     {{ super() }}
+  {% endblock %}
+  {% block body %}
+     {{ super() }}
+     {{ aside() }}
+  {% endblock %}
+  {% block nav %}
+    {{ nav("show") }}
+  {% endblock %}
+  {% block header %}
+    {{ header() }}
+  {% endblock %}
+  {% block main %}
+    {{ super() }}
+    <section id="categories">
+      {% for category in multimedia %}
+        <div>
+          <table>
+            <tr>
+              <th>
+              {% if category.count > 1 %}
+                <a href="#media{{ loop.index }}">
+                  <p>{{ category.category }}</p>
+                </a>
+              {% else %}
+                <a href="/tools/multimedia/view/{{ category.media[0].uuid }}">
+                  <p>{{ category.category }}</p>
+                </a>
+              {% endif %}
+              </th>
+            </tr>
+            {% if category.count > 1 %}
+            <tr id="media{{ loop.index }}" class="userinfo collapse">
+              <td>
+                <ul>
+                  {% for media in category.media %}
+                    <li><a href="/tools/multimedia/view/{{ media.uuid }}">{{ media.title }}</a></li>
+                  {% endfor %}
+                </ul>
+              </td>
+            </tr>
+            {% endif %}
+          </table>
+        </div>
+      {% endfor %}
+    </section>
+  {% endblock %}
+
+  {% block footer %}
+    {{ super() }}
+  {% endblock %}
+

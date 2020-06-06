@@ -1,0 +1,17 @@
+server {
+
+  listen 80 default_server;
+  listen [::]:80 default_server;
+
+  server_name _;
+  client_max_body_size 0;
+  client_body_timeout 300s;
+
+  location / {
+    include uwsgi_params;
+    uwsgi_read_timeout 600s;
+    uwsgi_send_timeout 300s;
+    uwsgi_pass unix:/home/minicloud/minicloud.sock;
+  }
+
+}

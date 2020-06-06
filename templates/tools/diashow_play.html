@@ -1,0 +1,110 @@
+{% extends "layout.html" %}
+{% block head %}
+  {{ super() }}
+  <title>{{ diashow.title }}</title>
+  <link href="{{ url_for('static', filename='styles/diashow.css') }}" media="all" rel="stylesheet" type="text/css">
+  <script src="{{ url_for('static', filename='scripts/diashow.js') }}" ></script>   
+{% endblock %}
+
+{% block body %}
+{% endblock %}
+
+{% block header %}
+{% endblock %}
+
+{% block main %}
+  <div class="slide">
+    <div id="progress">
+      <div id="bar"></div>
+      <div id="status"></div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block footer %}
+  <script>
+    window.onload = (event) => {
+      let files = [];
+      let screen = document.getElementById('main');
+      
+      {% for file in diashow.files %}
+        var file = { 'index': '{{ loop.index }}'
+                   , 'title': '{{ file.title }}'
+                   , 'description': '{{ file.description | tojson }}'
+                   , 'path': '{{ url_for('tools.diashow_download', diashow = diashow.uuid, uid = file.uuid, _external = True) }}'
+                   , 'img': new Image()
+                   };
+        files.push(file);
+      {% endfor %}
+
+      let diashow = new Diashow(files, () => {
+        screen.innerHTML = '';
+
+        files.forEach((file) => {
+
+          var first = document.createElement('a');
+          first.setAttribute('href', '#slide-1');
+          first.innerHTML = 'First';
+
+          var last = document.createElement('a');
+          last.setAttribute('href', '#slide-' + files.length);
+          last.innerHTML = 'Last';
+
+          var slide = document.createElement('div');
+          slide.id = 'slide-' + file.index;
+          slide.className = 'slide';
+
+          slide.onclick = (event) => {
+            if (parseInt(file.index) == files.length) window.location.href= '#slide-1';
+            else window.location.href = '#slide-' + (parseInt(file.index) + 1);
+          };
+
+          var text = document.createElement('div');
+          text.className = 'text';
+          var container = document.createElement('div');
+          container.className = 'container';
+          var nav = document.createElement('div');
+          nav.className = 'nav';
+          var next = document.createElement('a');
+          next.setAttribute('href', '#slide-' + (parseInt(file.index) + 1));
+          next.innerHTML = 'Next';
+          var back = document.createElement('a');
+          back.setAttribute('href', '#slide-' + (parseInt(file.index) - 1));
+          back.innerHTML = 'Back';
+          var header = document.createElement('div');
+          header.className = 'header';
+          var index = document.createElement('h1');
+          var title = document.createElement('h2');
+          var description = document.createElement('p');
+          description.className = 'markdown';
+          var image = document.createElement('div');
+          image.className = 'image';
+
+          index.innerHTML = file.index;
+          title.innerHTML = file.title;
+          description.innerHTML = file.description.replace(/^"|"$/g,'');
+
+          container.appendChild(title);
+
+          if (parseInt(file.index) == 1) nav.appendChild(last);
+          else nav.appendChild(back);
+
+          if (parseInt(file.index) == files.length) nav.appendChild(first);
+          else nav.appendChild(next);
+
+          container.appendChild(nav);
+          container.appendChild(description);
+
+          text.appendChild(container);
+          image.appendChild(file.img);
+
+          header.appendChild(index);
+          slide.appendChild(header);
+          slide.appendChild(text);
+          slide.appendChild(image);
+          screen.appendChild(slide);
+        });
+      });
+    };
+  </script>
+{% endblock %}

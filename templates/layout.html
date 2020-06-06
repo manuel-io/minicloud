@@ -1,0 +1,90 @@
+{% block html %}
+<!Doctype html>
+<html>
+  <head>
+    {% block head %}
+      <meta charset="utf-8" />
+      <meta name="robots" content="noindex">
+      <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+      <meta http-equiv="Pragma" content="no-cache" />
+      <meta http-equiv="Expires" content="0" />
+      <meta name="MobileOptimized" content="320">
+      <meta name="Viewport" content="width=device-width, initial-scale=1">
+      <link rel="shortcut icon" sizes="32x32" href="{{ url_for('static', filename='icons/favicon.ico', _external = True) }}">
+      <link rel="shortcut icon" sizes="192x192" type="image/png" href="{{ url_for('static', filename='icons/favicon32.png', _external = True) }}">
+      <link rel="apple-touch-icon" sizes="57x57" href="{{ url_for('static', filename='icons/favicon57.png', _external = True) }}">
+      <link rel="apple-touch-icon" sizes="64x64" href="{{ url_for('static', filename='icons/favicon64.png', _external = True) }}">
+      <link rel="apple-touch-icon" sizes="72x72" href="{{ url_for('static', filename='icons/favicon72.png', _external = True) }}">
+      <link rel="apple-touch-icon" sizes="76x76" href="{{ url_for('static', filename='icons/favicon76.png', _external = True) }}">
+      <link rel="apple-touch-icon" sizes="114x114" href="{{ url_for('static', filename='icons/favicon114.png', _external = True) }}">
+      <link rel="apple-touch-icon" sizes="120x120" href="{{ url_for('static', filename='icons/favicon120.png', _external = True) }}">
+      <link rel="apple-touch-icon" sizes="128x128" href="{{ url_for('static', filename='icons/favicon128.png', _external = True) }}">
+      <link rel="apple-touch-icon" sizes="144x144" href="{{ url_for('static', filename='icons/favicon144.png', _external = True) }}">
+      <link rel="apple-touch-icon" sizes="152x152" href="{{ url_for('static', filename='icons/favicon152.png', _external = True) }}">
+      <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='icons/favicon180.png', _external = True) }}">
+      <link rel="apple-touch-icon" sizes="192x192" href="{{ url_for('static', filename='icons/favicon192.png', _external = True) }}">
+      <title>Minicloud</title>
+      <link href="{{ url_for('static', filename='styles/minicloud.css') }}" media="all" rel="stylesheet" type="text/css">
+      <script src="{{ url_for('static', filename='scripts/jquery-3.4.1.min.js') }}" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+      <script src="{{ url_for('static', filename='scripts/script.js') }}" ></script>
+    {% endblock%}
+  </head>
+  <body>
+    {% block body %}
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <section id="alerts">
+            <ul>
+              {% for category, message in messages %}
+                <li class="{{ category }}">
+                  {% for line in message %}
+                    <p>{{ line }}</p>
+                  {% endfor %}
+              </li>
+              {% endfor %}
+            </ul>
+          </section>
+        {% endif %}
+      {% endwith %}
+    {% endblock %}
+
+    <nav>
+      {% block nav %}
+      {% endblock %}
+    </nav>
+
+    <header>
+      {% block header %}
+        <section id="progress">
+          <fieldset>
+            <label class="loading">Uploding file ...</label>
+            <label class="saving">Processing file ...</label>
+            <div class="status">
+              <div class="loader"></div>
+            </div>
+          </fieldset>
+        </section>
+      {% endblock %}
+    </header>
+
+    <main id="main">
+      {% block main %}
+      {% endblock %}
+    </main>
+
+    <footer>
+      {% block footer %}
+        <section id="disclaimer">
+          <div>
+            <img src="{{ url_for('static', filename='icons/favicon32.png') }}">
+          </div>
+          <div>
+            <p class="text-small">© 2019 Minicloud</p>
+            <p class="text-smaller"><a href="https://github.com/manuel-io/minicloud" target="_blank">Minicloud on Github</a></p>
+          </div>
+        </section>
+      {% endblock %}
+    </footer>
+  </body>
+</html>
+{% endblock %}

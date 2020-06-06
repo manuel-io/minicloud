@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+{% from "_macros.html" import aside, tinymce with context %}
+{% from "tools/_diashow_macros.html" import nav, header with context %}
+  {% block head %}
+     {{ super() }}
+  {% endblock %}
+  {% block body %}
+     {{ super() }}
+     {{ aside() }}
+  {% endblock %}
+  {% block nav %}
+    {{ nav("show") }}
+  {% endblock %}
+  {% block header %}
+    {{ header() }}
+  {% endblock %}
+  {% block main %}
+    {{ super() }}
+    <section id="categories">
+      {% for diashow in diashows %}
+        <div>
+          <table>
+            <tr>
+              <th>
+                <a href="diashow/play/{{diashow.uuid}}">
+                  <div class="">
+                    <p>{{ diashow.title }}</p>
+                  </div>
+                </a>
+              </th>
+            </tr>
+            <tr class="userinfo">
+              <td>
+                <ul>
+                  {% set link = url_for('tools.diashow_play', uuid = diashow.uuid, _external = True) %}
+                  <li><a href="{{ link }}" target="_blank">{{ link }}</a></li>
+                  <li class="text-small">
+                    <form class="link" action="/tools/diashow/delete/{{ diashow.uid }}" method="post">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                      <input class="link" type="submit" value="Remove" />
+                    </form>
+                  </li>
+                </ul>
+              </td>
+            </tr>
+          </table>
+        </div>
+      {% endfor %}
+    </section>
+  {% endblock %}
+
+  {% block footer %}
+    {{ super() }}
+  {% endblock %}
+

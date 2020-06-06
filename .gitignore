@@ -1,0 +1,8 @@
+bin
+lib
+local
+include
+share/python-wheels/
+*.pyc
+lib64
+pyvenv.cfg

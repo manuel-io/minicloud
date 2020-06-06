@@ -1,0 +1,200 @@
+{% extends "layout.html" %}
+{% from "_macros.html" import nav, aside, tinymce with context %}
+{% from "files/_macros.html" import nav, header with context %}
+  {% block body %}
+     {{ super() }}
+     {{ aside() }}
+  {% endblock %}
+  {% block nav %}
+    {{ nav("edit") }}
+  {% endblock %}
+  {% block header %}
+    {{ header() }}
+    {{ tinymce() }}
+  {% endblock %}
+  {% block main %}
+    {{ super() }}
+    <section id="edit_file">
+      <div>
+        <p>
+          {{ file.title }}
+        </p>
+      </div>
+
+      <div>
+        {% if file.mime in config["ftypes"]["image"] %}
+          <img src="/files/stream/{{ file.uid }}" />
+        {% elif file.mime in config["ftypes"]["audio"] %}
+          <audio controls controlsList="nodownload">
+            <source src="/files/stream/{{ file.uid }}" type="{{ file.mime }}" />
+          </audio>
+        {% elif file.mime in config["ftypes"]["video"] %}
+          <video controls controlsList="nodownload">
+            <source src="/files/stream/{{ file.uid }}" type="{{ file.mime }}" />
+          </video>
+        {% endif %}
+      </div>
+
+      <fieldset>
+        <form action="/files/download/{{ file.uid }}" method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <input type="submit" value="Download" />
+        </form>
+      </fieldset>
+    </section>
+
+    <section id="category_file">
+      <form action="/files/edit/{{ file.uid }}" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+        <fieldset>
+          <label>Title.</label>
+          <input type="text" name="title" value="{{ file.title }}" required />
+        </fieldset>
+
+        <fieldset>
+          <label>Description.</label>
+          <textarea type="text" name="description">{{ file.description }}</textarea>
+        </fieldset>
+
+        <fieldset>
+          <label>Category.</label>
+          <input tpye="text" name="category" value="{{ file.category }}" required />
+          <select class="sub">
+            <option value="0" selected disabled>Select category ...</option>
+            {% for option in categories %}
+              <option>{{ option.title }}</option>
+            {% endfor %}
+          </select>
+        </fieldset>
+
+        <fieldset>
+          <input type="submit" value="Change" />
+        </fieldset>
+      </form>
+    </section>
+
+    <section id="share_file">
+      <form action="/shared/add/{{ file.uid }}" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <input type="hidden" name="file_id" value="{{ file.id }}" />
+        <input type="hidden" name="file_uid" value="{{ file.uid }}" />
+
+        <fieldset>
+          <div class="radiobox">
+            <label class="radiobox">
+              <input type="radio" name="shared_type" value="public" checked required />
+              <p>Share with the public</p>
+            </label>
+          </div>
+
+          <div class="radiobox">
+            <label class="radiobox">
+              <input type="radio" name="shared_type" value="cloud" />
+              <p>Share within the cloud</p>
+            </label>
+          </div>
+
+          <div class="radiobox sub">
+            <label class="radiobox">
+              <input type="radio" name="shared_type" value="user" />
+              <p>Share with a user</p>
+            </label>
+          </div>
+
+          <select class="sub" name="shared_id">
+            <option value="0" selected disabled>Select user ...</option>
+            {% for option in users %}
+              <option value="{{ option.id }}">{{ option.name }}</option>
+            {% endfor %}
+          </select>
+        </fieldset>
+
+        <fieldset>
+          <input type="submit" value="Share" />
+        </fieldset>
+      </form>
+    </section>
+
+    <section>
+      {% for share in shared %}
+        <div>
+          <table>
+            {% if share.shared_type == 1 %}
+              <tr>
+                <th>
+                  <div>
+                    Shared with the {{ share.target }}
+                  </div>
+                </th>
+              </tr>
+              <tr class="userinfo">
+                <td>
+                  <ul>
+                    {% set link = url_for('shared.download_public', uid = share.uid, _external = True) %}
+                    <li class="text-small"><a href="{{ link }}" target="_blank">{{ link }}</a></li>
+                    <li class="text-small">
+                      <form class="link" action="/shared/delete/{{ share.uid }}" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        <input type="hidden" name="file_uid" value="{{ file.uid }}" />
+                        <input class="link" type="submit" value="Unshare" />
+                      </form>
+                    </li>
+                  </ul>
+                </td>
+              </tr>
+            {% endif %}
+            {% if share.shared_type == 2 %}
+              <tr>
+                <th>
+                  <div>
+                    Shared within the {{ share.target }}
+                  </div>
+                </th>
+              </tr>
+              <tr class="userinfo">
+                <td>
+                  <ul>
+                    <li class="text-small">
+                      <form class="link" action="/shared/delete/{{ share.uid }}" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        <input type="hidden" name="file_uid" value="{{ file.uid }}" />
+                        <input class="link" type="submit" value="Unshare" />
+                      </form>
+                    </li>
+                  </ul>
+                </td>
+              </tr>
+            {% endif %}
+            {% if share.shared_type == 3 %}
+              <tr>
+                <th>
+                  <div>
+                    Shared with {{ share.target }}
+                  </div>
+                </th>
+              </tr>
+              <tr class="userinfo">
+                <td>
+                  <ul>
+                    <li class="text-small">
+                      <form class="link" action="/shared/delete/{{ share.uid }}" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        <input type="hidden" name="file_uid" value="{{ file.uid }}" />
+                        <input class="link" type="submit" value="Unshare" />
+                      </form>
+                    </li>
+                  </ul>
+                </td>
+              </tr>
+            {% endif %}
+          </table>
+        </div>
+      {% endfor %}
+    </section>
+  {% endblock %}
+
+  {% block footer %}
+    {{ super() }}
+  {% endblock %}
+

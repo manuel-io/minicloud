@@ -1,0 +1,51 @@
+{% macro nav(target) %}
+  <section id="nav">
+    {% if target == "show" %}
+    <div><button onclick="toggle('headup');">New User</button></div>
+    {% else  %}
+    <div>
+      <form action="/users" method="get">
+        <button type="submit">Users</button>
+      </form>
+    </div>
+    {% endif %}
+    <div>
+      <form action="/logout" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <button type="submit">Exit</button>
+      </form>
+    </div>
+  </section>
+{% endmacro %}
+
+{% macro header() %}
+  <input class="menu" type="checkbox" name="headup" />
+  <section id="new_user">
+    <form action="/users/add" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+       
+      <fieldset>
+        <label>Name.</label>
+        <input type="text" name="name" required />
+      </fieldset>
+
+      <fieldset>
+        <label>Email.</label>
+        <input type="email" name="email" required />
+      </fieldset>
+
+      <fieldset>
+        <div class="checkbox">
+        <label class="checkbox">
+          <input type="checkbox" name="admin" />
+          <p>Give this user admin privileges</p>
+        </label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <input type="submit" value="New User" />
+      </fieldset>
+    </form>
+  </section>
+{% endmacro %}

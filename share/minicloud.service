@@ -1,0 +1,14 @@
+[Unit]
+Description = Minicloud Webservice
+After = network.target
+
+[Service]
+User = minicloud
+Group = www-data
+WorkingDirectory = /home/minicloud
+Environment="PATH=/home/minicloud/bin"
+Environment="TZ=Europe/Berlin"
+ExecStart=/home/minicloud/bin/uwsgi --ini minicloud.ini
+
+[Install]
+WantedBy=multi-user.target

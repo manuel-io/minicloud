@@ -1,0 +1,68 @@
+{% extends "layout.html" %}
+{% from "_macros.html" import aside, tinymce with context %}
+{% from "tasks/_macros.html" import nav, header with context %}
+  {% block head %}
+     {{ super() }}
+     {{ tinymce() }}
+  {% endblock %}
+  {% block body %}
+     {{ super() }}
+     {{ aside() }}
+  {% endblock %}
+  {% block nav %}
+    {{ nav("show") }}
+  {% endblock %}
+  {% block header %}
+    {{ header() }}
+  {% endblock %}
+  {% block main %}
+    {{ super() }}
+    <section id="today">
+      <p>Today: {{ today }}</p>
+    </section>
+    <section id="categories">
+      {% for category in categories %}
+        <div class="nav">
+          <p>{{ category.name }}</p>
+        </div>
+        {% for task in category.tasks %}
+          <div>
+            <table>
+              <tr>
+                <th>
+                  <a href="edit/{{task.id}}">
+                    <div class="{{ "delayed" if task.delayed else "ontime" }}">
+                      <p>{{ task.description }}</p>
+                    </div>
+                  </a>
+                </th>
+              </tr>
+              <tr class="userinfo">
+                <td>
+                  <ul>
+                    <li class="text-small">{{ task.status }}</li>
+                    {% if task.status == "completed" or task.status == "deleted" %}
+                      <li class="text-small">on {{ task.done }}</li>
+                    {% else %}
+                      {% if task.status == "processing" %}
+                        <li class="text-small">since {{task.process}}</li>
+                      {% endif %}
+                      {% if task.due %}
+                        <li class="text-small">due {{ task.due }}</li>
+                        <li class="text-small">{{ task.deadline }} days left</li>
+                      {% endif %}
+                    {% endif %}
+                  </ul>
+                </td>
+              </tr>
+            </table>
+          </div>
+        {% endfor %}
+      {% endfor %}
+    </section>
+  {% endblock %}
+
+  {% block footer %}
+    {{ super() }}
+  {% endblock %}
+

@@ -1,0 +1,50 @@
+{% macro nav(target) %}
+  <section id="nav">
+    {% if target == "show" %}
+      <div><button onclick="toggle('headup');">New Diashow</button></div>
+    {% else %}
+      <div>
+        <form action="/tasks" method="get">
+          <button type="submit">Diashows</button>
+        </form>
+      </div>
+    {% endif %}
+    <div>
+      <form action="/logout" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <button type="submit">Exit</button>
+      </form>
+    </div>
+  </section>
+{% endmacro %}
+
+{% macro header() %}
+  <input class="menu" type="checkbox" name="headup" />
+  <section id="category">
+    <form action="/tools/diashow/add" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+       
+      <fieldset>
+        <label>
+          <p>Title.</p>
+        </label>
+        <input type="text" name="title" required />
+      </fieldset>
+
+      <fieldset>
+        <label>Category.</label>
+        <input tpye="text" name="category" required />
+        <select class="sub">
+          <option value="0" selected disabled>Select category ...</option>
+          {% for option in categories %}
+            <option>{{ option.title }}</option>
+          {% endfor %}
+        </select>
+      </fieldset>
+
+      <fieldset>
+        <input type="submit" value="Create Diashow" />
+      </fieldset>
+    </form>
+  </section>
+{% endmacro %}

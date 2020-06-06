@@ -1,0 +1,60 @@
+{% macro aside() %}
+<input type="checkbox" name="sidebar" />
+<aside onclick="toggle('sidebar')">
+  <div>
+    <section>
+      <p class="title">Minicloud</p>
+      <ul>
+        <a href="/files"><li>Files</li></a>
+        <a href="/shared"><li>Shared</li></a>
+        <a href="/tasks"><li>Tasks</li></a>
+      </ul>
+    </section>
+
+    <section>
+      <p class="title">Tools</p>
+      <ul>
+        <a href="/tools/multimedia"><li>Multimedia</li></a>
+        <a href="/tools/diashow"><li>Diashow</li></a>
+      </ul>
+    </section>
+
+    <section>
+      <p class="title">User Profile</p>
+      <ul>
+        <a href="/profile"><li>Profile</li></a>
+      </ul>
+    </section>
+
+    {% if current_user.admin %}
+    <section>
+      <p class="title">Administration</p>
+      <ul>
+        <a href="/users"><li>Users</li></a>
+      </ul>
+    </section>
+    {% endif %}
+  </div>
+  <div>
+    <p></p>
+  </div>
+</aside>
+{% endmacro %}
+
+{% macro tinymce() %}
+<script src="{{url_for('static', filename='scripts/tinymce/tinymce.min.js')}}"></script>
+<script>
+  tinymce.init({ selector: 'textarea'
+               , height: 300
+               , visual: false
+               , plugins: ['autolink paste table lists link codesample fullscreen']
+               , menubar: 'edit format insert view'
+               , toolbar: 'formatselect | bold italic | alignleft aligncenter alignright | bullist  | outdent indent'
+               , menu: { edit: { title: "Edit", items: "undo redo" }
+                       , format: { title: "Format", items: "bold italic underline strikethrough"}
+                       , insert: { title: "Insert", items: "inserttable codesample"}
+                       , view: { title: "View", items: "fullscreen"}
+                       }
+               });
+</script>
+{% endmacro %}

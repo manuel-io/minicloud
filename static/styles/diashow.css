@@ -1,0 +1,146 @@
+html, body, div, p, img, h2 {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  overflow: hidden;
+}
+
+div#progress {
+  border: 1px solid #cecece;
+  border-radius: 5px;
+  width: 80%;
+  height: 80vh;
+}
+
+div#bar {
+  width: 0%;
+  height: 100%;
+  background-color: #5c92ae;
+}
+
+div#status {
+  position: absolute;
+  top: 50%;
+  font-size: 2.5rem;
+  transform: translateY(-50%);
+  text-align: center;
+  color: #5c92ae;
+  width: 80%;
+  text-shadow: -1px 1px 0 #fff, 1px 1px 0 #fff, 1px -1px 0 #fff, -1px -1px 0 #fff;
+}
+
+div.slide {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  background-color: #fff;
+  width: 100%;
+  height: 100vh;
+}
+
+div.slide > .header {
+  position: absolute;
+  top: 12.5px;
+  margin: 0 0 0 50px;
+  width: 100%;
+}
+
+div.slide > .header > h1 {
+  border: 1px solid #000;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  text-align: center;
+  color: #000;
+  line-height: 27px;
+  background-color: #fff;
+  z-index: 55;
+}
+
+div.nav {
+  margin-bottom: 10px;
+}
+
+div.nav a:not(:last-child):after {
+  margin: 0 5px 0 5px;
+  content: '|';
+}
+
+div.text {
+  flex-grow: 0;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  color: #000;
+  width: calc(40% - 50px);
+  height: calc(100vh - 100px);
+  text-align: left;
+  padding: 10px;
+  overflow: hidden;
+  overflow-y: auto;
+  border: 0px solid #000;
+  border-radius: 5px;
+  box-shadow: 2px 2px 5px #cecece;
+  margin: 50px 25px 50px 25px;
+}
+
+div.image {
+  flex-grow: 0;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  width: calc(60% - 50px);
+  height: calc(100vh - 100px);
+  overflow: hidden;
+  overflow-y: auto;
+  border: 0px solid #000;
+  border-radius: 5px;
+  box-shadow: 2px 2px 5px #cecece;
+  margin: 50px 25px 50px 25px;
+}
+
+img {
+  border: 1px solid #cecece;
+  border-radius: 5px;
+  margin: 10px;
+  max-height: calc(100% - 20px);
+  max-width: calc(100% - 20px);
+}
+
+.markdown ul {
+  list-style-position: inside;
+}
+
+.markdown li ul {
+  list-style-position: inside;
+  margin-left: 10px;
+}
+
+@media only screen and (max-width: 800px) {
+  div.slide > .header {
+    width: 90%;
+    margin: 0 0 0 0;
+  }
+
+  div.text {
+    width: 90%;
+    height: calc(50vh - 50px);
+    margin: 50px 0 0 0;
+  }
+
+  div.image {
+    width: 90%;
+    height: calc(50vh - 30px);
+    margin: 15px 0 15px 0;
+  }
+}

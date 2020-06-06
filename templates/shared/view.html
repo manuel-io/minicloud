@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+{% from "_macros.html" import aside with context %}
+  {% block body %}
+     {{ super() }}
+     {{ aside() }}
+  {% endblock %}
+  {% block nav %}
+  {% endblock %}
+  {% block header %}
+  {% endblock %}
+  {% block main %}
+    {{ super() }}
+    <section id="edit_file">
+      <div>
+        <p>{{ shared.title }}</p>
+      </div>
+
+      <div>
+        {% if shared.mime in config["ftypes"]["image"] %}
+          <img src="/files/stream/{{ shared.uid }}" />
+        {% elif shared.mime in config["ftypes"]["audio"] %}
+          <audio controls controlsList="nodownload">
+            <source src="/files/stream/{{ shared.uid }}" type="{{ shared.mime }}" />
+          </audio>
+        {% elif shared.mime in config["ftypes"]["video"] %}
+          <video controls controlsList="nodownload">
+            <source src="/shared/stream/{{ shared.uid }}" type="{{ shared.mime }}" />
+          </video>
+        {% endif %}
+      </div>
+
+      <fieldset>
+        <form action="/shared/stream/{{ shared.uid }}" method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <input type="submit" value="Download" />
+        </form>
+      </fieldset>
+    </section>
+
+  {% endblock %}
+
+  {% block footer %}
+    {{ super() }}
+  {% endblock %}
+

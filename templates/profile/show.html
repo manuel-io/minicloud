@@ -1,0 +1,110 @@
+{% extends "layout.html" %}
+{% from "_macros.html" import aside with context %}
+{% from "profile/_macros.html" import nav with context %}
+
+  {% block body %}
+     {{ super() }}
+     {{ aside() }}
+  {% endblock %}
+
+  {% block nav %}
+    {{ nav("show") }}
+  {% endblock %}
+
+  {% block header %}
+    {{ super() }}
+  {% endblock %}
+
+  {% block main %}
+    {{ super() }}
+    <section id="profile">
+      <form action="/profile" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+         
+        <fieldset>
+          <label>Name.</label>
+          <input type="text" name="name" value="{{ user.name }}" required />
+        </fieldset>
+
+        <fieldset>
+          <label>Email.</label>
+          <input type="email" name="email" value="{{ user.email }}" required />
+        </fieldset>
+
+        <fieldset>
+          <input type="submit" value="Update" />
+        </fieldset>
+      </form>
+    </section>
+
+    <section id="profile_password">
+      <form action="/profile/password" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+        <fieldset>
+          <label>Password.</label>
+          <input type="password" name="password" minlength="6" required />
+          <label>Confirmation.</label>
+          <input type="password" name="confirmation" required />
+        </fieldset>
+
+        <fieldset>
+          <input type="submit" value="Update" />
+        </fieldset>
+      </form>
+    </section>
+
+    <section id="profile_import">
+      <form action="/profile/import" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+         
+        <fieldset>
+          <label>Select a file
+          <span class="nospace">from your computer.</span></label>
+          <input id="upload_file" name="file" type="file" required />
+        </fieldset>
+  
+        <fieldset>
+          <input type="submit" value="Import" />
+        </fieldset>
+      </form>
+    </section>
+
+    <section id="profile_export">
+      <form action="/profile/export" method="post" target="_blank">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        
+        <fieldset>
+          <div class="radiobox">
+            <label class="radiobox">
+              <input type="radio" name="files" value="no" checked required />
+              <p>Include no files</p>
+            </label>
+          </div>
+<!--
+          <div class="radiobox">
+            <label class="radiobox">
+              <input type="radio" name="files" value="attached" />
+              <p>Include attached files</p>
+            </label>
+          </div>
+-->
+          <div class="radiobox">
+            <label class="radiobox">
+              <input type="radio" name="files" value="all" />
+              <p>Include all files</p>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <input type="submit" value="Export" />
+        </fieldset>
+      </form>
+    </section>
+  {% endblock %}
+
+  {% block footer %}
+    {{ super() }}
+  {% endblock %}
+

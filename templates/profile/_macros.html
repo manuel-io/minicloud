@@ -1,0 +1,20 @@
+{% macro nav(target) %}
+  <section id="nav">
+    <div>
+      <form action="/files" method="get">
+        <button type="submit">Files</button>
+      </form>  
+    </div>
+    <div>
+      <form action="/tasks" method="get">
+        <button type="submit">Tasks</button>
+      </form>  
+    </div>
+    <div>
+      <form action="/logout" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <button type="submit">Exit</button>
+      </form>
+    </div>
+  </section>
+{% endmacro %}

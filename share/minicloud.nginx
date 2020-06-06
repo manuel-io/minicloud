@@ -1,0 +1,26 @@
+# example config file using a subdomain of `example.com`
+
+server {
+  listen 80;
+  listen [::]:80;
+  server_name minicloud.example.com;
+  return 301 https://$host$request_uri;
+}
+
+server {
+  listen 443 ssl;
+  listen [::]:443 ssl;
+  server_name minicloud.example.com;
+  client_max_body_size 0;
+  client_body_timeout 300s;
+
+  ssl_certificate /etc/letsencrypt/minicloud.example.com/minicloud.example.com.cer;
+  ssl_certificate_key /etc/letsencrypt/minicloud.example.com/minicloud.example.com.key;
+
+  location / {
+    include uwsgi_params;
+    uwsgi_read_timeout 600s;
+    uwsgi_send_timeout 300s;
+    uwsgi_pass unix:/home/minicloud/minicloud.sock;
+  }
+}

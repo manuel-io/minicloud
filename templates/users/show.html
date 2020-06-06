@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+{% from "_macros.html" import aside with context %}
+{% from "users/_macros.html" import nav, header with context %}
+  {% block body %}
+     {{ super() }}
+     {{ aside() }}
+  {% endblock %}
+  {% block nav %}
+     {{ nav("show") }}
+  {% endblock %}
+  {% block header %}
+    {{ header() }}
+  {% endblock %}
+  {% block main %}
+    {{ super() }}
+    <section id="users">
+      {% for user in users %}
+        <div>
+          <table>
+            <tr>
+              <th>
+                <a href="edit/{{user.id}}">
+                  <div class="{{ ("admin" if user.admin else "user") if not user.disabled }}">
+                    <p>{{ user.name }}</p>
+                  </div>
+                </a>
+              </th>
+            </tr>
+            <tr class="userinfo">
+              <td>
+                <ul>
+                  <li class="text-small">{{ user.email }}</li>
+                  <li class="text-small">{{ user.task_count }} task{{ "s" if user.task_count != 1 else ""}}</li>
+                  <li class="text-small">{{ user.file_count }} file{{ "s" if user.file_count != 1 else ""}}</li>
+                </ul>
+              </td>
+            </tr>
+          </table>
+        </div>
+      {% endfor %}
+    </section>
+  {% endblock %}
+
+  {% block footer %}
+    {{ super() }}
+  {% endblock %}
+

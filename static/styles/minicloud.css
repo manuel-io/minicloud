@@ -1,0 +1,685 @@
+@font-face {
+  font-family: 'LatoWeb';
+  src: url('../fonts/Lato-Regular.eot');
+  src: url('../fonts/Lato-Regular.eot?#iefix') format('embedded-opentype'),
+       url('../fonts/Lato-Regular.woff2') format('woff2'),
+       url('../fonts/Lato-Regular.woff') format('woff'),
+       url('../fonts/Lato-Regular.ttf') format('truetype');
+  font-style: normal;
+  font-weight: normal;
+  text-rendering: optimizeLegibility;
+}
+
+html,
+body,
+header,
+main,
+footer,
+div,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+ul,
+li,
+span,
+form,
+fieldset,
+label,
+input,
+button,
+textarea,
+select {
+  margin: 0;
+  padding: 0;
+  font-family: "LatoWeb";
+  font-size: 1em;
+}
+
+a {
+  margin: 0;
+  padding: 0;
+}
+
+li.text-small,
+p.text-small {
+  font-size: .85em;
+}
+
+li.text-smaller,
+p.text-smaller {
+  font-size: .7em;
+}
+
+body {
+  min-width: 320px;
+  background-color: #fff;
+}
+
+a {
+  color: #888;
+  font-weight: normal;
+  text-decoration: none;
+}
+
+aside {
+  position: fixed;
+  overflow: hidden;
+  cursor: pointer;
+  top: 0;
+  left: -257px;
+  width: 290px;
+  margin: 5px 0 5px 0;
+  height: calc(100vh - 12px);
+  background-color: rgba(0, 0, 0, .8);
+  border: 1px solid #cfcfcf;
+  z-index: 50;
+  border-radius: 0 20px 20px 0;
+  transition: left 1s ease-out;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+aside > div:first-child {
+  flex-grow: 1;
+  flex-shrink: 0;
+  background-color: #fff;
+  border-radius: 5px;
+}
+
+aside > div:first-child > section ul {
+  list-style-position: inside;
+}
+
+aside > div:last-child {
+  flex-grow: 0;
+  flex-shrink: 0;
+  align-self: center;
+  width: 34px;
+  color: #fff;
+  font-weight: bold;
+  text-align: center;
+  padding: 5px;
+}
+
+aside > div:last-child p {
+  width: 30px;
+  height: 30px;
+  margin: 0 auto;
+  background-image: url("../fontawesome/right.svg");
+  background-position: center center;
+  background-size: 25px 25px;
+  background-repeat: no-repeat;
+  transform: rotate(0deg);
+  transition: 1s ease-out;
+}
+
+header input[name="headup"],
+body input[name="popup"],
+body input[name="sidebar"] {
+  display: none;
+}
+
+body input[name="sidebar"]:checked + aside div:last-child p {
+  transform: rotate(-180deg);
+}
+
+body input[name="sidebar"]:checked + aside {
+  left: 0;
+}
+
+header input[name="headup"]:not(:checked) + section {
+  display: none;
+}
+
+header input[name="headup"]:checked + section {
+  display: block;
+}
+
+body > section > ul,
+nav > section,
+header > section,
+footer > section,
+main > section {
+  width: 230px;
+  box-sizing: border-box;
+}
+
+.popup {
+  position: absolute;
+  top: 0px;
+  left: 42px;
+  z-index: 40;
+  width: calc(100% - 54px);
+  height: calc(100vh - 24px);
+  margin: 6px 0 5px 0;
+  background-color: rgba(0, 0, 0, .8);
+  border: 1px solid #cfcfcf;
+  border-radius: 20px 0 0 20px;
+  display: none;
+  flex-direction: column;
+}
+
+.popup header,
+.popup footer {
+  flex-grow: 0;
+  flex-shrink: 0;
+  height: 30px;
+}
+
+.popup header .close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  background-color: #fff;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+}
+
+.popup header .close span {
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  background-image: url("../fontawesome/close.svg");
+  background-position: center center;
+  background-size: 16px 16px;
+  background-repeat: no-repeat;
+}
+
+.popup main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: calc(100% - 60px);
+  margin: 0 auto 0 auto;
+  text-align: center;
+}
+
+body > #popup main .loading {
+  width: 180px;
+  height: 80px;
+  background-image: url("../icons/loading.gif");
+  background-position: center center;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+.popup main video {
+  max-width: 95%;
+  max-height: 95%;
+}
+
+input[type="submit"].link,
+aside > div:first-child > section,
+aside > div:first-child > section .title,
+aside > div:first-child > section li,
+nav > section,
+header > section,
+header > section fieldset,
+main > section,
+main > section > div,
+main > section > div audio,
+main > section > div video,
+main > section > div img,
+main > section fieldset {
+  background-color: rgba(200, 200, 200, .1);
+  border: 1px solid #cfcfcf;
+  border-radius: 5px;
+}
+
+main > section#media {
+  display: flex;
+  flex-direction: column;
+  background-color: #000;
+  justify-content: center;
+  align-items: center;
+}
+
+main > section#media audio {
+  width: 100%;
+}
+
+main > section#media audio,
+main > section#media video {
+  max-width: 100%;
+}
+
+body > section {
+  border-width: 1px 0 1px 0;
+  border-radius: 0;
+}
+
+input[type="submit"].link,
+aside > div:first-child > section .title,
+aside > div:first-child > section li,
+body > section > ul,
+nav > section button,
+main > section > p,
+main > section > div,
+footer > section > div,
+main > section > ul > li,
+header > section fieldset,
+main > section fieldset,
+aside > div:first-child section {
+  margin: 5px;
+  padding: 5px;
+}
+
+main > section#cloud .cloud {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: calc(100% - 12px);
+  padding: 0;
+}
+
+main > section#cloud .view {
+  background-color: rgba(200, 200, 200, .1);
+  border: 1px solid #cfcfcf;
+  border-radius: 5px;
+  margin: 5px;
+  padding: 5px;
+}
+
+main > section#cloud .item {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  width: 190px;
+  height: 190px;
+  background-size: cover;
+  background-color: rgba(200, 200, 200, .1);
+  border: 1px solid #cfcfcf;
+  border-radius: 5px;
+  margin: 0;
+  padding: 0;
+}
+
+section#cloud .item > p {
+  background-color: #fff;
+  border-radius: 0 5px 0 0;
+  white-space: nowrap;
+  padding: 2.5px 5px 2.5px 5px;
+  max-width: 170px;
+  text-overflow: ellipsis;
+  overflow-x: hidden;
+}
+
+main > section#cloud .view .action {
+  margin: 5px 0 5px 0;
+}
+
+body > section > ul,
+nav > section,
+header > section,
+footer > section,
+main > section {
+  margin: 5px auto;
+}
+
+section#nav {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  box-sizing: border-box;
+  padding: 0 10px 0 10px;
+}
+
+section#nav > div {
+  padding: 0 5px 0 5px;
+}
+
+section#progress .status {
+  background-color: rgba(200, 200, 200, .1);
+  border: 1px solid #cfcfcf;
+  border-radius: 5px;
+  height: 31px;
+}
+
+section#alerts ul {
+  list-style-type: none;
+}
+
+section#alerts ul li.info {
+  color: #00a028;
+}
+
+section#alerts ul li.error {
+  color: #a02800;
+}
+
+section#alerts ul li.alert {
+  color: #a0a000;
+}
+
+section#alerts ul li{
+  overflow-y: hidden;
+  overflow-x: auto;
+}
+
+section#alerts ul li.info p:before {
+  background-image: url('../fontawesome/info.svg');
+  background-repeat: no-repeat;
+  background-position: left center;
+  padding-right: 21px;
+  content: '';
+}
+
+section#alerts ul li.error p:before {
+  background-image: url('../fontawesome/error.svg');
+  background-repeat: no-repeat;
+  background-position: left center;
+  padding-right: 16px;
+  content: '';
+}
+
+@media only screen and (min-width: 558px) {
+  body > section > ul,
+  nav > section,
+  header > section,
+  footer > section,
+  main > section {
+    width: 442px;
+  }
+}
+
+@media only screen and (min-width: 772px) {
+  body > section > ul,
+  nav > section,
+  header > section,
+  footer > section,
+  main > section {
+    width: 656px;
+  }
+}
+
+@media only screen and (min-width: 986px) {
+  body > section > ul,
+  nav > section,
+  header > section,
+  footer > section,
+  main > section {
+    width: 870px;
+  }
+}
+
+@media only screen and (min-width: 1200px) {
+  body > section > ul,
+  nav > section,
+  header > section,
+  footer > section,
+  main > section {
+    width: 1084px;
+  }
+}
+
+@media only screen and (min-width: 180px) {
+  body input[name=settings]:checked + aside section:last-child p {
+    transform: rotate(0deg);
+  }
+
+  #body aside {
+    cursor: auto;
+    left: 0px;
+  }
+}
+
+section#edit_file img {
+  width: auto;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+section#edit_file video,
+section#edit_file audio {
+  /* margin 10px, border 2px */
+  width: 100%;
+  /*
+  max-width: calc(100% - 12px);
+  */
+  box-sizing: border-box;
+}
+
+section#progress .loader {
+  width: 0;
+  height: 100%;
+  background-color: #5c92ae;
+}
+
+section#progress,
+section#progress .loading,
+section#progress .saving {
+  display: none;
+}
+
+/*
+section#profile input,
+section#profile_password input,
+section#profile_import input,
+section#profile_export input,
+section#edit_categories input,
+section#category_file input,
+section#category_file select,
+section#download_file input,
+section#delete_categories input,
+section#edit_task input,
+section#edit_task textarea,
+section#edit_task select,
+section#delete_task input,
+section#login input,
+section#upload select,
+section#upload input,
+section#category input,
+section#category textarea,
+section#categories input,
+section#users input,
+section#new_user input,
+section#edit_user input,
+section#new_activation input,
+section#delete_user input,
+section#cloud .action input {
+*/
+button,
+main > section#cloud .action input,
+main > section fieldset input,
+header > section fieldset input,
+header > section fieldset select,
+main > section fieldset select,
+main > section fieldset textarea {
+  display: block;
+  width: 100%;
+  background-color: rgba(200, 200, 200, .1);
+  border: 1px solid #cfcfcf;
+  border-radius: 5px;
+  cursor: pointer;
+  padding: 5px;
+  box-sizing: border-box;
+}
+
+section#users input,
+section#categories input {
+  width: auto;
+}
+
+section#edit_task textarea,
+section#category textarea {
+  min-height: 150px;
+}
+
+section#progress label,
+section#login label,
+section#category label,
+section#upload label {
+  display: block;
+  margin: 1px 0 2px 0;
+}
+
+span.nospace {
+  white-space: nowrap;
+}
+
+table {
+  width: 100%;
+  background-color: rgba(200, 200, 200, .1);
+  border: 1px solid #cfcfcf;
+  border-radius: 5px;
+  box-sizing: border-box;
+  padding: 5px;
+}
+
+table th {
+  vertical-align: top;
+  text-align: left;
+  font-weight: normal;
+  width: 100%;
+}
+
+table td {
+  vertical-align: top;
+  text-align: left;
+}
+
+table th a {
+  color: #000;
+}
+
+table th div {
+  background-color: rgba(200, 200, 200, .1);
+  border: 1px solid #cfcfcf;
+  border-radius: 5px;
+  padding: 5px;
+}
+
+table th div.delayed,
+table th div.admin {
+  background-color: rgba(100, 0, 0, .1);
+}
+
+table th div.ontime,
+table th div.user {
+  background-color: rgba(0, 100, 0, .1);
+}
+
+div.radiobox,
+div.checkbox {
+  background-color: rgba(200, 200, 200, .1);
+  border: 1px solid #cfcfcf;
+  border-radius: 5px;
+  margin: 5px 0 5px 0;
+  padding: 5px;
+}
+
+div.radiobox.sub,
+div.checkbox.sub {
+  margin: 5px 0 0 0;
+}
+
+label.radiobox,
+label.checkbox {
+  display: block;
+  cursor: pointer;
+}
+
+label.radiobox:not(:first-child):not(:last-child) {
+  margin: 5px 0 5px 0;
+}
+
+fieldset div.radiobox label.radiobox input[type="radio"],
+fieldset div.checkbox label.checkbox input[type="checkbox"] {
+  display: none;
+}
+
+label.radiobox p,
+label.checkbox p {
+  margin-left: 30px;
+}
+
+label.radiobox p:before,
+label.checkbox p:before {
+  position: absolute;
+  margin-left: -30px;
+  width: 15px;
+  height: 15px;
+  border: 2px solid #cfcfcf;
+  border-radius: 50%;
+  content: "";
+}
+
+input:checked + p:before {
+  background-image: url("../icons/cross.svg");
+  background-size: 10px 10px;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+
+.smallgap {
+  margin-top: 9.5px;
+}
+
+section#categories tr.userinfo td,
+section#users tr.userinfo td {
+  text-align: left;
+}
+
+tr.userinfo ul {
+  margin: 5px;
+  list-style-position: inside;
+}
+
+section#last > p,
+section#today > p {
+  text-align: center;
+}
+
+section#disclaimer div:first-child {
+  position: absolute;
+  margin: 0px;
+}
+
+section#disclaimer div:last-child {
+  margin-left: 40px;
+}
+
+header > section select.sub,
+main > section select.sub {
+  border: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: transparent;
+}
+
+section select.sub option {
+  border: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: #fff;
+}
+
+form.link {
+  display: inline;
+}
+
+input[type="submit"] {
+  cursor: pointer;
+}
+
+.collapse:not(:target) {
+  display: none;
+}
+
+.collapse:target {
+  display: block;
+}
