@@ -26,7 +26,7 @@ RUN chown -R minicloud:www-data /home/minicloud
 RUN service postgresql start && sleep 10 && su minicloud -c 'psql < /home/minicloud/share/schema.sql'
 RUN su - minicloud -c 'python3 -m venv /home/minicloud'
 RUN su - minicloud -c '/home/minicloud/bin/pip install -r /home/minicloud/requirements.txt'
-RUN service postgresql start && sleep 10 && su - minicloud -c '/home/minicloud/bin/python /home/minicloud/admtool.py'
+RUN service postgresql start && sleep 10 && su - minicloud -c '/home/minicloud/bin/python /home/minicloud/admtool.py setup --username minicloud --password minicloud'
 
 RUN cp /home/minicloud/share/docker.service /etc/init.d/minicloud
 RUN chmod a+x /etc/init.d/minicloud

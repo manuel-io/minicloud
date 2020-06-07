@@ -19,7 +19,7 @@
     git clone mincloud /home/minicloud
     python3 -m venv /home/minicloud
 
-    psql < /home/minicloud/share/schema.sq
+    psql < /home/minicloud/share/schema.sql
 
     cp /home/minicloud/share/minicloud.service /etc/systemd/system/minicloud.service
     cp /home/minicloud/share/minicloud.nginx /etc/nginx/sites-available/minicloud
@@ -32,6 +32,10 @@
     git clone https://github.com/manuel-io/minicloud.git minicloud_docker
     docker build -t minicloud .
     docker run -d -p 8080:80 --name minicloud minicloud:latest
+
+## Inspect the container
+
+    docker run -it minicloud bash
 
 # SimpleLightbox
 

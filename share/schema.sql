@@ -89,7 +89,7 @@ user_id BIGINT NOT NULL REFERENCES minicloud_users(id) ON DELETE CASCADE,
 category TEXT NOT NULL,
 created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 updated_at TIMESTAMP NOT NULL,
-UNIQUE (user_id, title, category),
+UNIQUE (user_id, category),
 UNIQUE (user_id, uid)
 );
 
