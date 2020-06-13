@@ -52,7 +52,7 @@ RUN cp /home/minicloud/share/docker.nginx /etc/nginx/sites-available/minicloud
 RUN rm /etc/nginx/sites-enabled/default
 RUN ln -s /etc/nginx/sites-available/minicloud /etc/nginx/sites-enabled/minicloud
 
-ADD share/docker.sh /startup.sh
+COPY share/docker.sh /startup.sh
 
 EXPOSE 22
 EXPOSE 80
