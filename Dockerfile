@@ -31,7 +31,8 @@ RUN useradd -u 9001 -g 9001 -d /home/minicloud -m -s /bin/bash minicloud
 RUN echo 'minicloud:minicloud' | chpasswd
 RUN service postgresql start && sleep 10 && su postgres -c 'createuser -w -d minicloud' && su postgres -c 'createdb -O minicloud minicloud'
 
-COPY share/pg_hba.conf /etc/postgresql/10/main/pg_hba.conf
+COPY share/pg_hba.conf /pg_hba.conf
+COPY share/copy_hba.sh /copy_hba.sh
 COPY share/minidlna.conf /etc/minidlna.conf
 COPY share/minidlna.default /etc/default/minidlna
 COPY . /home/minicloud
@@ -42,6 +43,7 @@ RUN service postgresql start && sleep 10 && su minicloud -c 'psql < /home/minicl
 RUN su - minicloud -c 'python3 -m venv /home/minicloud'
 RUN su - minicloud -c '/home/minicloud/bin/pip install wheel'
 RUN su - minicloud -c '/home/minicloud/bin/pip install -r /home/minicloud/requirements.txt'
+RUN service postgresql start && sleep 10 && /bin/bash /copy_hba.sh
 RUN service postgresql start && sleep 10 && su - minicloud -c '/home/minicloud/bin/python /home/minicloud/admtool.py setup --username minicloud --password minicloud'
 
 RUN cp /home/minicloud/share/docker.service /etc/init.d/minicloud

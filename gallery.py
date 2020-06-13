@@ -31,7 +31,7 @@ def find_orphan_files(user_id):
     with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
         try:
             cursor.execute("""
-              SELECT oid, * FROM minicloud_uploads
+              SELECT * FROM minicloud_uploads
               WHERE user_id = %s and type = 1 and (mime = 'image/jpeg' or mime = 'image/png')
             """, [ user_id ])
 

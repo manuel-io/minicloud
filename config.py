@@ -10,28 +10,25 @@ today = datetime.utcnow().replace(tzinfo = utczone).astimezone(zone)
 class Config:
     VERSION = 0.9
     SECRET_KEY = os.urandom(32)
-    MINIDLNA = ['http://192.168.178.42:8200']
-    PROXYPORT = 8290
 
     def __init__():
-        print('Config')
-    
+        pass
+
     @staticmethod
     def getUnixTimestamp():
         return int(datetime.timestamp(datetime.utcnow().replace(tzinfo = tz.UTC)))
 
 
 def get_db():
-    db = psycopg2.connect( host = os.environ["MINICLOUD_HOST"]
-                           if "MINICLOUD_HOST" in os.environ else "localhost"
-                         , dbname = os.environ["MINICLOUD_DBNAME"]
-                           if "MINICLOUD_DBNAME" in os.environ else "minicloud"
-                         , user = os.environ["MINICLOUD_USR"]
-                           if "MINICLOUD_USR" in os.environ else "minicloud"
-                         , password = os.environ["MINICLOUD_PWD"]
-                           if "MINICLOUD_PWD" in os.environ else None
-                         )
-    return db
+    host = os.environ['MINICLOUD_HOST'] if 'MINICLOUD_HOST' in os.environ else 'localhost'
+    dbname = os.environ['MINICLOUD_DBNAME'] if 'MINICLOUD_DBNAME' in os.environ else 'minicloud'
+    user = os.environ['MINICLOUD_USR'] if 'MINICLOUD_USR' in os.environ else 'minicloud'
+    password = os.environ['MINICLOUD_PWD'] if 'MINICLOUD_PWD' in os.environ else None 
+
+    if password:
+        return psycopg2.connect(host = host, dbname = dbname, user = user, password = password)
+    else:
+        return psycopg2.connect(host = host, dbname = dbname, user = user)
 
 MIME_SUFFIX = { 'text/plain': 'txt'
               , 'text/x-python': 'rb'
