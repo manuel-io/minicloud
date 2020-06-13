@@ -67,6 +67,10 @@ The default password for the user minicloud is minicloud.
     export MINICLOUD_DLNA="http://127.0.0.1:8200"
     export MINICLOUD_DLNA_PROXY_PORT="8290"
 
+## Inspect the container
+
+    docker run -it minicloud bash
+
 # SimpleLightbox
 
 SimpleLightbox (https://github.com/andreknieriem/simplelightbox) is licensed
