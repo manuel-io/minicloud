@@ -30,7 +30,7 @@ created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 updated_at TIMESTAMP NOT NULL,
 UNIQUE (user_id, title, reference),
 UNIQUE (user_id, uid)
-) WITH OIDS;
+);
 
 CREATE INDEX minicloud_uploads_uid_idx ON minicloud_uploads (uid);
 CREATE INDEX minicloud_uploads_user_id_idx ON minicloud_uploads (user_id);
@@ -89,7 +89,7 @@ user_id BIGINT NOT NULL REFERENCES minicloud_users(id) ON DELETE CASCADE,
 category TEXT NOT NULL,
 created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 updated_at TIMESTAMP NOT NULL,
-UNIQUE (user_id, title, category),
+UNIQUE (user_id, category),
 UNIQUE (user_id, uid)
 );
 

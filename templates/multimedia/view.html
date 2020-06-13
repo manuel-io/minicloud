@@ -131,37 +131,46 @@
 
   <script>
     let hash = window.location.hash.substr(1);
-    let video = document.getElementById('video');
     let ret = document.getElementById('return');
     ret.href = ret.href + `#${hash}`;
 
-    video.onloadeddata = (e) => {
-      let [type, uuid, current, duration] = '{{ media.status }}'.split('$');
-      if (uuid == '{{ media.uuid }}') {
-        video.dataset.last = current;
-        video.currentTime = current;
-      }
-    };
+    {% if media.mime in config.ftypes.video %}
+      let video = document.getElementById('video');
+      // let audio = document.getElementById('audio');
 
-    video.onpause = (e) => {
-      let last = video.dataset.last;
-      let current = parseInt(video.currentTime);
+      {% if proxy %}
+        // audio.setAttribute('crossorigin', 'anonymous');
+        video.setAttribute('crossorigin', 'anonymous');
+      {% endif %}
 
-      if (last) last = parseInt(last);
-      else last = .0;
+      video.onloadeddata = (e) => {
+        let [type, uuid, current, duration] = '{{ media.status }}'.split('$');
+        if (uuid == '{{ media.uuid }}') {
+          video.dataset.last = current;
+          video.currentTime = current;
+        }
+      };
 
-      if (last - 30 > current || last + 30 < current ) {
-        let value = 'video' + '$' + video.dataset.uuid + '$' + current + '$' + parseInt(video.duration);
-        let data = new FormData();
-        let url = '{{ url_for('users.set_media') }}';
+      video.onpause = (e) => {
+        let last = video.dataset.last;
+        let current = parseInt(video.currentTime);
 
-        video.dataset.last = current;
-        data.append('csrf_token', '{{ csrf_token() }}');
-        data.append('media', value);
+        if (last) last = parseInt(last);
+        else last = .0;
 
-        upload(url, data);
-      }
-    };
+        if (last - 30 > current || last + 30 < current ) {
+          let value = 'video' + '$' + video.dataset.uuid + '$' + current + '$' + parseInt(video.duration);
+          let data = new FormData();
+          let url = '{{ url_for('users.set_media') }}';
+
+          video.dataset.last = current;
+          data.append('csrf_token', '{{ csrf_token() }}');
+          data.append('media', value);
+
+          upload(url, data);
+        }
+      };
+    {% endif %}
 
     window.onload = (e) => {
       let target = document.querySelector('#multimedia .tags');

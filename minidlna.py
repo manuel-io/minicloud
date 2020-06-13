@@ -83,7 +83,7 @@ class MiniDLNA:
                , 'sampling': result.getAttribute('sampleFrequency')
                , 'channels': result.getAttribute('nrAudioChannels')
                , 'resolution': result.getAttribute('resolution')
-               , 'url': url #.replace(':8200', ':8290')
+               , 'url': url
                , 'path': path
                , 'mime': MimeTypes().guess_type(path)[0]
                }

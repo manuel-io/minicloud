@@ -9,15 +9,16 @@ from minidlna import MiniDLNA
 from helpers import get_categories
 
 multimedia = Blueprint('multimedia', __name__)
-folder = '/var/minicloud/multimedia'
 base = Path('/var/minicloud/multimedia')
-minidlna = 'http://192.168.178.42:8200'
+minidlna = os.environ['MINICLOUD_DLNA'] if 'MINICLOUD_DLNA' in os.environ else 'http://127.0.0.1:8200'
+minidlna_proxy = True if 'MINICLOUD_DLNA_PROXY_PORT' in os.environ else False
+minidlna_proxy_port = os.environ['MINICLOUD_DLNA_PROXY_PORT'] if 'MINICLOUD_DLNA_PROXY_PORT' in os.environ else '8200'
 
 def find_local_files():
     return list(map(lambda path: str(path.relative_to(base)), list(base.rglob('*.*'))))
 
 def find_minidlna_files():
-    return MiniDLNA('http://192.168.178.42:8200').files()
+    return MiniDLNA(minidlna).files()
 
 def find_minidlna_paths():
     return list(map(lambda item: item['path'], find_minidlna_files()))
@@ -90,11 +91,16 @@ def view(uuid):
             media = cursor.fetchone()
             sources = list(filter(lambda item: item['path'] == media['path'], dlna))
 
+            if minidlna_proxy:
+                for i, val in enumerate(sources):
+                    sources[i]['url'] = val['url'].replace('8200', minidlna_proxy_port)
+
             if len(sources) > 0:
                 return render_template( "multimedia/view.html"
                                       , media = media
                                       , config = config
                                       , sources = sources
+                                      , proxy = minidlna_proxy
                                       )
 
         except:
@@ -132,9 +138,6 @@ def add():
         if not category: category = title
         if not description: description = ''
         if not director: director = 'Generic'
-
-        print(year)
-        print(mime)
 
         try:
             cursor.execute("""

@@ -67,7 +67,7 @@ def file_add():
             try:
                 cursor.execute("""
                   INSERT INTO minicloud_uploads (user_id, reference, backref, type, title, size, mime)
-                  VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING oid
+                  VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id
                   """, [ int(current_user.id)
                        , parent
                        , backref
@@ -78,18 +78,19 @@ def file_add():
                        ])
 
                 data = cursor.fetchone()
-                oid = g.db.lobject(0, 'w', int(data['oid']))
-                write = oid.write(content)
+                lo = g.db.lobject(0, 'w', 0)
+                write = lo.write(content)
 
                 cursor.execute("""
                   UPDATE minicloud_uploads SET lo = %s
-                  WHERE user_id = %s AND oid = %s
-                  """, [ int(data['oid'])
+                  WHERE user_id = %s AND id = %s
+                  """, [ lo.oid
                        , int(current_user.id)
-                       , int(data['oid'])
+                       , int(data['id'])
                        ])
 
                 g.db.commit()
+                lo.close()
                 count = count + 1
 
             except Warning:
@@ -111,18 +112,15 @@ def download(uid):
     with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
         try:
             cursor.execute("""
-              SELECT uid AS name, oid, mime, size FROM minicloud_uploads
+              SELECT uid, lo, mime, size FROM minicloud_uploads
               WHERE user_id = %s AND uid = %s LIMIT 1;
               """, [int(current_user.id), uid])
 
             data = cursor.fetchone()
             suffix = MIME_SUFFIX[data['mime']] if data['mime'] in MIME_SUFFIX else 'unknwon'
-            filename = '%s.%s' % (data['name'], suffix)
-            oid = int(data['oid'])
-            mime = data['mime']
-            size = int(data['size'])
+            filename = '%s.%s' % (data['uid'], suffix)
 
-            return get_stream(request, filename, oid, mime, size)
+            return get_stream(request, filename, data['lo'], data['mime'], data['size'])
 
         except Exception as e:
             g.db.rollback()
@@ -149,14 +147,14 @@ def delete(uid):
 
             cursor.execute("""
               DELETE FROM minicloud_uploads
-              WHERE user_id = %s AND uid = %s RETURNING size, oid
+              WHERE user_id = %s AND uid = %s RETURNING size, lo
               """, [ int(current_user.id), uid ])
 
             data = cursor.fetchone()
             if data['size'] > 0:
-                oid = g.db.lobject(int(data['oid']), 'wb')
-                oid.unlink()
-                oid.close()
+                lo = g.db.lobject(data['lo'], 'wb')
+                lo.unlink()
+                lo.close()
 
             g.db.commit()
             flash(['Object deleted'], 'info')

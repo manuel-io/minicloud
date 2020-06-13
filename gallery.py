@@ -3,7 +3,7 @@ from PIL import Image, ImageOps
 from flask import Blueprint, url_for, redirect, g, render_template, send_file, request, flash, send_from_directory, Response, abort, make_response, jsonify
 from flask_login import UserMixin, login_required, current_user
 from config import config, MIME_SUFFIX
-from helpers import get_categories
+from helpers import get_categories, get_stream
 
 gallery = Blueprint('gallery', __name__)
 
@@ -46,9 +46,10 @@ def find_orphan_files(user_id):
     
     with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
         for orphan in orphans:
-            oid = g.db.lobject(orphan['oid'], 'rb')
-            upload = oid.read()
-            oid.close()
+            lo = g.db.lobject(orphan['lo'], 'rb')
+            upload = lo.read()
+            lo.close()
+
             data = pillow_thumbnail(upload, orphan['mime'])
             size = len(data)
 
@@ -148,18 +149,18 @@ def delete(uid):
             cursor.execute("""
               DELETE FROM minicloud_uploads AS a
                 USING minicloud_gallery AS b
-              WHERE b.user_id = %s AND b.uid = %s AND a.user_id = b.user_id AND a.id = b.uploads_id RETURNING oid
+              WHERE b.user_id = %s AND b.uid = %s AND a.user_id = b.user_id AND a.id = b.uploads_id RETURNING lo
             """, [ int(current_user.id), uid])
 
             data = cursor.fetchone()
-            oid = g.db.lobject(int(data['oid']), 'wb')
-            oid.unlink()
-            oid.close()
+            lo = g.db.lobject(data['lo'], 'wb')
+            lo.unlink()
+            lo.close()
 
             g.db.commit()
             flash(['File deleted'], 'info')
 
-        except:
+        except Warning:
             g.db.rollback()
             flash(['Failed :-('], 'error')
 
@@ -171,23 +172,17 @@ def download(uid):
     with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
         try:
             cursor.execute("""
-              SELECT b.uid AS uid, b.oid AS oid, b.mime AS mime FROM minicloud_gallery AS a
+              SELECT b.uid AS uid, b.lo AS lo, b.size AS size, b.mime AS mime FROM minicloud_gallery AS a
                 LEFT JOIN minicloud_uploads AS b ON (b.id = a.uploads_id AND b.user_id = a.user_id)
               WHERE a.user_id = %s AND a.uid = %s LIMIT 1;
               """, [int(current_user.id), uid])
 
             data = cursor.fetchone()
-            oid = g.db.lobject(int(data['oid']), 'rb')
-            stream = oid.read()
-            oid.close()
             suffix = MIME_SUFFIX[data['mime']] if data['mime'] in MIME_SUFFIX else 'unknwon'
+            filename = '%s.%s' % (data['uid'], suffix)
 
-            return send_file( io.BytesIO(stream)
-                            , mimetype = data['mime']
-                            , as_attachment = True
-                            , attachment_filename = '%s.%s' % (data['uid'], suffix)
-                            , cache_timeout = 0
-                            )
+            return get_stream(request, filename, data['lo'], data['mime'], data['size'])
+
         except:
             g.db.rollback()
             # Log message e
@@ -296,21 +291,17 @@ def diashow_download(uuid, uid):
     with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
         try:
             cursor.execute("""
-                SELECT c.oid AS oid, c.mime AS mime FROM minicloud_diashow AS a
+                SELECT c.uid AS uid, c.lo AS lo, c.size AS size, c.mime AS mime FROM minicloud_diashow AS a
                 LEFT JOIN minicloud_gallery AS b ON (a.user_id = b.user_id AND b.uid = %s)
                 LEFT JOIN minicloud_uploads AS c ON (b.user_id = c.user_id AND b.uploads_id = c.id)
                 WHERE a.uuid = %s LIMIT 1;
                 """, [uid, uuid])
 
             data = cursor.fetchone()
-            oid = g.db.lobject(int(data['oid']), 'rb')
-            stream = oid.read()
-            oid.close()
+            suffix = MIME_SUFFIX[data['mime']] if data['mime'] in MIME_SUFFIX else 'unknwon'
+            filename = '%s.%s' % (data['uid'], suffix)
 
-            return send_file( io.BytesIO(stream)
-                            , mimetype = data['mime']
-                            , as_attachment = False
-                            )
+            return get_stream(request, filename, data['lo'], data['mime'], data['size'])
 
         except Exception as e:
             g.db.rollback()
