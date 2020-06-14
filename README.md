@@ -1,3 +1,5 @@
+:warning: **This version is not fully tested**
+
 ![Gallery](share/preview/minicloud1.png)
 
 # Requirements
