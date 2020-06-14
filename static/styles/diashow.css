@@ -1,146 +1,130 @@
-html, body, div, p, img, h2 {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
+#main {
+  border: 1px solid #cecece;
+  border-radius: 5px;
+  height: 100%;
   overflow: hidden;
 }
 
-div#progress {
-  border: 1px solid #cecece;
-  border-radius: 5px;
-  width: 80%;
-  height: 80vh;
+#main > .slide .animation {
+  width: 100%;
 }
 
-div#bar {
+#main > .slide .progress {
+  position: relative;
+  width: 80%;
+  height: 160px;
+  margin: 0 auto;
+  padding: 10px;
+  border: 1px solid #cecece;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+#main > .slide .progress .bar {
+  box-sizing: border-box;
   width: 0%;
   height: 100%;
   background-color: #5c92ae;
 }
 
-div#status {
+#main > .slide .progress .status {
   position: absolute;
   top: 50%;
-  font-size: 2.5rem;
+  left: 0;
+  right: 0;
+  font-size: 2.5em;
   transform: translateY(-50%);
   text-align: center;
   color: #5c92ae;
-  width: 80%;
   text-shadow: -1px 1px 0 #fff, 1px 1px 0 #fff, 1px -1px 0 #fff, -1px -1px 0 #fff;
+  background-color: transparent;
 }
 
-div.slide {
-  position: relative;
+#main > .slide {
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
   background-color: #fff;
   width: 100%;
-  height: 100vh;
+  height: 100%;
+  overflow: hidden;
 }
 
-div.slide > .header {
-  position: absolute;
-  top: 12.5px;
-  margin: 0 0 0 50px;
+#main > .slide > .footer,
+#main > .slide > .header {
+  flex-grow: 0;
   width: 100%;
+  height: 33px;
 }
 
-div.slide > .header > h1 {
-  border: 1px solid #000;
-  border-radius: 50%;
-  width: 25px;
-  height: 25px;
-  text-align: center;
-  color: #000;
-  line-height: 27px;
-  background-color: #fff;
-  z-index: 55;
+#main > .slide > .footer button,
+#main > .slide > .header button {
+  width: calc(100% - 4px);
+padding: 5px;
+margin: 2px;
+color: #fff;
+box-sizing: border-box;
+background-color: #333;
+border-radius: 5px;
+text-align: center;
 }
 
-div.nav {
+#main > .slide > .content {
+  flex-grow: 0;
+  width: 100%;
+  height: calc(100% - 66px);
+  display: flex;
+  flex-direction: row;
+}
+
+#main > .slide > .content > div {
+  box-sizing: border-box;
+  width: 50%;
+  height: 100%;
+  margin: 10px;
+  padding: 10px;
+}
+
+#main > .slide > .content > div.text {
+  position: relative;
+  padding-top: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  width: 50%;
+  height: calc(100% - 30px);
+  overflow: hidden;
+  overflow-y: auto;
+}
+
+#main > .slide > .content > div.text > h2.title {
   margin-bottom: 10px;
 }
 
-div.nav a:not(:last-child):after {
-  margin: 0 5px 0 5px;
-  content: '|';
+#main > .slide > .content > div.text > p.index {
+  position: absolute;
+  top: 0;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  font-weight: bold;
+  text-align: center;
+  border: 0.5px solid #000;
+  border-radius: 50%;
+  box-sizing: border-box;
+  box-shadow: 0 0 1px 0px black inset, 0 0 1px 0px black;
 }
 
-div.text {
-  flex-grow: 0;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-start;
-  color: #000;
-  width: calc(40% - 50px);
-  height: calc(100vh - 100px);
-  text-align: left;
-  padding: 10px;
-  overflow: hidden;
-  overflow-y: auto;
-  border: 0px solid #000;
-  border-radius: 5px;
-  box-shadow: 2px 2px 5px #cecece;
-  margin: 50px 25px 50px 25px;
+#main > .slide > .content > div.image {
+  box-sizing: border-box;
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
+  margin: 0;
+  padding: 0;
 }
 
-div.image {
-  flex-grow: 0;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  width: calc(60% - 50px);
-  height: calc(100vh - 100px);
-  overflow: hidden;
-  overflow-y: auto;
-  border: 0px solid #000;
-  border-radius: 5px;
-  box-shadow: 2px 2px 5px #cecece;
-  margin: 50px 25px 50px 25px;
-}
-
-img {
-  border: 1px solid #cecece;
-  border-radius: 5px;
-  margin: 10px;
-  max-height: calc(100% - 20px);
-  max-width: calc(100% - 20px);
-}
-
-.markdown ul {
-  list-style-position: inside;
-}
-
-.markdown li ul {
-  list-style-position: inside;
-  margin-left: 10px;
-}
-
-@media only screen and (max-width: 800px) {
-  div.slide > .header {
-    width: 90%;
-    margin: 0 0 0 0;
-  }
-
-  div.text {
-    width: 90%;
-    height: calc(50vh - 50px);
-    margin: 50px 0 0 0;
-  }
-
-  div.image {
-    width: 90%;
-    height: calc(50vh - 30px);
-    margin: 15px 0 15px 0;
-  }
+#main > .slide .footer {
+  width: 100%;
 }

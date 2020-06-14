@@ -132,7 +132,6 @@ def edit(uid):
                     """, [title, description,  category, int(current_user.id), uid])
 
                 g.db.commit()
-                app.logger.info('File modified')
                 flash(['File modified'], 'info')
 
             except Warning:

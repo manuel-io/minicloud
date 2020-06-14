@@ -1,3 +1,5 @@
+![Gallery](share/preview/minicloud1.png)
+
 # Requirements
 
     sudo apt install git \

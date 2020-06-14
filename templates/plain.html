@@ -11,14 +11,12 @@
   <body>
     <main>
       <header>
-        <nav>
-          {% block nav %}
+        <section>
+          {% block header %}
           {% endblock %}
-        </nav>
-        {% block header %}
-        {% endblock %}
+        </section>
       </header>
-      
+
       {% block section %}
       {% endblock %}
 
@@ -29,7 +27,6 @@
         </section>
         {{ disclaimer() }}
       </footer>
-
     </main>
   </body>
 </html>

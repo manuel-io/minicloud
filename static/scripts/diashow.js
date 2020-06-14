@@ -1,11 +1,11 @@
-class Diashow {
+export class Diashow {
 
   constructor(dias, next) {
     this.count = 0;
     this.length = dias.length;
     this.dias = dias;
-    this.bar = document.getElementById('bar');
-    this.bartext = document.getElementById('status');
+    this.bar = document.querySelector('.slide .progress > .bar');
+    this.bartext = document.querySelector('.slide .progress > .status');
 
     dias.forEach((dia, index) => {
       this.dias[index].img.src = this.dias[index].path;
@@ -25,8 +25,7 @@ class Diashow {
 
   static _load_img(check, next) {
     if (check()) next();
-    else setTimeout(() => {
-      Diashow._load_img(check, next);
+    else setTimeout(() => { Diashow._load_img(check, next);
     }, 1000);
   }
 }

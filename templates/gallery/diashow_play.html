@@ -1,28 +1,33 @@
-<!Doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>{{ diashow.title }}</title>
-    <link href="{{ url_for('static', filename='styles/diashow.css') }}" media="all" rel="stylesheet" type="text/css">
-    <script src="{{ url_for('static', filename='scripts/diashow.js') }}" ></script>
-  </head>
-   
-  <body>
-    <main id="main">
-      <div class="slide">
-        <div id="progress">
-          <div id="bar"></div>
-          <div id="status"></div>
+{% extends "plain.html" %}
+
+{% block head %}
+  {{ super() }}
+  <link href="{{ url_for('static', filename='styles/diashow.css') }}" media="all" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% block section %}
+  <main id="main">
+    <div class="slide">
+      <div class="header"></div>
+      <div class="animation">
+        <div class="progress">
+          <div class="bar"></div>
+          <div class="status"></div>
         </div>
       </div>
-    </main>
-  </body>
+      <div class="footer"></div>
+    </div>
+  </main>
+{% endblock %}
 
-  <script>
+{% block footer %}
+  <script type="module">
+    import { Diashow } from '{{ url_for("static", filename="scripts/diashow.js") }}';
+
     window.onload = (event) => {
       let files = [];
       let screen = document.getElementById('main');
-      
+
       {% for file in diashow.files %}
         var file = { 'index': '{{ loop.index }}'
                    , 'title': '{{ file.title }}'
@@ -31,78 +36,75 @@
                    , 'img': new Image()
                    };
 
-        console.log(file);
         files.push(file);
       {% endfor %}
 
       let diashow = new Diashow(files, () => {
+        // Clear screen for slides
         screen.innerHTML = '';
 
         files.forEach((file) => {
-
-          var first = document.createElement('a');
-          first.setAttribute('href', '#slide-1');
-          first.innerHTML = 'First';
-
-          var last = document.createElement('a');
-          last.setAttribute('href', '#slide-' + files.length);
-          last.innerHTML = 'Last';
-
-          var slide = document.createElement('div');
+          let slide = document.createElement('div');
           slide.id = 'slide-' + file.index;
           slide.className = 'slide';
 
-          slide.onclick = (event) => {
+          let header = document.createElement('div');
+          let content = document.createElement('div');
+          let footer = document.createElement('div');
+          header.className = 'header';
+          content.className = 'content';
+          footer.className = 'footer';
+
+          content.onclick = (event) => {
             if (parseInt(file.index) == files.length) window.location.href= '#slide-1';
             else window.location.href = '#slide-' + (parseInt(file.index) + 1);
           };
 
-          var text = document.createElement('div');
+          let back = document.createElement('button');
+          back.innerText = 'Back';
+          header.appendChild(back);
+          back.onclick = (event) => {
+            if (parseInt(file.index) <= 1) window.location.href= '#slide-' + files.length;
+            else window.location.href = '#slide-' + (parseInt(file.index) - 1);
+          };
+
+          let next = document.createElement('button');
+          next.innerText = 'Next';
+          footer.appendChild(next);
+          next.onclick = (event) => {
+            if (parseInt(file.index) >= files.length) window.location.href= '#slide-1';
+            else window.location.href = '#slide-' + (parseInt(file.index) + 1);
+          };
+
+          let text = document.createElement('div');
+          let title = document.createElement('h2');
+          let index = document.createElement('p');
+          let description = document.createElement('p');
           text.className = 'text';
-          var container = document.createElement('div');
-          container.className = 'container';
-          var nav = document.createElement('div');
-          nav.className = 'nav';
-          var next = document.createElement('a');
-          next.setAttribute('href', '#slide-' + (parseInt(file.index) + 1));
-          next.innerHTML = 'Next';
-          var back = document.createElement('a');
-          back.setAttribute('href', '#slide-' + (parseInt(file.index) - 1));
-          back.innerHTML = 'Back';
-          var header = document.createElement('div');
-          header.className = 'header';
-          var index = document.createElement('h1');
-          var title = document.createElement('h2');
-          var description = document.createElement('p');
-          description.className = 'markdown';
-          var image = document.createElement('div');
+          index.className = 'index';
+          title.className = 'title';
+          description.className = 'description';
+          index.innerText = file.index;
+          title.innerText = file.title;
+          description.innerHTML = file.description;
+          text.appendChild(index);
+          text.appendChild(title);
+          text.appendChild(description);
+
+          let image = document.createElement('div');
           image.className = 'image';
+          image.style.backgroundImage = 'url(' + file.img.src + ')';
 
-          index.innerHTML = file.index;
-          title.innerHTML = file.title;
-          description.innerHTML = file.description.replace(/^"|"$/g,'');
+          content.appendChild(text);
+          content.appendChild(image);
 
-          container.appendChild(title);
-
-          if (parseInt(file.index) == 1) nav.appendChild(last);
-          else nav.appendChild(back);
-
-          if (parseInt(file.index) == files.length) nav.appendChild(first);
-          else nav.appendChild(next);
-
-          container.appendChild(nav);
-          container.appendChild(description);
-
-          text.appendChild(container);
-          image.appendChild(file.img);
-
-          header.appendChild(index);
           slide.appendChild(header);
-          slide.appendChild(text);
-          slide.appendChild(image);
+          slide.appendChild(content);
+          slide.appendChild(footer);
+
           screen.appendChild(slide);
         });
       });
     };
   </script>
-</html>
+{% endblock %}
