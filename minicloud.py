@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import psycopg2, psycopg2.extras, bcrypt, io, os
+import psycopg2, psycopg2.extras, bcrypt, io, os, urllib.request
 from flask import Flask, flash, g, render_template, request, url_for, redirect
 from flask_wtf.csrf import CSRFProtect
 from flask_login import LoginManager, login_user, logout_user, current_user
@@ -39,7 +39,8 @@ def before_request():
 # handle login failed
 @app.errorhandler(401)
 def page_not_found(e):
-    return redirect(url_for('login'))
+    page = url_for(request.endpoint, **request.view_args, _external = True)
+    return redirect(url_for('login', page = page))
 
 @app.context_processor
 def globals():
@@ -102,20 +103,22 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
-        return render_template('users/login.html')
-  
+        page = request.args.get('page')
+        return render_template('users/login.html', page = page)
+
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-    
+        page = request.form.get('page')
+
         with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
-        
+
             try:
                 cursor.execute("""
                     SELECT id, name, password, admin FROM minicloud_users
                     WHERE name = %s AND disabled = %s ORDER BY id ASC LIMIT 1;
                     """, [username, False])
-                    
+
                 data = cursor.fetchone()
 
                 user = User(int(data['id']), data['name'], data['admin'])
@@ -127,11 +130,17 @@ def login():
 
         if current_user.is_authenticated:
             flash(['Logged in'], 'info')
-            return redirect(url_for('index'))
+
+            if page:
+                code = urllib.request.urlopen(page).getcode()
+                if code > 199 and code < 300:
+                    return redirect(page)
+
+            return redirect(url_for('gallery.show'))
 
         else:
             flash(['Invalid credentials'], 'error')
-        
+
         return render_template('users/login.html')
 
 # somewhere to logout

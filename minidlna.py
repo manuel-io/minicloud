@@ -9,19 +9,20 @@ from mimetypes import MimeTypes
 class MiniDLNA:
     headers = { 'SOAPACTION': 'urn:schemas-upnp-org:service:ContentDirectory:1#Browse' }
 
-    def __init__(self, host):
+    def __init__(self, host, verify):
 
         # Get Service ContentDirectory
-        result = requests.get('%s%s' % (host, '/rootDesc.xml'))
+        result = requests.get('%s%s' % (host, '/rootDesc.xml'), verify=verify)
         root = parseString(result.content)
         services = list(map(lambda service: self.__parse_service(service), root.getElementsByTagName('service')))
         content = [ service for service in services if service['name'] == 'urn:schemas-upnp-org:service:ContentDirectory:1' ][0]
         request = '%s%s' % (host, content['url'])
 
         # Get Root of ContentDirectory
-        result = requests.post(request, data=self.__get_object_id('0'), headers=MiniDLNA.headers)
+        result = requests.post(request, data=self.__get_object_id('0'), headers=MiniDLNA.headers, verify=verify)
         root = parseString(result.content)
-        
+
+        self.verify = verify
         self.request = request
         self.body = parseString(root.getElementsByTagName('Result')[0].firstChild.nodeValue)
 
@@ -33,7 +34,7 @@ class MiniDLNA:
         items = list(map(lambda item: self.__parse_item(item, base), body.getElementsByTagName('item')))
   
         for container in containers:
-            result = requests.post(self.request, data=self.__get_object_id(container['index']), headers=MiniDLNA.headers)
+            result = requests.post(self.request, data=self.__get_object_id(container['index']), headers=MiniDLNA.headers, verify=self.verify)
             root = parseString(result.content)
             body = parseString(root.getElementsByTagName('Result')[0].firstChild.nodeValue)
             items += self.__next(body, base + [container['title']])

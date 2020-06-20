@@ -28,7 +28,6 @@
             </a>
             <nav>
               <form action="{{ url_for('gallery.edit', uid = file.uid, _anchor = 'gc' ~ index) }}" method="get">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                 <input type="submit" value="Edit">
               </form>
             </nav>

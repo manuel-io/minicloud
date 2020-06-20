@@ -1,44 +1,31 @@
 {% macro aside() %}
   <div>
-    {% if current_user.is_authenticated %}
-      <!--
-      <div class="infobox">
-        <p>Login: {{ current_user.name  }}</p>
-      </div>
-      -->
-    {% endif %}
-
     <fieldset>
       <form action="/uploads" method="get">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="submit" value="Uploads">
       </form>
     </fieldset>
 
     <fieldset>
       <form action="/gallery" method="get">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="submit" value="Gallery">
       </form>
     </fieldset>
     
     <fieldset>
       <form action="/tasks" method="get">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="submit" value="Tasks">
       </form>
     </fieldset>
     
     <fieldset>
       <form action="/multimedia" method="get">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="submit" value="Multimedia">
       </form>
     </fieldset>
     
     <fieldset>
       <form action="/profile" method="get">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="submit" value="Profile">
       </form>
     </fieldset>
@@ -46,7 +33,6 @@
     {% if current_user.admin %}
       <fieldset>
         <form action="/users" method="get">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <input type="submit" value="Users">
         </form>
       </fieldset>

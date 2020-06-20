@@ -11,14 +11,15 @@ from helpers import get_categories
 multimedia = Blueprint('multimedia', __name__)
 base = Path('/var/minicloud/multimedia')
 minidlna = os.environ['MINICLOUD_DLNA'] if 'MINICLOUD_DLNA' in os.environ else 'http://127.0.0.1:8200'
-minidlna_proxy = True if 'MINICLOUD_DLNA_PROXY_PORT' in os.environ else False
-minidlna_proxy_port = os.environ['MINICLOUD_DLNA_PROXY_PORT'] if 'MINICLOUD_DLNA_PROXY_PORT' in os.environ else '8200'
+minidlna_verify = False if 'MINICLOUD_DLNA_NOVERIFY' in os.environ else True
+minidlna_proxy_host = os.environ['MINICLOUD_DLNA_PROXY_HOST'] if 'MINICLOUD_DLNA_PROXY_HOST' in os.environ else None
+minidlna_proxy_port = os.environ['MINICLOUD_DLNA_PROXY_PORT'] if 'MINICLOUD_DLNA_PROXY_PORT' in os.environ else None
 
 def find_local_files():
     return list(map(lambda path: str(path.relative_to(base)), list(base.rglob('*.*'))))
 
 def find_minidlna_files():
-    return MiniDLNA(minidlna).files()
+    return MiniDLNA(minidlna, minidlna_verify).files()
 
 def find_minidlna_paths():
     return list(map(lambda item: item['path'], find_minidlna_files()))
@@ -88,19 +89,27 @@ def view(uuid):
               WHERE a.uuid = %s LIMIT 1
               """, [int(current_user.id), uuid])
 
+            proxy = False
             media = cursor.fetchone()
             sources = list(filter(lambda item: item['path'] == media['path'], dlna))
 
-            if minidlna_proxy:
+            if minidlna_proxy_host:
+                for i, val in enumerate(sources):
+                    sources[i]['url'] = re.sub('^http.\/\/[^:]*:8200', minidlna_proxy_host, val['url'])
+
+            if minidlna_proxy_port:
                 for i, val in enumerate(sources):
                     sources[i]['url'] = val['url'].replace('8200', minidlna_proxy_port)
+
+            if minidlna_proxy_host or minidlna_proxy_port:
+                proxy = True;
 
             if len(sources) > 0:
                 return render_template( "multimedia/view.html"
                                       , media = media
                                       , config = config
                                       , sources = sources
-                                      , proxy = minidlna_proxy
+                                      , proxy = proxy
                                       )
 
         except:
