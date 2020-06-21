@@ -3,10 +3,9 @@ from flask import Flask
 from datetime import datetime
 from dateutil import tz
 
-app = Flask('minicloud')
 handler = logging.handlers.SysLogHandler(address = '/dev/log')
 handler.setFormatter(logging.Formatter('minicloud: [%(levelname)s] %(message)s'))
-app = Flask(__name__)
+app = Flask('minicloud')
 app.logger.addHandler(handler)
 app.logger.setLevel(logging.INFO)
 
