@@ -36,14 +36,15 @@ complete environment by yourself.
 
     systemctl restart postgresql.service
     systemctl restart nginx.service
+    systemctl restart rsyslog.service
     systemctl restart minicloud.service
     systemctl restart minidlna.service
 
 ## Dockerfile
     
-    git clone https://github.com/manuel-io/minicloud.git minicloud_docker
+    git clone https://github.com/manuel-io/minicloud.git minicloud .
     docker build -t minicloud .
-    docker run -d -P --name cloud minicloud:latest
+    docker run --network host -d -P --name cloud minicloud
 
 #### Get the container's ip address
 
@@ -74,10 +75,6 @@ The default password for the user minicloud is minicloud.
     export MINICLOUD_DLNA_NOVERIFY="True"
     export MINICLOUD_DLNA_PROXY_HOST="https://dlna.example.com"
     export MINICLOUD_DLNA_PROXY_PORT="8290"
-
-#### Inspect the container
-
-    docker run -it minicloud bash
 
 ## SimpleLightbox
 

@@ -13,7 +13,10 @@ services:
 
 before_install:
   - docker build -t minicloud .
-  - docker run -d -P --name cloud minicloud:latest
+  - docker run --network host -d -P --name cloud minicloud:latest
+
+script:
+  - curl -I localhost/login 2> /dev/null | grep '501'
 
 addons:
   apt:

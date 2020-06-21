@@ -1,10 +1,9 @@
-#!/usr/bin/python
-
+#!/usr/bin/python3
 import psycopg2, psycopg2.extras, bcrypt, io, os, urllib.request
-from flask import Flask, flash, g, render_template, request, url_for, redirect
+from flask import flash, g, render_template, request, url_for, redirect, abort
 from flask_wtf.csrf import CSRFProtect
 from flask_login import LoginManager, login_user, logout_user, current_user
-from config import get_db, Config
+from config import app, get_db, Config
 from users import User, users, login_required
 from uploads import uploads
 from gallery import gallery
@@ -12,7 +11,6 @@ from tasks import tasks
 from profile import profile
 from multimedia import multimedia
 
-app = Flask(__name__)
 app.register_blueprint(users, url_prefix='/users')
 app.register_blueprint(uploads, url_prefix='/uploads')
 app.register_blueprint(gallery, url_prefix='/gallery')
@@ -36,15 +34,14 @@ login_manager.init_app(app)
 def before_request():
     g.db = get_db()
 
-# handle login failed
+# Handle login required
 @app.errorhandler(401)
 def page_not_found(e):
     page = url_for(request.endpoint, **request.view_args, _external = True)
-    return redirect(url_for('login', page = page))
+    if request.endpoint == 'index':
+        page = ''
 
-@app.context_processor
-def globals():
-    return dict(example = "Hello World")
+    return redirect(url_for('login', page = page))
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -56,34 +53,29 @@ def register():
         code = request.form['code']
         password = request.form['password']
         confirmation = request.form['confirmation']
-        check = True
 
         if len(password) < 6:
-            flash(['Passsword required at least 6 characters'], 'error')
-            check = False if check is True else False
+            app.logger.error('Password length failed')
+            flash(['Passsword requires at least 6 characters'], 'error')
+            return redirect(url_for("index"))
 
         if not password == confirmation:
-            flash(['Password doesn\'t satisfy confirmation'], 'error')
-            check = False if check is True else False
+            app.logger.error('Password confirmation failed')
+            flash(['Password confirmation failed'], 'error')
+            return redirect(url_for("index"))
 
-        if check:
-            hashed = User.generate_password(password)
+        hashed = User.generate_password(password)
 
         with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             try:
                 cursor.execute("""
-                    SELECT id, email, activation_key FROM minicloud_users
+                    SELECT id  FROM minicloud_users
                     WHERE email = %s AND activation_key = %s AND disabled = %s
                     ORDER BY id ASC LIMIT 1
                     """, [email, code, True])
 
                 data = cursor.fetchone()
-                print('data', data)
 
-            except:
-                pass
-
-            try:
                 cursor.execute("""
                     UPDATE minicloud_users
                     SET password = %s, activation_key = %s, disabled = %s
@@ -93,13 +85,16 @@ def register():
                 g.db.commit()
                 flash(['Activation successful'], 'info')
 
-            except:
+            except Exception as e:
+                app.logger.error('Activation failed: %s' % str(e))
                 g.db.rollback()
                 flash(['Activation failed'], 'error')
 
         return redirect(url_for("index"))
 
-# somewhere to login
+    abort(501)
+
+# Somewhere to login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
@@ -112,7 +107,6 @@ def login():
         page = request.form.get('page')
 
         with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
-
             try:
                 cursor.execute("""
                     SELECT id, name, password, admin FROM minicloud_users
@@ -126,43 +120,61 @@ def login():
                     login_user(user)
 
             except Exception as e:
+                app.logger.warning('Login failed: %s' % str(e))
                 g.db.rollback()
 
         if current_user.is_authenticated:
+            app.logger.info('%s logged in' % current_user.name)
             flash(['Logged in'], 'info')
 
-            if page:
-                code = urllib.request.urlopen(page).getcode()
-                if code > 199 and code < 300:
-                    return redirect(page)
+            if page and not page.lower() == 'none':
+                try:
+                    code = urllib.request.urlopen(page).getcode()
+                    if code > 199 and code < 300:
+                        return redirect(page)
+
+                except Exception as e:
+                    app.logger.error('Redirect failed: %s' % str(e))
 
             return redirect(url_for('gallery.show'))
 
         else:
+            app.logger.warning('Login failed: %s' % username)
             flash(['Invalid credentials'], 'error')
 
         return render_template('users/login.html')
 
-# somewhere to logout
+    abort(501)
+
+# Somewhere to logout
 @app.route('/logout', methods = ['POST'])
 @login_required
 def logout():
+    name = current_user.name
     logout_user()
+    app.logger.info('%s logged out' % name)
     flash(['Logged out'], 'info')
+
     return redirect(url_for('index'))
 
-# callback to reload the user object
+# Callback to reload the user object
 @login_manager.user_loader
 def load_user(id):
     with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
+        try:
+            cursor.execute("""
+              SELECT id, name, admin, disabled FROM minicloud_users
+              WHERE id = %s ORDER BY id ASC LIMIT 1;
+              """, [int(id)])
 
-        cursor.execute("""
-            SELECT id, name, admin, disabled FROM minicloud_users
-            WHERE id = %s ORDER BY id ASC LIMIT 1;
-            """, [int(id)])
-        
-        data = cursor.fetchone()
-        return User(int(data['id']), data['name'], data['admin'])
+            data = cursor.fetchone()
+            return User(int(data['id']), data['name'], data['admin'])
+
+        except Exception as e:
+            app.logger.error('User object failed: %s' % str(e))
+            g.db.rollback()
+
+    return None
 
 @app.route('/')
 @login_required

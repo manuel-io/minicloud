@@ -1,4 +1,4 @@
-FROM ubuntu:bionic
+FROM ubuntu:focal
 RUN apt-get update && apt upgrade -y
 
 # BUILD TOOLS
@@ -12,7 +12,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y postgresql \
                                                       nginx-full \
                                                       minidlna
 
-RUN apt-get install -y ssh
+RUN apt-get install -y ssh rsyslog
 RUN echo 'root:minicloud' | chpasswd
 
 RUN mkdir /var/run/sshd

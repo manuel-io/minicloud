@@ -3,7 +3,7 @@ from datetime import datetime
 from dateutil import parser
 from flask import Blueprint, g, request, Response, render_template, url_for, redirect, jsonify, make_response, flash, send_file, send_from_directory, abort
 from users import login_required, admin_required, current_user
-from config import config
+from config import app, config
 from pathlib import Path
 from minidlna import MiniDLNA
 from helpers import get_categories
@@ -72,7 +72,8 @@ def show():
                                   , config = config
                                   )
 
-        except Warning:
+        except Exception as e:
+            app.logger.error('Show in multimedia failed: %s' % str(e))
             pass
 
     abort(500)
@@ -112,8 +113,8 @@ def view(uuid):
                                       , proxy = proxy
                                       )
 
-        except:
-            pass
+        except Exception as e:
+            app.logger.error('View in multimedia failed: %s' % str(e))
 
     abort(500)
 
@@ -167,7 +168,8 @@ def add():
             flash(['Media added'], 'info')
 
         except:
-            flash(['Database error'], 'error')
+            app.logger.error('Indexing in multimedia failed: %s' % str(e))
+            flash(['Indexing failed'], 'error')
             g.db.rollback()
 
     return redirect("/multimedia")
@@ -210,6 +212,7 @@ def edit(uuid):
             flash(['Media modified'], 'info')
 
         except Exception as e:
+            app.logger.error('Edit in multimedia failed: %s' % str(e))
             g.db.rollback()
     
     return redirect("/multimedia")
@@ -227,7 +230,8 @@ def delete(uuid):
             g.db.commit()
             flash(['Media removed'], 'info')
 
-        except Warning:
+        except Exception:
+            app.logger.error('Deletion in multimedia failed: %s' % str(e))
             g.db.rollback()
 
     return redirect("/multimedia")

@@ -1,7 +1,8 @@
 import psycopg2, psycopg2.extras, bcrypt, random, string
-from flask import Blueprint, url_for, request, redirect, g, render_template, flash, make_response, jsonify
+from flask import Blueprint, url_for, request, redirect, g, render_template, flash, make_response, jsonify, abort
 from flask_login import UserMixin, login_required, current_user
 from functools import wraps, reduce
+from config import app
 users = Blueprint('users', __name__)
 
 class User(UserMixin):
@@ -53,8 +54,8 @@ def show():
             return render_template("users/show.html", users = users)
 
         except Exception as e:
+            app.logger.error('Show in users failed: %s' % str(e))
             g.db.rollback()
-            # Log message e
 
     abort(500)
 
@@ -90,11 +91,13 @@ def edit(uuid):
                 flash(['User modified'], 'info')
 
             except Exception as e:
+                app.logger.error('Edit in users failed: %s' % str(e))
                 g.db.rollback()
-                flash(['Failed :-('], 'error')
-                # Log message e
+                flash(['Edit failed'], 'error')
 
         return redirect("/users")
+
+    abort(501)
 
 @users.route("/add", methods = ["POST"])
 @login_required
@@ -115,13 +118,12 @@ def add():
             """, [name, email, password, admin, key, True])
             
             g.db.commit()
-            # flash(['User added'], 'info')
             flash(['User added', 'Activation Key:', key], 'info')
 
         except Exception as e:
+            app.logger.error('Adding in users failed: %s' % str(e))
             g.db.rollback()
-            flash(['Failed :-('], 'error')
-            # Log message e
+            flash(['Adding failed'], 'error')
 
     return redirect(url_for('users.show'))
 
@@ -140,9 +142,9 @@ def delete(uuid):
             flash(['User removed'], 'info')
 
         except Exception as e:
+            app.logger.error('Deletion in users failed: %s' % str(e))
             g.db.rollback()
-            flash(['Failed :-('], 'error')
-            # Log message e
+            flash(['Deletion failed'], 'error')
 
     return redirect(url_for('users.show'))
 
@@ -163,9 +165,9 @@ def reset(uuid):
             flash(['Activation code:', key], 'info')
 
         except Exception as e:
+            app.logger.error('Reset in users failed: %s' % str(e))
             g.db.rollback()
-            flash(['Failed :-('], 'error')
-            # Log message e
+            flash(['Reset failed'], 'error')
 
     return redirect(url_for('users.show'))
 
@@ -184,7 +186,7 @@ def set_media():
             return make_response(jsonify(['Saved']), 200)
 
         except Exception as e:
+            app.logger.error('Set media in users failed: %s' % str(e))
             g.db.rollback()
-            # Log message e
 
     return make_response(jsonify(['Error']), 500)

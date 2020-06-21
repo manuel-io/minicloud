@@ -1,11 +1,9 @@
 import psycopg2, psycopg2.extras, json, io, base64
-from PIL import Image
 from psycopg2.errors import UniqueViolation
-from datetime import datetime
 from dateutil import tz, parser
-from flask import Blueprint, g, request, render_template, url_for, redirect, flash, Response, send_file
+from flask import Blueprint, g, request, render_template, url_for, redirect, flash, send_file, abort
 from users import User, login_required, current_user
-from config import config, Config
+from config import app, config, Config
 from gallery import pillow_orientation, pillow_thumbnail
 
 profile = Blueprint('profile', __name__)
@@ -24,7 +22,8 @@ def show():
                 user = cursor.fetchone()
                 return render_template("profile/show.html", user = user)
 
-            except:
+            except Exception as e:
+                app.logger.error('Show in profile failed: %s' % str(e))
                 g.db.rollback()
 
     if request.method == "POST":
@@ -43,10 +42,11 @@ def show():
                 flash(['Profile updated'], 'info')
 
             except Exception as e:
+                app.logger.error('Update in profile failed: %s' % str(e))
                 g.db.rollback()
-                flash(['Profile not updated'], 'error')
+                flash(['Update failed'], 'error')
 
-    return redirect(url_for('profile.show'))
+    abort(501)
 
 @profile.route("/import", methods = ["POST"])
 @login_required
@@ -170,14 +170,12 @@ def profile_export():
     timestamp = Config.getUnixTimestamp()
 
     options = request.form.getlist('option')
-    print(options)
 
     exported = { 'version': version
                , 'date': timestamp
                , 'items': {}
                }
 
-    print(exported)
     return send_file( io.BytesIO(bytes(json.dumps(exported), encoding = 'utf-8'))
                     , mimetype = 'application/json'
                     , as_attachment = True
@@ -214,6 +212,7 @@ def password():
             flash(['Password updated'], 'info')
 
         except Exception as e:
+          app.logger.error('Password update in profile failed: %s' % str(e))
           g.db.rollback()
           flash(['Password not updated'], 'error')
 

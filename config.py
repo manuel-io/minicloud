@@ -1,6 +1,14 @@
-import psycopg2, os
+import psycopg2, os, logging, logging.handlers
+from flask import Flask
 from datetime import datetime
 from dateutil import tz
+
+app = Flask('minicloud')
+handler = logging.handlers.SysLogHandler(address = '/dev/log')
+handler.setFormatter(logging.Formatter('minicloud: [%(levelname)s] %(message)s'))
+app = Flask(__name__)
+app.logger.addHandler(handler)
+app.logger.setLevel(logging.INFO)
 
 utczone = tz.gettz('UTC')
 dbzone = tz.gettz('UTC')

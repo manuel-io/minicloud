@@ -1,9 +1,9 @@
 import psycopg2, psycopg2.extras, re
 from datetime import datetime
 from dateutil import tz, parser
-from flask import Blueprint, g, request, render_template, url_for, redirect, flash
+from flask import Blueprint, g, request, render_template, url_for, redirect, flash, abort
 from users import login_required, admin_required, current_user
-from config import config
+from config import app, config
 from helpers import get_categories
 
 tasks = Blueprint('tasks', __name__)
@@ -64,8 +64,8 @@ def show():
                                   )
 
         except Exception as e:
+            app.logger.error('Show in tasks failed: %s' % str(e))
             g.db.rollback()
-            # Log message e
 
     abort(500)
 
@@ -112,9 +112,9 @@ def add():
             flash(['Task added'], 'info')
 
         except Exception as e:
+            app.logger.error('Adding in tasks failed: %s' % str(e))
             g.db.rollback()
-            flash(['Failed :-('], 'error')
-            # Log message e
+            flash(['Adding failed'], 'error')
 
     return redirect(url_for('tasks.show'))
 
@@ -200,11 +200,13 @@ def edit(uid):
                 flash(['Task modified'], 'info')
             
             except Exception as e:
+                app.logger.error('Edit in tasks failed: %s' % str(e))
                 g.db.rollback();
-                flash(['Failed :-('], 'error')
-                # Log message e
+                flash(['Edit failed'], 'error')
         
         return redirect(url_for('tasks.show'))
+
+    abort(501)
 
 @tasks.route("/delete/<uid>", methods = ["POST"])
 @login_required
@@ -220,8 +222,8 @@ def delete(uid):
             flash(['Task removed'], 'info')
 
         except Exception as e:
+            app.logger.error('Deletion in tasks failed: %s' % str(e))
             g.db.rollback()
-            flash(['Failed :-('], 'error')
-            # Log message e
+            flash(['Deletion failed'], 'error')
 
     return redirect(url_for('tasks.show'))

@@ -1,8 +1,8 @@
 import psycopg2, psycopg2.extras, io, time, os, re, functools
 from PIL import Image, ImageOps
-from flask import Blueprint, url_for, redirect, g, render_template, send_file, request, flash, send_from_directory, Response, abort, make_response, jsonify
-from flask_login import UserMixin, login_required, current_user
-from config import config, MIME_SUFFIX
+from flask import Blueprint, url_for, redirect, g, render_template, send_file, request, flash, abort
+from flask_login import login_required, current_user
+from config import app, config, MIME_SUFFIX
 from helpers import get_categories, get_stream
 
 gallery = Blueprint('gallery', __name__)
@@ -95,8 +95,8 @@ def show():
                               )
 
       except Exception as e:
+          app.logger.error('Show in gallery failed: %s' % str(e))
           g.db.rollback()
-          # Log message e
 
     abort(500)
 
@@ -134,11 +134,14 @@ def edit(uid):
                 g.db.commit()
                 flash(['File modified'], 'info')
 
-            except Warning:
+            except Exception as e:
+                app.logger.error('Edit in gallery failed: %s' % str(e))
                 g.db.rollback()
-                flash(['Failed :-('], 'error')
+                flash(['Edit failed'], 'error')
         
         return redirect(url_for('gallery.show'))
+
+    abort(501)
 
 @gallery.route("/delete/<uid>", methods = ["POST"])
 @login_required
@@ -159,9 +162,10 @@ def delete(uid):
             g.db.commit()
             flash(['File deleted'], 'info')
 
-        except Warning:
+        except Exception as e:
+            app.logger.error('Deletion in gallery failed: %s' % str(e))
             g.db.rollback()
-            flash(['Failed :-('], 'error')
+            flash(['Deletion failed'], 'error')
 
     return redirect(url_for("gallery.show"))
 
@@ -182,9 +186,9 @@ def download(uid):
 
             return get_stream(request, filename, data['lo'], data['mime'], data['size'])
 
-        except:
+        except Exception as e:
+            app.logger.error('Download in gallery failed: %s' % str(e))
             g.db.rollback()
-            # Log message e
 
     abort(500)
 
@@ -209,8 +213,8 @@ def thumbnail(uid):
                             )
 
         except Exception as e:
+            app.logger.error('Thumbnail in gallery failed: %s' % str(e))
             g.db.rollback()
-            # Log message e
         
     abort(500)
 
@@ -225,8 +229,9 @@ def pillow_orientation(upload, mimetype):
 
         return image.getvalue()
 
-    except:
+    except Warning:
         return upload
+        # Log message e
 
 def pillow_thumbnail(upload, mimetype):
     try:
@@ -239,8 +244,9 @@ def pillow_thumbnail(upload, mimetype):
         
         return thumbnail.getvalue()
 
-    except:
+    except Warning:
         return upload
+        # Log message e
 
 @gallery.route('/diashow')
 @login_required
@@ -260,8 +266,8 @@ def diashow():
                                   )
 
         except Exception as e:
+            app.logger.error('Show in diashow failed: %s' % str(e))
             g.db.rollback()
-            # Log message e
 
     abort(500)
 
@@ -280,8 +286,8 @@ def diashow_play(uuid):
             return render_template("gallery/diashow_play.html", diashow = diashow)
 
         except Exception as e:
+            app.logger.error('Play in diashow failed: %s' % str(e))
             g.db.rollback()
-            # Log message e
 
     abort(500)
 
@@ -303,8 +309,8 @@ def diashow_download(uuid, uid):
             return get_stream(request, filename, data['lo'], data['mime'], data['size'])
 
         except Exception as e:
+            app.logger.error('Download in diashow failed: %s' % str(e))
             g.db.rollback()
-            # Log message e
 
     abort(500)
 
@@ -325,9 +331,10 @@ def diashow_add():
             g.db.commit()
             flash(['Diashow added'], 'info')
 
-        except:
+        except Exception as e:
+            app.logger.error('Adding in diashow failed: %s' % str(e))
             g.db.rollback()
-            flash(['Failed :-('], 'error')
+            flash(['Adding failed'], 'error')
 
     return redirect(url_for('gallery.diashow'))
 
@@ -344,8 +351,9 @@ def diashow_delete(uid):
             g.db.commit()
             flash(['Diashow deleted'], 'info')
 
-        except:
+        except Exception as e:
+            app.logger.error('Deletion in diashow failed: %s' % str(e))
             g.db.rollback()
-            flash(['Failed :-('], 'error')
+            flash(['Deletion failed'], 'error')
 
     return redirect(url_for('gallery.diashow'))

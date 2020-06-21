@@ -1,8 +1,7 @@
-import psycopg2, psycopg2.extras, io, time, os, re, functools
-from PIL import Image, ImageOps
-from flask import Blueprint, url_for, redirect, g, render_template, send_file, request, flash, send_from_directory, Response, abort, make_response, jsonify
-from flask_login import UserMixin, login_required, current_user
-from config import config, MIME_SUFFIX
+import psycopg2, psycopg2.extras
+from flask import Blueprint, url_for, redirect, g, render_template, request, flash, abort, make_response, jsonify
+from flask_login import login_required, current_user
+from config import app, config, MIME_SUFFIX
 from helpers import get_categories, get_stream
 
 uploads = Blueprint('uploads', __name__)
@@ -39,8 +38,8 @@ def show():
             return render_template("uploads/show.html", parent = parent, backref = backref, directory = directory)
 
         except Exception as e:
+            app.logger.error('Show in uploads failed: %s' % str(e))
             g.db.rollback()
-            # Log message e
 
     abort(500)
 
@@ -93,9 +92,9 @@ def file_add():
                 lo.close()
                 count = count + 1
 
-            except Warning:
+            except Exception as e:
+                app.logger.error('Adding file in uploads failed: %s' % str(e))
                 g.db.rollback()
-                # Log message e
 
     messages.append('%s of %s files uploaded' % (count, len(uploads)))
 
@@ -123,8 +122,8 @@ def download(uid):
             return get_stream(request, filename, data['lo'], data['mime'], data['size'])
 
         except Exception as e:
+            app.logger.error('Download in uploads failed: %s' % str(e))
             g.db.rollback()
-            # Log message e
 
     abort(500)
 
@@ -142,7 +141,8 @@ def delete(uid):
 
             data = cursor.fetchone()
             if data['count'] > 0:
-                flash(['Object has some references'], 'error')
+                app.logger.error('Deletion in uploads failed. Object has references')
+                flash(['Deletion failed. Object has references'], 'error')
                 return redirect(url_for('uploads.show', parent=parent))
 
             cursor.execute("""
@@ -160,12 +160,13 @@ def delete(uid):
             flash(['Object deleted'], 'info')
 
         except Exception as e:
+            app.logger.error('Deletion in uploads failed: %s' % str(e))
             g.db.rollback()
-            flash(['Failed :-('], 'error')
+            flash(['Deletion failed'], 'error')
 
     return redirect(url_for('uploads.show', parent=parent))
 
-@uploads.route("/dir/add", methods = ['POST'])
+@uploads.route('/dir/add', methods = ['POST'])
 @login_required
 def dir_add():
     title = request.form['title']
@@ -192,7 +193,8 @@ def dir_add():
             flash(['Dir added'], 'info')
 
         except Exception as e:
+            app.logger.error('Adding dir in uploads failed: %s' % str(e))
             g.db.rollback()
-            flash(['Failed :-('], 'error')
+            flash(['Adding failed'], 'error')
 
     return redirect(url_for('uploads.show', parent=parent))
