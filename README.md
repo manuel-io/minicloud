@@ -48,19 +48,15 @@ complete environment by yourself.
     docker build -t minicloud .
     docker run --network host -d -P --name cloud minicloud
 
-#### Get the container's ip address
-
-    docker inspect cloud | grep IPAddress
-
-#### Inspect the container (e.g. 172.17.0.2)
+#### Inspect the container
 
 The default password for the user minicloud is minicloud.
 
-    ssh minicloud@172.17.0.2
+    ssh minicloud@localhost
 
-#### Copy a file to the container (e.g. 172.17.0.2)
+#### Copy a file to the container
 
-    scp ~/movies/butenland-2020.mp4 minicloud@172.17.0.2:/var/minicloud/multimedia/documentary
+    scp ~/movies/butenland-2020.mp4 minicloud@localhost:/var/minicloud/multimedia/documentary
 
 ## Environment variables
 
