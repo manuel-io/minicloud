@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/manuel-io/minicloud.svg?branch=master)](https://travis-ci.com/manuel-io/minicloud) 
+
 :warning: **This version is not fully tested**
 
 ![Gallery](share/preview/minicloud1.png)
