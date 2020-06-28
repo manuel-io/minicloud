@@ -19,27 +19,24 @@ minidlna_proxy_port = os.environ['MINICLOUD_DLNA_PROXY_PORT'] if 'MINICLOUD_DLNA
 def find_local_files():
     return list(map(lambda path: str(path.relative_to(base)), list(base.rglob('*.*'))))
 
-def find_minidlna_files(user_id):
-    auth = auths.generate(user_id)
-    print('auth', auth)
+def find_minidlna_files(auth):
     return MiniDLNA(minidlna, auth, minidlna_verify).files()
 
-def find_minidlna_paths(user_id):
-    return list(map(lambda item: item['path'], find_minidlna_files(user_id)))
+def find_minidlna_paths(auth):
+    return list(map(lambda item: item['path'], find_minidlna_files(auth)))
 
-def find_orphan_files():
-    dlna = find_minidlna_files()
-    orphan = [];
-    catalogue = [];
+def find_orphan_files(auth):
+    dlna = find_minidlna_files(auth)
+    orphan, catalogue = [[], []]
 
-    with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
-        try:
+    try:
+        with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""SELECT path FROM minicloud_multimedia ORDER BY path""")
             for result in cursor.fetchall():
                 catalogue.append(result['path'])
 
-        except:
-            pass
+    except Exception as e:
+        pass
 
     for item in dlna:
         if not item['path'] in catalogue: orphan.append(item)
@@ -49,7 +46,9 @@ def find_orphan_files():
 @multimedia.route('/')
 @login_required
 def show():
-    paths = find_minidlna_paths(int(current_user.id))
+    auth = auths.generate(current_user.id)
+    paths = find_minidlna_paths(auth)
+
     with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
         try:
             multimedia = []
@@ -84,43 +83,54 @@ def show():
 @multimedia.route('/view/<uuid>')
 @login_required
 def view(uuid):
-    dlna = find_minidlna_files(current_user.id)
-    with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
-        try:
+    try:
+        auth = auths.generate(int(current_user.id))
+        dlna = find_minidlna_files(auth)
+        proxy, media = [False, None]
+
+        with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
               SELECT a.id AS id, a.uuid AS uuid, category, title, description, director, actors, path, year, mime, media AS status FROM minicloud_multimedia AS a
                 LEFT JOIN minicloud_users AS b ON (b.id = %s)
               WHERE a.uuid = %s LIMIT 1
               """, [int(current_user.id), uuid])
 
-            proxy = False
             media = cursor.fetchone()
-            sources = list(filter(lambda item: item['path'] == media['path'], dlna))
-            app.logger.info('Open multimedia %s' % media['path'])
 
-            if minidlna_proxy_host:
-                for i, val in enumerate(sources):
-                    sources[i]['url'] = re.sub('^http.\/\/[^:]*:8200', minidlna_proxy_host, val['url'])
-                    app.logger.info('Source: %s' % sources[i]['url'])
+        if not media:
+            raise Exception('not found');
 
-            if minidlna_proxy_port:
-                for i, val in enumerate(sources):
-                    sources[i]['url'] = val['url'].replace('8200', minidlna_proxy_port)
-                    app.logger.info('Source: %s' % sources[i]['url'])
+        sources = list(filter(lambda item: item['path'] == media['path'], dlna))
+        app.logger.info('Open multimedia %s' % media['path'])
 
-            if minidlna_proxy_host or minidlna_proxy_port:
-                proxy = True;
+        if minidlna_proxy_host:
+            for i, val in enumerate(sources):
+                sources[i]['url'] = re.sub('^http.\/\/[^:]*:8200', minidlna_proxy_host, val['url'])
+                sources[i]['url'] = sources[i]['url'] + '?auth=%s' % auth
+                app.logger.info('Source: %s' % sources[i]['url'])
 
-            if len(sources) > 0:
-                return render_template( "multimedia/view.html"
-                                      , media = media
-                                      , config = config
-                                      , sources = sources
-                                      , proxy = proxy
-                                      )
+        if minidlna_proxy_port:
+            for i, val in enumerate(sources):
+                sources[i]['url'] = val['url'].replace('8200', minidlna_proxy_port)
+                sources[i]['url'] = sources[i]['url'] + '?auth=%s' % auth
+                app.logger.info('Source: %s' % sources[i]['url'])
 
-        except Exception as e:
-            app.logger.error('View in multimedia failed: %s' % str(e))
+        if minidlna_proxy_host or minidlna_proxy_port:
+            proxy = True;
+
+        if len(sources) > 0:
+            return render_template( "multimedia/view.html"
+                                  , media = media
+                                  , config = config
+                                  , sources = sources
+                                  , proxy = proxy
+                                  )
+        else:
+            raise Exception('no sources')
+
+    except Exception as e:
+        app.logger.error('Multimedia (%s): %s' % (uuid, str(e)))
+        return redirect("/multimedia")
 
     abort(500)
 
@@ -128,7 +138,8 @@ def view(uuid):
 @login_required
 @admin_required
 def indexing():
-    dlna = find_orphan_files()
+    auth = auths.generate(int(current_user.id))
+    dlna = find_orphan_files(auth)
     return render_template( "multimedia/indexing.html"
                           , config = config
                           , items = dlna
@@ -220,7 +231,7 @@ def edit(uuid):
         except Exception as e:
             app.logger.error('Edit in multimedia failed: %s' % str(e))
             g.db.rollback()
-    
+
     return redirect("/multimedia")
 
 @multimedia.route('/delete/<uuid>', methods = ["POST"])
