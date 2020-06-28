@@ -125,6 +125,17 @@ CREATE INDEX minicloud_multimedia_director_idx ON minicloud_multimedia (director
 CREATE INDEX minicloud_multimedia_title_idx ON minicloud_multimedia (title);
 CREATE INDEX minicloud_multimedia_year_idx ON minicloud_multimedia (year);
 
+CREATE TABLE minicloud_auths (
+id BIGSERIAL UNIQUE PRIMARY KEY,
+uid VARCHAR(16) NOT NULL DEFAULT lpad(md5(random()::text), 16),
+user_id BIGINT NOT NULL REFERENCES minicloud_users(id) ON DELETE CASCADE,
+token VARCHAR(32) NOT NULL UNIQUE DEFAULT lpad(md5(random()::text), 32),
+xtimes INT NOT NULL DEFAULT 1,
+created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+updated_at TIMESTAMP NOT NULL,
+UNIQUE (user_id, uid)
+);
+
 CREATE OR REPLACE FUNCTION minicloud_updated_at_task()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -133,28 +144,32 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
-CREATE TRIGGER minicloud_updated_at_task_trigger BEFORE
+CREATE TRIGGER minicloud_updated_uploads_trigger BEFORE
 INSERT OR UPDATE ON minicloud_uploads
 FOR EACH ROW EXECUTE PROCEDURE minicloud_updated_at_task();
 
-CREATE TRIGGER minicloud_updated_at_task_trigger BEFORE
+CREATE TRIGGER minicloud_updated_tasks_trigger BEFORE
 INSERT OR UPDATE ON minicloud_tasks
 FOR EACH ROW EXECUTE PROCEDURE minicloud_updated_at_task();
 
-CREATE TRIGGER minicloud_updated_at_task_trigger BEFORE
+CREATE TRIGGER minicloud_updated_users_trigger BEFORE
 INSERT OR UPDATE ON minicloud_users
 FOR EACH ROW EXECUTE PROCEDURE minicloud_updated_at_task();
 
-CREATE TRIGGER minicloud_updated_at_task_trigger BEFORE
+CREATE TRIGGER minicloud_updated_gallery_trigger BEFORE
 INSERT OR UPDATE ON minicloud_gallery
 FOR EACH ROW EXECUTE PROCEDURE minicloud_updated_at_task();
 
-CREATE TRIGGER minicloud_updated_at_task_trigger BEFORE
+CREATE TRIGGER minicloud_updated_diashow_trigger BEFORE
 INSERT OR UPDATE ON minicloud_diashow
 FOR EACH ROW EXECUTE PROCEDURE minicloud_updated_at_task();
 
-CREATE TRIGGER minicloud_updated_at_task_trigger BEFORE
+CREATE TRIGGER minicloud_updated_multimedia_trigger BEFORE
 INSERT OR UPDATE ON minicloud_multimedia
+FOR EACH ROW EXECUTE PROCEDURE minicloud_updated_at_task();
+
+CREATE TRIGGER minicloud_updated_auth_trigger BEFORE
+INSERT OR UPDATE ON minicloud_auths
 FOR EACH ROW EXECUTE PROCEDURE minicloud_updated_at_task();
 
 COMMIT;

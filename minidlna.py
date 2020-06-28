@@ -10,12 +10,15 @@ from config import app
 class MiniDLNA:
     headers = { 'SOAPACTION': 'urn:schemas-upnp-org:service:ContentDirectory:1#Browse' }
 
-    def __init__(self, host, verify):
+    def __init__(self, host, auth, verify):
         app.logger.info('Connect to DLNA: %s%s' % (host, '/rootDesc.xml'))
         app.logger.info('Verification: %s' % verify)
 
+        auth = { 'X-Auth-Token': auth }
+        MiniDLNA.headers.update(auth)
+
         # Get Service ContentDirectory
-        result = requests.get('%s%s' % (host, '/rootDesc.xml'), verify=verify)
+        result = requests.get('%s%s' % (host, '/rootDesc.xml'), headers=auth, verify=verify)
         root = parseString(result.content)
         services = list(map(lambda service: self.__parse_service(service), root.getElementsByTagName('service')))
         content = [ service for service in services if service['name'] == 'urn:schemas-upnp-org:service:ContentDirectory:1' ][0]

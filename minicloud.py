@@ -10,6 +10,7 @@ from gallery import gallery
 from tasks import tasks
 from profile import profile
 from multimedia import multimedia
+from auths import auths
 
 app.register_blueprint(users, url_prefix='/users')
 app.register_blueprint(uploads, url_prefix='/uploads')
@@ -17,6 +18,7 @@ app.register_blueprint(gallery, url_prefix='/gallery')
 app.register_blueprint(tasks, url_prefix='/tasks')
 app.register_blueprint(profile, url_prefix='/profile')
 app.register_blueprint(multimedia, url_prefix='/multimedia')
+app.register_blueprint(auths, url_prefix='/auths')
 
 @app.teardown_appcontext
 def close_db(e = None):

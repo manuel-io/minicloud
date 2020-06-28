@@ -1,4 +1,5 @@
 import psycopg2, psycopg2.extras, uuid, re, io, glob, os.path, requests
+import auths
 from datetime import datetime
 from dateutil import parser
 from flask import Blueprint, g, request, Response, render_template, url_for, redirect, jsonify, make_response, flash, send_file, send_from_directory, abort
@@ -18,11 +19,13 @@ minidlna_proxy_port = os.environ['MINICLOUD_DLNA_PROXY_PORT'] if 'MINICLOUD_DLNA
 def find_local_files():
     return list(map(lambda path: str(path.relative_to(base)), list(base.rglob('*.*'))))
 
-def find_minidlna_files():
-    return MiniDLNA(minidlna, minidlna_verify).files()
+def find_minidlna_files(user_id):
+    auth = auths.generate(user_id)
+    print('auth', auth)
+    return MiniDLNA(minidlna, auth, minidlna_verify).files()
 
-def find_minidlna_paths():
-    return list(map(lambda item: item['path'], find_minidlna_files()))
+def find_minidlna_paths(user_id):
+    return list(map(lambda item: item['path'], find_minidlna_files(user_id)))
 
 def find_orphan_files():
     dlna = find_minidlna_files()
@@ -46,7 +49,7 @@ def find_orphan_files():
 @multimedia.route('/')
 @login_required
 def show():
-    paths = find_minidlna_paths()
+    paths = find_minidlna_paths(int(current_user.id))
     with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
         try:
             multimedia = []
@@ -81,7 +84,7 @@ def show():
 @multimedia.route('/view/<uuid>')
 @login_required
 def view(uuid):
-    dlna = find_minidlna_files()
+    dlna = find_minidlna_files(current_user.id)
     with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
         try:
             cursor.execute("""
