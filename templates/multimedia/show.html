@@ -26,16 +26,16 @@
               <section class="describtion">
                 <table onclick="media_toogle(event, '{{ index }}')">
                   <tr>
-                    <td>Title:</td>
-                    <td>{{ media.title }}</td>
+                    <td><p title="{{ media.title }}">Title:</p></td>
+                    <td><p title="{{ media.title }}">{{ media.title }}</p></td>
                   </tr>
                   <tr>
-                    <td>Director:</td>
-                    <td>{{ media.director }}</td>
+                    <td><p title="{{ media.director }}">Director:</p></td>
+                    <td><p title="{{ media.director }}">{{ media.director }}</p></td>
                   </tr>
                   <tr>
-                    <td>Year:</td>
-                    <td>{{ media.year }}</td>
+                    <td><p title="{{ media.year }}">Year:</p></td>
+                    <td><p title="{{ media.year }}">{{ media.year }}</p></td>
                   </tr>
                 </table>
               </section>
@@ -50,8 +50,7 @@
               <section class="describtion">
                 <table onclick="media_toogle(event, '{{ index }}')">
                   <tr>
-                    <td></td>
-                    <td>
+                    <td colspan="2">
                       {% for actor in media.actors %}
                         <p>{{ actor }}</p>
                       {% endfor %}

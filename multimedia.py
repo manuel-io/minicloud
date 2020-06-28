@@ -93,14 +93,17 @@ def view(uuid):
             proxy = False
             media = cursor.fetchone()
             sources = list(filter(lambda item: item['path'] == media['path'], dlna))
+            app.logger.info('Open multimedia %s' % media['path'])
 
             if minidlna_proxy_host:
                 for i, val in enumerate(sources):
                     sources[i]['url'] = re.sub('^http.\/\/[^:]*:8200', minidlna_proxy_host, val['url'])
+                    app.logger.info('Source: %s' % sources[i]['url'])
 
             if minidlna_proxy_port:
                 for i, val in enumerate(sources):
                     sources[i]['url'] = val['url'].replace('8200', minidlna_proxy_port)
+                    app.logger.info('Source: %s' % sources[i]['url'])
 
             if minidlna_proxy_host or minidlna_proxy_port:
                 proxy = True;

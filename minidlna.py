@@ -5,11 +5,14 @@ import requests
 from xml.dom.minidom import parseString
 from pathlib import Path
 from mimetypes import MimeTypes
+from config import app
 
 class MiniDLNA:
     headers = { 'SOAPACTION': 'urn:schemas-upnp-org:service:ContentDirectory:1#Browse' }
 
     def __init__(self, host, verify):
+        app.logger.info('Connect to DLNA: %s%s' % (host, '/rootDesc.xml'))
+        app.logger.info('Verification: %s' % verify)
 
         # Get Service ContentDirectory
         result = requests.get('%s%s' % (host, '/rootDesc.xml'), verify=verify)
