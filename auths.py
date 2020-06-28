@@ -10,7 +10,7 @@ def generate(user_id):
             cursor.execute("""
               INSERT INTO minicloud_auths (user_id)
               VALUES (%s) RETURNING token
-              """ % user_id)
+              """, [user_id])
 
             data = cursor.fetchone()
             g.db.commit()
@@ -23,6 +23,8 @@ def generate(user_id):
 
 @auths.route("/verify", methods = ["GET"])
 def verify():
+    token, data = [None, None]
+
     if 'X-Auth-Token' in request.headers:
         app.logger.info('X-Auth-Token: %s' % request.headers['X-Auth-Token'])
         token = request.headers['X-Auth-Token']
@@ -34,18 +36,18 @@ def verify():
         with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
               SELECT token FROM minicloud_auths
-              WHERE token = %s RETURNING token
-              """, (token))
+              WHERE token = %s
+              """, [token])
 
             data = cursor.fetchone()
 
-        if not data['token'] == token:
+        if not data or not data['token'] == token:
             raise Exception('%s invalid' % token)
 
         else:
             return ('', 201)
 
     except Exception as e:
-        app.logger.error('Token: %s' % str(e))
+        app.logger.error('X-Auth-Token: %s' % str(e))
 
     return ('', 401)
