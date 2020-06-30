@@ -83,15 +83,15 @@ def show():
 @multimedia.route('/view/<uuid>')
 @login_required
 def view(uuid):
-    try:
-        auth = auths.generate(int(current_user.id))
-        dlna = find_minidlna_files(auth)
-        proxy, media = [False, None]
+    auth = auths.generate(current_user.id)
+    dlna = find_minidlna_files(auth)
+    proxy, media = [False, None]
 
+    try:
         with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
               SELECT a.id AS id, a.uuid AS uuid, category, title, description, director, actors, path, year, mime, media AS status FROM minicloud_multimedia AS a
-                LEFT JOIN minicloud_users AS b ON (b.id = %s)
+              LEFT JOIN minicloud_users AS b ON (b.id = %s)
               WHERE a.uuid = %s LIMIT 1
               """, [int(current_user.id), uuid])
 
@@ -101,7 +101,7 @@ def view(uuid):
             raise Exception('not found');
 
         sources = list(filter(lambda item: item['path'] == media['path'], dlna))
-        app.logger.info('Open multimedia %s' % media['path'])
+        app.logger.info('Multimedia %s' % media['path'])
 
         if minidlna_proxy_host:
             for i, val in enumerate(sources):
@@ -130,15 +130,14 @@ def view(uuid):
 
     except Exception as e:
         app.logger.error('Multimedia (%s): %s' % (uuid, str(e)))
-        return redirect("/multimedia")
 
-    abort(500)
+    return redirect("/multimedia")
 
 @multimedia.route('/indexing', methods = ["GET"])
 @login_required
 @admin_required
 def indexing():
-    auth = auths.generate(int(current_user.id))
+    auth = auths.generate(current_user.id)
     dlna = find_orphan_files(auth)
     return render_template( "multimedia/indexing.html"
                           , config = config

@@ -10,7 +10,7 @@ from gallery import gallery
 from tasks import tasks
 from profile import profile
 from multimedia import multimedia
-from auths import auths
+from auths import auths, revoke
 
 app.register_blueprint(users, url_prefix='/users')
 app.register_blueprint(uploads, url_prefix='/uploads')
@@ -20,17 +20,17 @@ app.register_blueprint(profile, url_prefix='/profile')
 app.register_blueprint(multimedia, url_prefix='/multimedia')
 app.register_blueprint(auths, url_prefix='/auths')
 
-@app.teardown_appcontext
-def close_db(e = None):
-    db = g.pop('db', None)
-    if db is not None:
-        db.close()
-
 login_manager = LoginManager()
 app.config['SECRET_KEY'] = Config.SECRET_KEY
 csrf = CSRFProtect(app)
 csrf.init_app(app)
 login_manager.init_app(app)
+
+@app.teardown_appcontext
+def close_db(e = None):
+    db = g.pop('db', None)
+    if db is not None:
+        db.close()
 
 @app.before_request
 def before_request():
@@ -126,6 +126,7 @@ def login():
                 g.db.rollback()
 
         if current_user.is_authenticated:
+            revoke(current_user.id)
             app.logger.info('%s logged in' % current_user.name)
             flash(['Logged in'], 'info')
 
@@ -153,6 +154,7 @@ def login():
 @login_required
 def logout():
     name = current_user.name
+    revoke(current_user.id)
     logout_user()
     app.logger.info('%s logged out' % name)
     flash(['Logged out'], 'info')

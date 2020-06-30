@@ -1,4 +1,5 @@
 import psycopg2, psycopg2.extras, bcrypt, random, string
+import auths
 from flask import Blueprint, url_for, request, redirect, g, render_template, flash, make_response, jsonify, abort
 from flask_login import UserMixin, login_required, current_user
 from functools import wraps, reduce
@@ -174,19 +175,22 @@ def reset(uuid):
 @users.route("/set_media/", methods = ["POST"])
 @login_required
 def set_media():
+    auths.generate(current_user.id)
     media = request.form['media']
-    with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
-        try:
+
+    try:
+        with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
               UPDATE minicloud_users
               SET media = %s WHERE id = %s;
-            """, [ media, int(current_user.id) ])
+              """, [ media, int(current_user.id) ])
 
             g.db.commit()
-            return make_response(jsonify(['Saved']), 200)
 
-        except Exception as e:
-            app.logger.error('Set media in users failed: %s' % str(e))
-            g.db.rollback()
+        return make_response(jsonify(['Saved']), 200)
+
+    except Exception as e:
+        g.db.rollback()
+        app.logger.error('Save media failed: %s' % str(e))
 
     return make_response(jsonify(['Error']), 500)

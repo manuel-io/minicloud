@@ -219,5 +219,4 @@ let tags_handle_input = (e) => {
   }
 };
 
-window.onload = (e) => {
-};
+window.onload = (e) => {};

@@ -1,6 +1,7 @@
 import psycopg2, psycopg2.extras
+from datetime import datetime
 from flask import g, Blueprint, request
-from config import app
+from config import app, dbzone, utczone
 
 auths = Blueprint('auths', __name__)
 
@@ -49,7 +50,8 @@ def verify():
 
         with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
-              SELECT token FROM minicloud_auths WHERE token = %s
+              SELECT token, created_at FROM minicloud_auths
+              WHERE token = %s ORDER BY created_at DESC LIMIT 1
               """, [token])
 
             data = cursor.fetchone()
@@ -57,10 +59,14 @@ def verify():
         if not data or not data['token'] == token:
             raise Exception('%s invalid' % token)
 
-        else:
-            # Check token created_at
-            app.logger.info('X-Auth-Token (%s) valid' % token)
-            return ('', 201)
+        # Token is not older then 15min
+        created_at = data['created_at'].replace(tzinfo = dbzone).astimezone(utczone).timestamp()
+        current_time = datetime.utcnow().replace(tzinfo = utczone).timestamp()
+
+        if (current_time - created_at) > 900:
+            raise Exception('%s expired' % token)
+
+        return ('', 201)
 
     except Exception as e:
         app.logger.error('X-Auth-Token (%s):' % str(e))

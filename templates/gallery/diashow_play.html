@@ -31,7 +31,7 @@
       {% for file in diashow.files %}
         var file = { 'index': '{{ loop.index }}'
                    , 'title': '{{ file.title }}'
-                   , 'description': '{{ file.description | tojson }}'
+                   , 'description': {{ file.description | tojson }}
                    , 'path': '{{ url_for('gallery.diashow_download', uuid = diashow.uuid, uid = file.uid, _external = True) }}'
                    , 'img': new Image()
                    };
@@ -55,43 +55,67 @@
           content.className = 'content';
           footer.className = 'footer';
 
-          content.onclick = (event) => {
-            if (parseInt(file.index) == files.length) window.location.href= '#slide-1';
-            else window.location.href = '#slide-' + (parseInt(file.index) + 1);
-          };
-
           let back = document.createElement('button');
           back.innerText = 'Back';
           header.appendChild(back);
           back.onclick = (event) => {
-            if (parseInt(file.index) <= 1) window.location.href= '#slide-' + files.length;
-            else window.location.href = '#slide-' + (parseInt(file.index) - 1);
+            let href = '#slide-' + files.length;
+            if (parseInt(file.index) >1) href = '#slide-' + (parseInt(file.index) - 1);
+            let slide = document.querySelector(href + ' .text');
+            let description = document.querySelector(href + ' .text .description').innerHTML;
+            if (description.length > 0) slide.classList.add('show');
+            window.location.href = href;
           };
 
           let next = document.createElement('button');
           next.innerText = 'Next';
           footer.appendChild(next);
           next.onclick = (event) => {
-            if (parseInt(file.index) >= files.length) window.location.href= '#slide-1';
-            else window.location.href = '#slide-' + (parseInt(file.index) + 1);
+            let href = '#slide-1';
+            if (parseInt(file.index) < files.length) href = '#slide-' + (parseInt(file.index) + 1);
+            let slide = document.querySelector(href + ' .text');
+            let description = document.querySelector(href + ' .text .description').innerHTML;
+            if (description.length > 0) slide.classList.add('show');
+            window.location.href = href;
           };
 
           let text = document.createElement('div');
-          let title = document.createElement('h2');
           let index = document.createElement('p');
+          let title = document.createElement('h2');
           let description = document.createElement('p');
+
           text.className = 'text';
+          text.onclick = (e) => {
+            text.classList.remove('show');
+          };
+
           index.className = 'index';
           title.className = 'title';
           description.className = 'description';
+          description.classList.add('markdown');
           index.innerText = file.index;
           title.innerText = file.title;
+          console.log(file.description);
+
           description.innerHTML = file.description;
+          if (description.innerHTML.length > 0) {
+            text.classList.add('show');
+          }
+
           text.appendChild(index);
           text.appendChild(title);
           text.appendChild(description);
 
           let image = document.createElement('div');
+          image.onclick = (event) => {
+            let href = '#slide-1';
+            if (parseInt(file.index) < files.length) href = '#slide-' + (parseInt(file.index) + 1);
+            let slide = document.querySelector(href + ' .text');
+            let description = document.querySelector(href + ' .text .description').innerHTML;
+            if (description.length > 0) slide.classList.add('show');
+            window.location.href = href;
+          };
+
           image.className = 'image';
           image.style.backgroundImage = 'url(' + file.img.src + ')';
 

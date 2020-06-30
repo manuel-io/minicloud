@@ -61,59 +61,65 @@
 #main > .slide > .footer button,
 #main > .slide > .header button {
   width: calc(100% - 4px);
-padding: 5px;
-margin: 2px;
-color: #fff;
-box-sizing: border-box;
-background-color: #333;
-border-radius: 5px;
-text-align: center;
+  padding: 5px;
+  margin: 2px;
+  color: #fff;
+  box-sizing: border-box;
+  background-color: #333;
+  border-radius: 5px;
+  text-align: center;
 }
 
 #main > .slide > .content {
-  flex-grow: 0;
+  position: relative;
   width: 100%;
-  height: calc(100% - 66px);
-  display: flex;
-  flex-direction: row;
+  height: 100%;
 }
 
 #main > .slide > .content > div {
-  box-sizing: border-box;
-  width: 50%;
+  position: absolute;
+  top: 0;
+  width: 100%;
   height: 100%;
-  margin: 10px;
-  padding: 10px;
 }
 
 #main > .slide > .content > div.text {
-  position: relative;
-  padding-top: 40px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  width: 50%;
-  height: calc(100% - 30px);
-  overflow: hidden;
-  overflow-y: auto;
-}
-
-#main > .slide > .content > div.text > h2.title {
-  margin-bottom: 10px;
-}
-
-#main > .slide > .content > div.text > p.index {
-  position: absolute;
-  top: 0;
-  width: 30px;
-  height: 30px;
-  line-height: 30px;
-  font-weight: bold;
-  text-align: center;
-  border: 0.5px solid #000;
-  border-radius: 50%;
+  display: none;
+  background-color: transparent;
+  background-color: #fff;
+  z-index: 100;
+  margin: 10px;
+  width: calc(100% - 20px);
+  height: calc(100% - 20px);
+  min-width: 300px;
+  max-width: 320px;
+  max-height: 350px;
+  overflow: auto;
+  border: 2px solid #000;
+  border-radius: 5px;
+  box-shadow: 3px 3px 15px #000;
   box-sizing: border-box;
-  box-shadow: 0 0 1px 0px black inset, 0 0 1px 0px black;
+  padding: 10px;
+}
+
+#main > .slide > .content > div.text.show {
+  display: block;
+}
+
+#main > .slide > .content > div.text * {
+  background-color: transparent;
+}
+
+#main > .slide > .content > div.text p.index {
+  width: 25px;
+  height: 25px;
+  border: 1px solid #000;
+  border-radius: 50%;
+  box-shadow: 0 0 1px 0px #000 inset, 0 0 1px 0px #000;
+  text-align: center;
+  line-height: 25px;
+  font-size: 90%;
+  margin-bottom: 5px;
 }
 
 #main > .slide > .content > div.image {
@@ -121,10 +127,15 @@ text-align: center;
   background-size: contain;
   background-position: center center;
   background-repeat: no-repeat;
+  background-color: rgba(200, 200, 255, .1);
   margin: 0;
   padding: 0;
 }
 
 #main > .slide .footer {
   width: 100%;
+}
+
+.markdown ul {
+  list-style: inside;
 }
