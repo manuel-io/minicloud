@@ -20,7 +20,7 @@
 {% endblock %}
 
 {% block section %}
-  <section id="files" class="edit">
+  <section id="gallery" class="edit">
     <h2 class="top"><a id="return" class="back" href="{{ url_for('gallery.show') }}">Zurück</a></h2>
     <h2>{{ file.title }}</h2>
 
@@ -30,7 +30,6 @@
 
     <nav>
       <form action="{{ url_for('gallery.download', uid = file.uid) }}" method="get">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="submit" value="Download">
       </form>
     </nav>
@@ -41,7 +40,7 @@
       <div class="group">      
         <fieldset>
           <label>Title:</label>
-          <input type="text" name="title" value="{{ file.title }}" required>
+          <input type="text" name="title" value="{{ file.title }}" autofocus required>
         </fieldset>
   
         <fieldset>

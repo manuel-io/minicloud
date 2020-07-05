@@ -1,5 +1,5 @@
 import psycopg2, psycopg2.extras, uuid, re, io, glob, os.path, requests
-import auths
+import auths, filters
 from datetime import datetime
 from dateutil import parser
 from flask import Blueprint, g, request, Response, render_template, url_for, redirect, jsonify, make_response, flash, send_file, send_from_directory, abort
@@ -11,7 +11,7 @@ from helpers import get_categories
 
 multimedia = Blueprint('multimedia', __name__)
 base = Path('/var/minicloud/multimedia')
-minidlna = os.environ['MINICLOUD_DLNA'] if 'MINICLOUD_DLNA' in os.environ else 'http://127.0.0.1:8200'
+minidlna = os.environ['MINICLOUD_DLNA'] if 'MINICLOUD_DLNA' in os.environ else 'http://127.0.0.1:8290'
 minidlna_verify = False if 'MINICLOUD_DLNA_NOVERIFY' in os.environ else True
 minidlna_proxy_host = os.environ['MINICLOUD_DLNA_PROXY_HOST'] if 'MINICLOUD_DLNA_PROXY_HOST' in os.environ else None
 minidlna_proxy_port = os.environ['MINICLOUD_DLNA_PROXY_PORT'] if 'MINICLOUD_DLNA_PROXY_PORT' in os.environ else None
@@ -48,6 +48,16 @@ def find_orphan_files(auth):
 def show():
     auth = auths.generate(current_user.id)
     paths = find_minidlna_paths(auth)
+    all_directors = filters.get_directors()
+    all_actors = filters.get_actors()
+
+    directors = []
+    if 'director' in request.args.keys():
+        directors = [ director for director in [ request.args.get('director').strip() ] if len(director) > 0 ]
+
+    actors = []
+    if 'actors' in request.args.keys():
+        actors = [ tag.strip() for tag in request.args.get('actors').split(',') if len(tag.strip()) > 0 ]
 
     with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
         try:
@@ -56,8 +66,8 @@ def show():
             cursor.execute("""
               SELECT DISTINCT ON (category) category, count(category) AS count,
                 json_agg(json_build_object('title', title, 'director', director, 'actors', actors, 'year', year, 'path', path, 'uuid', uuid, 'mime', mime, 'capture', capture) ORDER BY year, title ASC) AS media
-              FROM minicloud_multimedia GROUP BY category ORDER BY category ASC
-              """)
+              FROM minicloud_multimedia WHERE actors @> %s AND ARRAY[director] @> %s GROUP BY category ORDER BY category ASC
+              """, [actors, directors])
 
             for fetch in cursor.fetchall():
                 media = list(filter(lambda media: media['path'] in paths, fetch['media']))
@@ -72,11 +82,12 @@ def show():
             return render_template( "multimedia/show.html"
                                   , multimedia = multimedia
                                   , config = config
+                                  , all_directors = all_directors
+                                  , all_actors = all_actors
                                   )
 
         except Exception as e:
             app.logger.error('Show in multimedia failed: %s' % str(e))
-            pass
 
     abort(500)
 
@@ -120,6 +131,7 @@ def view(uuid):
 
         if len(sources) > 0:
             return render_template( "multimedia/view.html"
+                                  , auth = auth
                                   , media = media
                                   , config = config
                                   , sources = sources
@@ -194,25 +206,31 @@ def add():
 @login_required
 @admin_required
 def edit(uuid):
-    with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
-        title = request.form['title']
-        lype = request.form['type']
-        year = request.form['year']
+    title = request.form['title']
+    lype = request.form['type']
+    year = request.form['year']
+
+    director = 'Generic'
+    if 'director' in request.form.keys():
         director = request.form.get('director')
+
+    category = title
+    if 'category' in request.form.keys():
         category = request.form.get('category')
+
+    description = ''
+    if 'description' in request.form.keys():
         description = request.form.get('description')
-        tags = request.form.get('tags')
-        actors = []
-        actors = tags.split(',')
 
-        if not category: category = title
-        if not description: description = ''
-        if not director: director = 'Generic'
+    actors = []
+    if 'tags' in request.form.keys():
+        actors = [ tag.strip() for tag in request.form.get('tags').split(',') ]
 
-        try:
+    try:
+        with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
-              UPDATE minicloud_multimedia SET
-                category = %s, type = %s, year = %s, title = %s, description = %s, director = %s, actors = %s
+              UPDATE minicloud_multimedia
+              SET category = %s, type = %s, year = %s, title = %s, description = %s, director = %s, actors = %s
               WHERE uuid = %s
               """, [ category
                    , lype
@@ -227,9 +245,9 @@ def edit(uuid):
             g.db.commit()
             flash(['Media modified'], 'info')
 
-        except Exception as e:
-            app.logger.error('Edit in multimedia failed: %s' % str(e))
-            g.db.rollback()
+    except Exception as e:
+        g.db.rollback()
+        app.logger.error('Edit in multimedia failed: %s' % str(e))
 
     return redirect("/multimedia")
 
@@ -237,18 +255,18 @@ def edit(uuid):
 @login_required
 @admin_required
 def delete(uuid):
-    with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
-        try:
+    try:
+        with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
               DELETE FROM minicloud_multimedia WHERE uuid = %s
-            """, [ uuid ])
+              """, [ uuid ])
 
             g.db.commit()
-            flash(['Media removed'], 'info')
+            flash(['Media deleted'], 'info')
 
-        except Exception:
-            app.logger.error('Deletion in multimedia failed: %s' % str(e))
-            g.db.rollback()
+    except Exception as e:
+        g.db.rollback()
+        app.logger.error('Deletion in multimedia failed: %s' % str(e))
 
     return redirect("/multimedia")
 
@@ -261,24 +279,25 @@ def capture(uuid):
     canvas = request.form['canvas']
     messages = []
 
-    with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
-        try:
+    try:
+        with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
               UPDATE minicloud_multimedia SET capture = %s
               WHERE uuid = %s
               """, [ canvas, uuid ])
 
-            g.db.commit()
-            messages.append('Capture saved')
+        g.db.commit()
+        messages.append('Capture saved')
 
-            if ajax:
-                return make_response(jsonify(messages), 200)
+        if ajax:
+            return make_response(jsonify(messages), 200)
 
-            else:
-                flash(messages, 'info')
-                return redirect(url_for('multimedia.view', uuid=uuid))
+        else:
+            flash(messages, 'info')
+            return redirect(url_for('multimedia.view', uuid=uuid))
 
-        except Exception as e:
-            g.db.rollback()
+    except Exception as e:
+        g.db.rollback()
+        app.logger.error('Capture failed: %s' % str(e))
 
     abort(500)

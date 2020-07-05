@@ -1,9 +1,10 @@
 import psycopg2, psycopg2.extras, bcrypt, random, string
-import auths
 from flask import Blueprint, url_for, request, redirect, g, render_template, flash, make_response, jsonify, abort
 from flask_login import UserMixin, login_required, current_user
 from functools import wraps, reduce
 from config import app
+from auths import generate, revoke
+
 users = Blueprint('users', __name__)
 
 class User(UserMixin):
@@ -40,23 +41,25 @@ def admin_required(func):
 @login_required
 @admin_required
 def show():
-    with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
-        try:
+    data = []
+
+    try:
+        with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
-                SELECT a.id, uuid, name, email, admin, disabled, count(DISTINCT b.id) AS uploads_count, count(DISTINCT c.id) AS gallery_count, count(DISTINCT d.id) AS tasks_count
-                FROM minicloud_users AS a
-                  LEFT JOIN minicloud_uploads AS b ON (a.id = b.user_id AND b.type = 1)
-                  LEFT JOIN minicloud_gallery AS c ON (a.id = c.user_id)
-                  LEFT JOIN minicloud_tasks AS d ON (a.id = d.user_id)
-                GROUP BY a.id ORDER BY name ASC;
-                """)
+              SELECT a.id, uuid, name, email, admin, disabled, count(DISTINCT b.id) AS uploads_count, count(DISTINCT c.id) AS gallery_count, count(DISTINCT d.id) AS tasks_count
+              FROM minicloud_users AS a
+                LEFT JOIN minicloud_uploads AS b ON (a.id = b.user_id AND b.type = 1)
+                LEFT JOIN minicloud_gallery AS c ON (a.id = c.user_id)
+                LEFT JOIN minicloud_tasks AS d ON (a.id = d.user_id)
+              GROUP BY a.id ORDER BY name ASC;
+              """)
 
-            users = cursor.fetchall()
-            return render_template("users/show.html", users = users)
+            data = cursor.fetchall()
+        return render_template("users/show.html", users = data)
 
-        except Exception as e:
-            app.logger.error('Show in users failed: %s' % str(e))
-            g.db.rollback()
+    except Exception as e:
+        g.db.rollback()
+        app.logger.error('Show in users failed: %s' % str(e))
 
     abort(500)
 
@@ -64,37 +67,43 @@ def show():
 @login_required
 @admin_required
 def edit(uuid):
+    data = []
+
     if request.method == "GET":
         with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
 
             cursor.execute("""
               SELECT * FROM minicloud_users
               WHERE uuid = %s LIMIT 1;
-            """, [ uuid ])
+              """, [ uuid ])
 
             data = cursor.fetchone()
-            return render_template("users/edit.html", user = data)
+        return render_template("users/edit.html", user = data)
 
     if request.method == "POST":
         values = list(map(lambda x: request.form[x], ["username", "email"]))
         admin = True if request.form.get("admin") else False
         disabled = True if request.form.get("disabled") else False
-       
-        with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
-            try:
+
+        try:
+            with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
                 cursor.execute("""
                   UPDATE minicloud_users
                   SET name = %s, email = %s, admin = %s, disabled = %s
-                  WHERE uuid = %s;
-                """, values + [admin, disabled, uuid])
+                  WHERE uuid = %s RETURNING id
+                  """, values + [admin, disabled, uuid])
 
-                g.db.commit()
-                flash(['User modified'], 'info')
+                data = cursor.fetchone()
 
-            except Exception as e:
-                app.logger.error('Edit in users failed: %s' % str(e))
-                g.db.rollback()
-                flash(['Edit failed'], 'error')
+            revoke(data['id'])
+            g.db.commit()
+
+            flash(['User modified'], 'info')
+
+        except Exception as e:
+            g.db.rollback()
+            app.logger.error('Edit in users failed: %s' % str(e))
+            flash(['Edit failed'], 'error')
 
         return redirect("/users")
 
@@ -104,27 +113,26 @@ def edit(uuid):
 @login_required
 @admin_required
 def add():
-    name = request.form['username']
-    email = request.form['email']
+    values = list(map(lambda x: request.form[x], ["username", "email"]))
     admin = True if request.form.get("admin") else False
     key = reduce(lambda x, _: x + random.choice(string.ascii_letters + string.digits), range(32), "")
     password = reduce(lambda x, _: x + random.choice(string.ascii_letters + string.digits), range(32), "")
 
-    with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
-        try:
+    try:
+        with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
               INSERT INTO minicloud_users
               (name, email, password, admin, activation_key, disabled)
               VALUES (%s, %s, %s, %s, %s, %s)
-            """, [name, email, password, admin, key, True])
-            
-            g.db.commit()
-            flash(['User added', 'Activation Key:', key], 'info')
+              """, values + [password, admin, key, True])
 
-        except Exception as e:
-            app.logger.error('Adding in users failed: %s' % str(e))
-            g.db.rollback()
-            flash(['Adding failed'], 'error')
+        g.db.commit()
+        flash(['User added', 'Activation Key:', key], 'info')
+
+    except Exception as e:
+        g.db.rollback()
+        app.logger.error('Adding in users failed: %s' % str(e))
+        flash(['Adding failed'], 'error')
 
     return redirect(url_for('users.show'))
 
@@ -132,20 +140,25 @@ def add():
 @login_required
 @admin_required
 def delete(uuid):
-    with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
-        try:
+    data = []
+
+    try:
+        with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
               DELETE FROM minicloud_users
-              WHERE uuid = %s;
-            """, [ uuid ])
+              WHERE uuid = %s RETURNING id
+              """, [ uuid ])
 
-            g.db.commit()
-            flash(['User removed'], 'info')
+            data = cursor.fetchone()
 
-        except Exception as e:
-            app.logger.error('Deletion in users failed: %s' % str(e))
-            g.db.rollback()
-            flash(['Deletion failed'], 'error')
+        revoke(data['id'])
+        g.db.commit()
+        flash(['User deleted'], 'info')
+
+    except Exception as e:
+        g.db.rollback()
+        app.logger.error('Deletion in users failed: %s' % str(e))
+        flash(['Deletion failed'], 'error')
 
     return redirect(url_for('users.show'))
 
@@ -153,29 +166,33 @@ def delete(uuid):
 @login_required
 @admin_required
 def reset(uuid):
+    data = []
     key = reduce(lambda x, _: x + random.choice(string.ascii_letters + string.digits), range(32), "")
-    with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
-        try:
+
+    try:
+        with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
-              UPDATE minicloud_users
-              SET activation_key = %s, disabled = %s
-              WHERE uuid = %s;
-            """, [ key, True, uuid ])
+              UPDATE minicloud_users SET activation_key = %s, disabled = %s
+              WHERE uuid = %s RETURNING id
+              """, [ key, True, uuid ])
 
-            g.db.commit()
-            flash(['Activation code:', key], 'info')
+            data = cursor.fetchone()
 
-        except Exception as e:
-            app.logger.error('Reset in users failed: %s' % str(e))
-            g.db.rollback()
-            flash(['Reset failed'], 'error')
+        revoke(data['id'])
+        g.db.commit()
+        flash(['Activation code:', key], 'info')
+
+    except Exception as e:
+        g.db.rollback()
+        app.logger.error('Reset in users failed: %s' % str(e))
+        flash(['Reset failed'], 'error')
 
     return redirect(url_for('users.show'))
 
 @users.route("/set_media/", methods = ["POST"])
 @login_required
 def set_media():
-    auths.generate(current_user.id)
+    # generate(current_user.id)
     media = request.form['media']
 
     try:
@@ -185,8 +202,7 @@ def set_media():
               SET media = %s WHERE id = %s;
               """, [ media, int(current_user.id) ])
 
-            g.db.commit()
-
+        g.db.commit()
         return make_response(jsonify(['Saved']), 200)
 
     except Exception as e:

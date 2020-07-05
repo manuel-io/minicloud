@@ -111,7 +111,7 @@ def login():
         with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             try:
                 cursor.execute("""
-                    SELECT id, name, password, admin FROM minicloud_users
+                    SELECT id, name, uuid, password, admin FROM minicloud_users
                     WHERE name = %s AND disabled = %s ORDER BY id ASC LIMIT 1;
                     """, [username, False])
 
@@ -167,7 +167,7 @@ def load_user(id):
     with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
         try:
             cursor.execute("""
-              SELECT id, name, admin, disabled FROM minicloud_users
+              SELECT id, name, uuid, admin, disabled FROM minicloud_users
               WHERE id = %s ORDER BY id ASC LIMIT 1;
               """, [int(id)])
 

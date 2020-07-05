@@ -20,7 +20,7 @@
 
     <section class="media" style="position:relative;">
       {% if media.mime in config["ftypes"]["audio"] %}
-        <audio id="audio" controls title="{{ media.title }}">
+        <audio id="audio" controls title="{{ media.title }}" title="{{ media.title }}" data-uuid="{{ media.uuid }}" data-last="">
           {% for source in sources %}
             <source src="{{ source.url }}" type="{{ source.mime }}" />
           {% endfor %}
@@ -48,21 +48,10 @@
       </section>
     </section>
 
-   <!--
-    <nav>
-      {% for source in sources %}
-        <form action="{{ source.url }}" method="get">
-          <input type="submit" value="Download">
-        </form>
-      {% endfor %}
-    </nav>
-    -->
-
     {% if current_user.admin %}
-
       {% if media.mime in config["ftypes"]["video"] %}
         <nav>
-          <form method="post" onsubmit="capture(event);">
+          <form method="post" onsubmit="handle_capture_dialog(event);">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="submit" value="Caption">
           </form>
@@ -104,7 +93,7 @@
                 {% endfor %}
               {% endif %}
               <div class="newtag">
-                <input type="text" name="tag" onkeydown="tags_prevent_submit(event)" onkeyup="tags_handle_input(event);">
+                <input type="text" name="tag" onkeydown="tags_prevent_submit(event)" onkeyup="tags_handle_input(event, 'tags');">
               </div>
             </div>
           </fieldset>
@@ -134,47 +123,75 @@
     let ret = document.getElementById('return');
     ret.href = ret.href + `#${hash}`;
 
-    {% if media.mime in config.ftypes.video %}
-      let video = document.getElementById('video');
-      // let audio = document.getElementById('audio');
+    let set_active = (media) => {
+      let data = new FormData();
+      let url = '{{ url_for('auths.renew', token = auth) }}';
+      data.append('csrf_token', '{{ csrf_token() }}');
+      send_status(url, data, (e) => alive_loop(media));
+    }
+
+    let alive_loop = (media) => {
+      if (!media.paused) {
+        window.setTimeout(() => {
+          set_active(media);
+        }, 150000);
+      }
+    }
+
+    let save_current = (media) => {
+      let last = media.dataset.last;
+      let current = parseInt(media.currentTime);
+
+      if (last) last = parseInt(last);
+      else last = 0;
+      if (last - 30 > current || last + 30 < current ) {
+        let value = media.id + '$' + media.dataset.uuid + '$' + current + '$' + parseInt(media.duration);
+        let data = new FormData();
+        let url = '{{ url_for('users.set_media') }}';
+
+        media.dataset.last = current;
+        data.append('csrf_token', '{{ csrf_token() }}');
+        data.append('media', value);
+        send_upload(url, data);
+      }
+    };
+
+    let load_current = (media) => {
+      media.focus();
+      let [type, uuid, current, duration] = '{{ media.status }}'.split('$');
+      if (uuid == '{{ media.uuid }}') {
+        media.dataset.last = current;
+        media.currentTime = current;
+      }
+    };
+
+    {% if media.mime in config.ftypes.audio %}
+      let audio = document.getElementById('audio');
 
       {% if proxy %}
-        // audio.setAttribute('crossorigin', 'anonymous');
+        audio.setAttribute('crossorigin', 'anonymous');
+      {% endif %}
+
+      audio.onloadeddata = (e) => load_current(audio);
+      audio.onpause = (e) => save_current(audio);
+      audio.onplay = (e) => set_active(audio);
+    {% endif %}
+
+    {% if media.mime in config.ftypes.video %}
+      let video = document.getElementById('video');
+
+      {% if proxy %}
         video.setAttribute('crossorigin', 'anonymous');
       {% endif %}
 
-      video.onloadeddata = (e) => {
-        let [type, uuid, current, duration] = '{{ media.status }}'.split('$');
-        if (uuid == '{{ media.uuid }}') {
-          video.dataset.last = current;
-          video.currentTime = current;
-        }
-      };
-
-      video.onpause = (e) => {
-        let last = video.dataset.last;
-        let current = parseInt(video.currentTime);
-
-        if (last) last = parseInt(last);
-        else last = .0;
-
-        if (last - 30 > current || last + 30 < current ) {
-          let value = 'video' + '$' + video.dataset.uuid + '$' + current + '$' + parseInt(video.duration);
-          let data = new FormData();
-          let url = '{{ url_for('users.set_media') }}';
-
-          video.dataset.last = current;
-          data.append('csrf_token', '{{ csrf_token() }}');
-          data.append('media', value);
-
-          upload(url, data);
-        }
-      };
+      video.onloadeddata = (e) => load_current(video);
+      video.onpause = (e) => save_current(video);
+      video.onplay = (e) => set_active(video);
     {% endif %}
 
     window.onload = (e) => {
       let target = document.querySelector('#multimedia .tags');
-      tags_set_input(target);
+      tags_set_input(target, 'tags');
     };
   </script>
 {% endblock %}

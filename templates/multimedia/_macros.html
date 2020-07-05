@@ -1,9 +1,7 @@
 {% macro nav(target) %}
   {% if target == 'show' %}
-    <!--
-    <button onclick="filters">Filters</button>
-    -->
-    
+    <button onclick="toggle('showfilters');">Filters</button>
+
     {% if current_user.admin %}
       <form action="/multimedia/indexing" method="get">
         <button type="submit">Indexing</button>
@@ -13,7 +11,7 @@
 
   {% if target == 'view' %}
   {% endif %}
-  
+
   {% if target == 'indexing' %}
     <form action="/multimedia" method="get">
       <button type="submit">Multimedia</button>
@@ -22,4 +20,37 @@
 {% endmacro %}
 
 {% macro header() %}
+  <input class="toggle" type="checkbox" name="showfilters">
+  <section id="showfilters">
+    <form action="{{ url_for('multimedia.show') }}" method="get" tabindex="0" onkeyup="this.submit()">
+      <div class="group">
+        <fieldset>
+          <label>Director:</label>
+          <input class="focus" type="text" name="director">
+          <select class="helper" onchange="handle_select_helper(event);">
+            <option value="0" selected disabled>Select director ...</option>
+            {% for option in all_directors %}
+              <option>{{ option }}</option>
+            {% endfor %}
+          </select>
+        </fieldset>
+
+        <fieldset>
+          <label>Cast:</label>
+          <input type="hidden" name="actors">
+          <div class="optlist">
+            {% for actor in all_actors %}
+              {% if actor | length %}
+                <span onclick="handle_select_optlist(event);">{{ actor }}</span>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <input type="submit" value="Filter">
+        </fieldset>
+      </div>
+    </form>
+  </section>
 {% endmacro %}

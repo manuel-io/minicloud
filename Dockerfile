@@ -56,6 +56,6 @@ COPY share/docker.sh /startup.sh
 
 EXPOSE 22
 EXPOSE 80
-EXPOSE 8200
+EXPOSE 8290
 
 CMD ["/bin/bash", "/startup.sh"]

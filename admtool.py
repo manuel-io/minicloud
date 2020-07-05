@@ -20,6 +20,36 @@ def cmd(cmd):
     for cmd in commands:
         sys.stderr.write("  %s:\t%s\n" % (cmd['name'], cmd['desc']))
 
+@command('users', 'List system users')
+def auths(cmd):
+    parser = argparse.ArgumentParser(usage = '%s %s' % (sys.argv[0], cmd['name']), description = cmd['desc'])
+    parser.add_argument('--username', default = '%', metavar = 'USERNAME', help = 'Set username')
+    args = parser.parse_args(sys.argv[2:]);
+    db = get_db()
+    data = []
+
+    try:
+        with db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
+            cursor.execute("""
+                SELECT * FROM minicloud_users AS a
+                  LEFT JOIN minicloud_auths AS b ON (a.id = b.user_id)
+                WHERE a.name LIKE %s
+                """, [args.username])
+
+            data = cursor.fetchall();
+        for user in data:
+            print('Username:', user['name'])
+            print('E-Mail:', user['email'])
+            print('Disabled:', user['disabled'])
+            print('Activation key:', user['activation_key'])
+            print('Admin:', user['admin'])
+            print('Media:', user['media'])
+
+    except Exception as e:
+        sys.stderr.write('Error: %s\n' % e)
+
+    db.close()
+
 @command('setup', 'Setup Minicloud')
 def setup(cmd):
     parser = argparse.ArgumentParser(usage = '%s %s' % (sys.argv[0], cmd['name']), description = cmd['desc'])
@@ -38,11 +68,11 @@ def setup(cmd):
                 VALUES (%s, %s, %s, %s)
                 """, [args.username, args.email, hash, True])
     
-            db.commit()
+        db.commit()
 
-    except Warning:
-        sys.stderr.write('error\n')
+    except Exception as e:
         db.rollback()
+        sys.stderr.write('Error: %s\n' % e)
         
     db.close()
 
@@ -73,9 +103,9 @@ def utool(cmd):
                 
                 db.commit()
                 
-            except Warning:
-                sys.stderr.write('error\n')
+            except Exception as e:
                 db.rollback()
+                sys.stderr.write('Error: %s\n' % e)
         
     db.close()
 

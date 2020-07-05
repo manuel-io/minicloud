@@ -1,15 +1,6 @@
-body > main > section > form {
-  display: block;
-}
-
-body > main > section > form:nth-child(even) {
-  box-sizing: border-box;
-}
-
-body > main > section#multimedia,
-body > main > section#login,
-body > main > section#tasks,
-body > main > section#files {
+body > main > section#tasks.show,
+body > main > section#gallery.show,
+body > main > section#login {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -34,12 +25,6 @@ button.slbCloseBtn {
 .slbWrap,
 .slbWrapOuter {
   background-color: transparent;
-}
-
-#multimedia.show {
-  /*
-   * background-image: radial-gradient(circle, #000, #ccc, #fff);
-   */
 }
 
 #multimedia.show .categories {

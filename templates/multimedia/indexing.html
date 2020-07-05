@@ -23,7 +23,7 @@
 
       <fieldset>
         <label>File:</label>
-        <select name="path" required>
+        <select name="path" autofocus required>
           {% for item in items %}
             <option data-id="{{ item.id }}" data-mime="{{ item.mime }}" data-size="{{ item.size }}" data-url="{{ item.url }}">{{ item.path }}</option>
           {% endfor %}

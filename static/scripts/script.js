@@ -10,37 +10,47 @@ let close_dialog = (x) => {
 
 let toggle = (x)  => {
   window.flash.style.display = 'none';
+  let select = undefined;
   let input = document.querySelector(`input[name=${x}]`);
+
   if (input.checked) input.checked = false;
   else {
     let all = document.getElementsByClassName("toggle");
+    select = document.querySelector(`#${x} input.focus`);
     Array.from(all).forEach((item) => item.checked = false);
     input.checked = true;
   }
+
+  if (select) select.focus();
 };
 
 let media_toogle = (e, index) => {
   e.preventDefault();
-  var media = document.getElementById(`media${index}`);
+  let media = document.getElementById(`media${index}`);
   if (media.style.display == 'flex') media.style.display = 'none';
   else {
-    var imgs = document.querySelectorAll(`#media${index} img`);
+    let imgs = document.querySelectorAll(`#media${index} img`);
+    let play = document.querySelector(`#media${index} input[type=submit]`);
+
     Array.from(imgs).forEach((img) => {
       img.src = img.dataset.src;
     });
+
     media.style.display = 'flex'
+    media.scrollIntoView();
+    play.focus();
   };
 }
 
-let upload = (url, data, ready, fail) => {
+let send_upload = (url, data, ready, fail) => {
   let progress = document.querySelector('section#progress');
   let bar = document.querySelector('section#progress > div');
   let text = document.querySelector('section#progress > div > p');
-
   let request = new XMLHttpRequest();
+
   request.open('post', url, true);
   request.setRequestHeader('X-Type', 'Ajax');
-  
+
   request.upload.onloadstart = (e) => {
     progress.style.display = 'block';
     bar.style.width = '0%';
@@ -79,10 +89,51 @@ let upload = (url, data, ready, fail) => {
   request.send(data);
 };
 
+let send_status = (url, data, ready) => {
+  let request = new XMLHttpRequest();
+
+  request.open('post', url, true);
+  request.setRequestHeader('X-Type', 'Ajax');
+
+  request.onreadystatechange = (e) => {
+    if (request.readyState == 4) {
+      if (request.status == 200) {
+        response = JSON.parse(request.responseText);
+        if (ready) ready(true);
+
+      } else {
+        console.log('error');
+        if (ready) ready(false);
+      }
+    }
+  };
+
+  request.send(data);
+};
+
+let handle_select_optlist = (e) => {
+  e.preventDefault();
+
+  if (e.target.classList.contains('active')) {
+    e.target.classList.remove('active')
+
+  } else {
+    e.target.classList.add('active')
+  }
+
+  let actives = e.target.parentElement.querySelectorAll('span.active');
+  let values = [...actives].map((node) => node.innerText);
+  e.target.parentElement.parentElement.querySelector('input').value = values.toString();
+  e.target.parentElement.parentElement.parentElement.parentElement.focus();
+};
+
 let handle_select_helper = (e) => {
   e.preventDefault();
-  let input = document.querySelectorAll('input[name=category]');
-  Array.from(input).forEach((item) => item.value = e.target.value);
+
+  let input = e.target.parentElement.querySelector('input');
+  input.value = e.target.value;
+  input.parentElement.focus();
+  input.focus();
   e.target.value = '0';
 };
 
@@ -90,9 +141,27 @@ let handle_uploads_form = (e) => {
   e.preventDefault();
   let data = new FormData(e.target);
   let url = e.target.getAttribute('action');
-  upload(url, data, (resp) => {
+  send_upload(url, data, (resp) => {
     window.location.reload(true);
   });
+};
+
+let handle_capture_dialog = (e) => {
+  e.preventDefault();
+  let canvas = document.querySelector('canvas');
+  let video = document.getElementById('video');
+  let scale = 300 / video.videoWidth;
+
+  canvas.width = video.videoWidth * scale;
+  canvas.height = video.videoHeight * scale;
+  canvas.setAttribute('width', canvas.width);
+  canvas.setAttribute('height', canvas.height);
+
+  ctx = canvas.getContext("2d");
+  ctx.scale(1, 1);
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  open_dialog('capture');
 };
 
 let handle_capture_form = (e) => {
@@ -101,7 +170,22 @@ let handle_capture_form = (e) => {
   let canvas = document.querySelector('canvas.capture');
   e.target['canvas'].value = canvas.toDataURL();
   // e.target.submit();
-  upload(url, new FormData(e.target));
+  send_upload(url, new FormData(e.target));
+};
+
+let handle_info_check = (e, message = undefined) => {
+  let button = e.target.querySelector('input[type=submit]');
+  if (!button.classList.contains('info')) {
+    e.preventDefault();
+    button.classList.add('info');
+
+    if (message) alert_update([message]);
+
+    // Wait 3 sec to remove info status again
+    window.setTimeout((e) => {
+      button.classList.remove('info');
+    }, 3000);
+  }
 };
 
 let handle_delete_check = (e) => {
@@ -116,7 +200,7 @@ let handle_delete_check = (e) => {
       button.classList.remove('active');
     }, 3000);
   }
-}
+};
 
 let alert_update = (info, error) => {
   alert_clear();
@@ -143,28 +227,10 @@ let alert_clear = (e) => {
   window.flash_inner.innerHTML = '';
 };
 
-let capture = (e) => {
-  e.preventDefault();
-  let canvas = document.querySelector('canvas');
-  let video = document.getElementById('video');
-  let scale = 300 / video.videoWidth;
-
-  canvas.width = video.videoWidth * scale;
-  canvas.height = video.videoHeight * scale;
-  canvas.setAttribute('width', canvas.width);
-  canvas.setAttribute('height', canvas.height);
-
-  ctx = canvas.getContext("2d");
-  ctx.scale(1, 1);
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-  open_dialog('capture');
-}
-
-let tags_set_input = (target) => {
+let tags_set_input = (target, name) => {
   let childs = [...target.querySelectorAll('.tag')];
   let list = childs.map((element) => element.innerText);
-  let input = target.querySelector('input[name=tags]');
+  let input = target.querySelector(`input[name=${name}]`);
   input.value = list;
 };
 
@@ -181,7 +247,7 @@ let tags_prevent_submit = (e) => {
   }
 };
 
-let tags_handle_input = (e) => {
+let tags_handle_input = (e, name) => {
   e.preventDefault();
 
   if ((e.keyCode == 8 || e.keyCode == 46) && e.target.value.length < 1) {
@@ -194,7 +260,7 @@ let tags_handle_input = (e) => {
     }
 
     /* update hidden input field */
-    tags_set_input(list);
+    tags_set_input(list, name);
     return;
   }
 
@@ -211,7 +277,7 @@ let tags_handle_input = (e) => {
       e.target.style.width = '15px';
 
       /* update hidden input field */
-      tags_set_input(list);
+      tags_set_input(list, name);
     }
 
   } else {

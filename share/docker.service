@@ -7,6 +7,8 @@ DESC="Minicloud Webservice"
 PID="/run/minicloud.pid"
 TZ="Europe/Berlin"
 
+export MINICLOUD_DLNA_PROXY_PORT="8290"
+
 . /lib/lsb/init-functions
 
 start_minicloud() {

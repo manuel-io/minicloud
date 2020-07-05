@@ -329,11 +329,11 @@ def diashow_add():
                    ])
 
             g.db.commit()
-            flash(['Diashow added'], 'info')
+            flash(['Slide show added'], 'info')
 
         except Exception as e:
-            app.logger.error('Adding in diashow failed: %s' % str(e))
             g.db.rollback()
+            app.logger.error('Adding in slide show failed: %s' % str(e))
             flash(['Adding failed'], 'error')
 
     return redirect(url_for('gallery.diashow'))
@@ -349,7 +349,7 @@ def diashow_delete(uid):
               """, [ int(current_user.id), uid] )
 
             g.db.commit()
-            flash(['Diashow deleted'], 'info')
+            flash(['Slide show deleted'], 'info')
 
         except Exception as e:
             app.logger.error('Deletion in diashow failed: %s' % str(e))

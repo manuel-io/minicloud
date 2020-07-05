@@ -309,7 +309,7 @@ audio, video {
 }
 
 #tasks > .categories,
-#files > .categories {
+#gallery > .categories {
   display: flex;
   flex-direction: row;
   overflow-x: auto;
@@ -317,18 +317,18 @@ audio, video {
 }
 
 #tasks > .categories,
-#files > .categories {
+#gallery > .categories {
   margin-top: 5px;
   margin-bottom: 5px;
 }
 
 #tasks > .categories section,
-#files > .categories section {
+#gallery > .categories section {
   margin-bottom: 5px;
 }
 
 #tasks > .categories > .item,
-#files > .categories > .item {
+#gallery > .categories > .item {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -365,7 +365,7 @@ audio, video {
   color: #fff;
 }
 
-#files > .categories section  {
+#gallery > .categories section  {
   flex-grow: 0;
   flex-shrink: 0;
   width: 150px;
@@ -449,6 +449,10 @@ input[type=submit].active {
   background-color: #de1f1f;
 }
 
+input[type=submit].info {
+  background-color: #99cc33;
+}
+
 fieldset input:valid {
   outline: 0;
   box-shadow: none;
@@ -479,13 +483,28 @@ fieldset select.helper {
   cursor: pointer;
 }
 
-#files .file {
-  border-radius: 5px;
+fieldset div.optlist {
   border: 1px solid #000;
-  box-sizing: border-box;
-  background-color: #fff;
+  border-radius: 5px;
   padding: 5px;
+  box-sizing: border-box;
+  text-align: justify;
+}
 
+fieldset div.optlist > span {
+  display: inline-block;
+  border: 1px solid #fff;
+  border-radius: 5px;
+  box-sizing: border-box;
+  margin: .5px;
+  padding: 2px;
+  cursor: pointer;
+  font-size: 90%;
+}
+
+fieldset div.optlist > span.active {
+  border: 1px solid #000;
+  background.color: rgba(200, 200, 255, 0.1);
 }
 
 section#alert,
