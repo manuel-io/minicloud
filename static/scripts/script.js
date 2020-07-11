@@ -1,12 +1,12 @@
 let open_dialog = (x) => {
   let input = document.querySelector(`input[name=${x}]`);
   input.checked = true;
-}
+};
 
 let close_dialog = (x) => {
   let input = document.querySelector(`input[name=${x}]`);
   input.checked = false;
-}
+};
 
 let toggle = (x)  => {
   window.flash.style.display = 'none';
@@ -40,7 +40,7 @@ let media_toogle = (e, index) => {
     media.scrollIntoView();
     play.focus();
   };
-}
+};
 
 let send_upload = (url, data, ready, fail) => {
   let progress = document.querySelector('section#progress');
@@ -79,7 +79,7 @@ let send_upload = (url, data, ready, fail) => {
         if (ready) ready(response);
 
       } else {
-        console.log('error');
+        // console.log('error');
         if (fail) fail();
 
       }
@@ -89,26 +89,26 @@ let send_upload = (url, data, ready, fail) => {
   request.send(data);
 };
 
-let send_status = (url, data, ready) => {
-  let request = new XMLHttpRequest();
+let send_status = (url, ready) => {
+  fetch(url, { headers: { 'X-Type': 'Ajax' }})
+    .then(response => {
 
-  request.open('post', url, true);
-  request.setRequestHeader('X-Type', 'Ajax');
-
-  request.onreadystatechange = (e) => {
-    if (request.readyState == 4) {
-      if (request.status == 200) {
-        response = JSON.parse(request.responseText);
-        if (ready) ready(true);
+      if (!response.ok) {
+        throw Error(response.json());
 
       } else {
-        console.log('error');
-        if (ready) ready(false);
+        return response.json();
       }
-    }
-  };
 
-  request.send(data);
+    }).then(data => {
+      alert_update(data, []);
+      ready(true);
+
+    }).catch((data) => {
+      alert_update([], data);
+      ready(false);
+
+    });
 };
 
 let handle_select_optlist = (e) => {

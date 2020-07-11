@@ -41,9 +41,9 @@ def revoke(user_id):
 
     return None
 
-@auths.route('/renew/<token>', methods = ['POST'])
+@auths.route('/renewal/<token>', methods = ['GET'])
 @login_required
-def renew(token):
+def renewal(token):
     try:
         with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
@@ -55,10 +55,10 @@ def renew(token):
         g.db.commit()
         return make_response(jsonify([]), 200)
 
-    except Exception as a:
+    except Exception as e:
         g.db.rollback()
 
-    return make_response(jsonify([str(e)]), 500)
+    return make_response(jsonify([]), 500)
 
 @auths.route('/verify', methods = ['GET'])
 def verify():

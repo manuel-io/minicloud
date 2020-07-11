@@ -125,10 +125,9 @@
 
     let set_active = (media) => {
       let data = new FormData();
-      let url = '{{ url_for('auths.renew', token = auth) }}';
-      data.append('csrf_token', '{{ csrf_token() }}');
-      send_status(url, data, (e) => alive_loop(media));
-    }
+      let url = '{{ url_for('auths.renewal', token = auth) }}';
+      send_status(url, (e) => alive_loop(media));
+    };
 
     let alive_loop = (media) => {
       if (!media.paused) {
@@ -136,7 +135,7 @@
           set_active(media);
         }, 150000);
       }
-    }
+    };
 
     let save_current = (media) => {
       let last = media.dataset.last;
@@ -146,13 +145,12 @@
       else last = 0;
       if (last - 30 > current || last + 30 < current ) {
         let value = media.id + '$' + media.dataset.uuid + '$' + current + '$' + parseInt(media.duration);
-        let data = new FormData();
-        let url = '{{ url_for('users.set_media') }}';
+        let url = '{{ url_for('users.set_media', uuid = media.uuid) }}';
+        url = url + '?media=' + escape(value);
 
-        media.dataset.last = current;
-        data.append('csrf_token', '{{ csrf_token() }}');
-        data.append('media', value);
-        send_upload(url, data);
+        send_status(url, (e) => {
+          if (e) media.dataset.last = current;
+        });
       }
     };
 

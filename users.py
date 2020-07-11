@@ -189,18 +189,17 @@ def reset(uuid):
 
     return redirect(url_for('users.show'))
 
-@users.route("/set_media/", methods = ["POST"])
+@users.route('/set_media/<uuid>', methods = ['GET'])
 @login_required
-def set_media():
-    # generate(current_user.id)
-    media = request.form['media']
+def set_media(uuid):
+    media = request.args['media']
 
     try:
         with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
               UPDATE minicloud_users
               SET media = %s WHERE id = %s;
-              """, [ media, int(current_user.id) ])
+              """, [ media, current_user.id ])
 
         g.db.commit()
         return make_response(jsonify(['Saved']), 200)
@@ -209,4 +208,4 @@ def set_media():
         g.db.rollback()
         app.logger.error('Save media failed: %s' % str(e))
 
-    return make_response(jsonify(['Error']), 500)
+    return make_response(jsonify([]), 500)
