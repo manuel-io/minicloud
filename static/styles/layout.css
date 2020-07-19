@@ -526,26 +526,24 @@ section#progress {
 section#alert {
   width: 33.3%;
   min-width: 300px;
+  cursor: pointer;
 }
 
 section#alert > div {
   width: 100%;
   margin: 5px 0 5px 0;
   background-color: transparent;
-  cursor: pointer;
-}
-
-section#alert > div > p {
   text-align: center;
 }
 
+section#alert > div > noscript,
+section#alert > div > span,
 section#alert > div > p.error {
   color: #de1f1f;
 }
 
 section#alert > div > p.alert,
 section#alert > div > p.info {
-  /* color: #1fde1f; */
   color: #99cc33;
 }
 section#progress {

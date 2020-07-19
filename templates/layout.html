@@ -30,9 +30,11 @@
         {% endblock %}
       </header>
       
-      <section id="alert">
-        <div onclick="alert_clear();">
-          <p class="error">Please use a browser with support of leading edge javascript technology</p>
+      <section id="alert" onclick="alert_clear();">
+        <div>
+          <noscript>
+            Please use a browser with support of leading edge javascript technology
+          </noscript>
         </div>
       </section>
 
