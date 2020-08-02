@@ -64,12 +64,7 @@
             let messages = {{ messages | tojson }};
             let [a, info] = messages.filter(([type, msg]) => type == 'info').flat();
             let [b, error] = messages.filter(([type, msg]) => type == 'error').flat();
-            console.log(info);
             alert_update(info, error);
-
-          {% else %}
-            alert_clear();
-
           {% endif %}
         {% endwith %}
       </script>

@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-import psycopg2, psycopg2.extras, bcrypt, io, os, urllib.request
+import psycopg2, psycopg2.extras, bcrypt, io, os, urllib.request, ssl
 from flask import flash, g, render_template, request, url_for, redirect, abort
 from flask_wtf.csrf import CSRFProtect
 from flask_login import LoginManager, login_user, logout_user, current_user
@@ -132,7 +132,8 @@ def login():
 
             if page and not page.lower() == 'none':
                 try:
-                    code = urllib.request.urlopen(page).getcode()
+                    context = ssl._create_unverified_context()
+                    code = urllib.request.urlopen(page, context = context).getcode()
                     if code > 199 and code < 300:
                         return redirect(page)
 
@@ -163,13 +164,13 @@ def logout():
 
 # Callback to reload the user object
 @login_manager.user_loader
-def load_user(id):
+def load_user(index):
     with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
         try:
             cursor.execute("""
               SELECT id, name, uuid, admin, disabled FROM minicloud_users
               WHERE id = %s ORDER BY id ASC LIMIT 1;
-              """, [int(id)])
+              """, [int(index)])
 
             data = cursor.fetchone()
             return User(int(data['id']), data['name'], data['admin'])
