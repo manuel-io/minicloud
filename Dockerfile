@@ -29,7 +29,7 @@ RUN locale-gen de_DE.UTF-8 en_US.UTF-8 en_GB.UTF-8
 RUN groupadd -g 9001 minicloud
 RUN useradd -u 9001 -g 9001 -d /home/minicloud -m -s /bin/bash minicloud
 RUN echo 'minicloud:minicloud' | chpasswd
-RUN service postgresql start && sleep 10 && su postgres -c 'createuser -w -d minicloud' && su postgres -c 'createdb -O minicloud minicloud'
+RUN service postgresql start && sleep 10 && su postgres -c 'createuser -w -d minicloud' && su postgres -c 'createdb -T template0 -l 'en_US.UTF-8' -E 'UTF-8' -O minicloud minicloud'
 
 COPY share/pg_hba.conf /pg_hba.conf
 COPY share/copy_hba.sh /copy_hba.sh

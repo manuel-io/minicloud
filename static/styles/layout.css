@@ -134,6 +134,10 @@ body > aside > div > nav {
   box-sizing: border-box;
 }
 
+body > aside > div > nav > div {
+  width: 280px;
+}
+
 ul {
   box-sizing: border-box;
 }
@@ -161,8 +165,6 @@ body > aside > div > section > p {
   background-position: center center;
   background-size: 25px 25px;
   background-repeat: no-repeat;
-  transform: rotate(0deg);
-  transition: 1s ease-out;
 }
 
 body > main {
@@ -227,8 +229,23 @@ body > main > footer {
   /* width: 100%; */
 }
 
+body > aside > div > input:not(:checked) ~ nav {
+  transition: all 0s ease-out;
+}
+
 body > aside > div > input:checked ~ nav {
   width: 280px;
+  transition: all 1s ease-out;
+}
+
+body > aside > div > input:not(:checked) ~ section > p {
+  transform: rotate(0deg);
+  transition: 0s ease-out;
+}
+
+body > aside > div > input:checked ~ section > p {
+  transform: rotate(-180deg);
+  transition: 1s ease-out;
 }
 
 input.toggle {

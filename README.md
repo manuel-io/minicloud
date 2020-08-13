@@ -21,7 +21,7 @@ complete environment by yourself.
     sudo groupadd -g 9001 minicloud
     useradd -u 9001 -g 9001 -d /home/minicloud -m -s /bin/bash minicloud
     sudo -u postgres createuser -P -d minicloud
-    sudo -u postgres createdb -O minicloud minicloud
+    sudo -u postgres createdb -T template0 -l 'en_US.UTF-8' -E 'UTF-8' -O minicloud minicloud
 
     su - minicloud
     cd ~

@@ -195,7 +195,7 @@ def add():
             g.db.commit()
             flash(['Media added'], 'info')
 
-        except:
+        except Exception as e:
             app.logger.error('Indexing in multimedia failed: %s' % str(e))
             flash(['Indexing failed'], 'error')
             g.db.rollback()
