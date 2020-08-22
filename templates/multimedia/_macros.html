@@ -3,7 +3,8 @@
     <button onclick="toggle('showfilters');">Filters</button>
 
     {% if current_user.admin %}
-      <form action="/multimedia/indexing" method="get">
+      <form action="{{ url_for('multimedia.indexing') }}" method="get">
+        <input type="hidden" name="ref" value="{{ ref }}">
         <button type="submit">Indexing</button>
       </form>
     {% endif %}
@@ -13,7 +14,8 @@
   {% endif %}
 
   {% if target == 'indexing' %}
-    <form action="/multimedia" method="get">
+    <form action="{{ url_for('multimedia.show') }}" method="get">
+      <input type="hidden" name="ref" value="{{ ref }}">
       <button type="submit">Multimedia</button>
     </form>
   {% endif %}
@@ -23,6 +25,8 @@
   <input class="toggle" type="checkbox" name="showfilters">
   <section id="showfilters">
     <form action="{{ url_for('multimedia.show') }}" method="get" tabindex="0" onkeyup="this.submit()">
+      <input type="hidden" name="ref" value="{{ ref }}">
+
       <div class="group">
         <fieldset>
           <label>Director:</label>

@@ -1,9 +1,49 @@
-body > main > section#tasks.show,
 body > main > section#gallery.show,
 body > main > section#login {
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+
+body > main > section#multimedia.show,
+body > main > section#tasks.show {
+  display: grid;
+  grid-template-columns: 1px auto 1px;
+  grid-template-rows: 1px auto 1px 1fr 1px;
+  background-color: #333;
+  border-radius: 5px;
+}
+
+body > main > section#multimedia.show > nav,
+body > main > section#tasks.show > nav {
+  grid-column: 2 / 3;
+  grid-row: 2 / 3;
+  background-color: #333;
+  box-sizing: border-box;
+}
+
+body > main > section#multimedia.show > nav button,
+body > main > section#tasks.show > nav button {
+  color: #fff;
+  background-color: #333;
+  box-sizing: border-box;
+  padding: 5px;
+}
+
+body > main > section#multimedia.show > nav button.active,
+body > main > section#tasks.show > nav button.active {
+  color: #99cc33;
+}
+
+body > main > section#multimedia.show > main,
+body > main > section#tasks.show > main {
+  grid-column: 2 / 3;
+  grid-row: 4 / 5;
+  background-color: #fff;
+  border-radius: 5px;
+  box-sizing: border-box;
+  padding: 5px;
+  overflow: auto;
 }
 
 button.slbCloseBtn {
@@ -27,7 +67,9 @@ button.slbCloseBtn {
   background-color: transparent;
 }
 
-#multimedia.show .categories {
+body > main > section#multimedia.show > main .categories {
+  margin-top: 5px;
+  margin-bottom: 5px;
   border: 1px solid #888;
   border-radius: 5px;
   padding: 5px;
@@ -35,7 +77,14 @@ button.slbCloseBtn {
   cursor: pointer;
 }
 
-#multimedia.show .media {
+body > main > section#multimedia.show > main .categoriess {
+  display: flex;
+  flex-direction: row;
+  overflow-x: auto;
+  scrollbar-width: auto;
+}
+
+body > main > section#multimedia.show > main .media {
   display: none;
   flex-direction: row;
   justify-content: flex-start;
@@ -43,7 +92,7 @@ button.slbCloseBtn {
   overflow-y: auto;
 }
 
-#multimedia.show main {
+body > main > section#multimedia.show > main .main {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -57,41 +106,41 @@ button.slbCloseBtn {
   border-radius: 5px;
 }
 
-#multimedia.show main section {
+body > main > section#multimedia.show > main .main section {
   width: 100%;
   box-sizing: border-box;
   padding: 5px 0 5px 0;
 }
 
-#multimedia.show main section table {
+body > main > section#multimedia.show > main .main section table {
   width: 100%;
   border-collapse: collapse;
 }
 
-#multimedia.show main section table tr {
+#multimedia.show .main section table tr {
   border-top: 1px solid #000;
   border-bottom: 1px solid #000;
 }
 
-#multimedia.show main section table tr:first-child {
+#multimedia.show .main section table tr:first-child {
   border-top: 0;
 }
 
-#multimedia.show main section table tr:last-child {
+#multimedia.show .main section table tr:last-child {
   border-bottom: 0;
 }
 
-#multimedia.show main section table td:first-child {
+#multimedia.show .main section table td:first-child {
   text-align: left;
   vertical-align: top;
 }
 
-#multimedia.show main section table td:last-child {
+#multimedia.show .main section table td:last-child {
   text-align: right;
   vertical-align: top;
 }
 
-#multimedia.show main section table td:nth-child(2) > p {
+#multimedia.show .main section table td:nth-child(2) > p {
   overflow: hidden;
   text-overflow: ellipsis;
   width: 220px;

@@ -16,13 +16,22 @@
 
 {% block section %}
   <section id="multimedia" class="show">
+    <nav>
+      {% for item in media_types %}
+        <form action="{{ url_for('multimedia.show') }}" method="get">
+          <input type="hidden" name="ref" value="{{ item.value}}">
+          <button type="submit" class="{{ 'active' if ref == item.value }}">{{ item.name }}</button>
+        </form>
+      {% endfor %}
+    </nav>
+    <main>
     {% for category in multimedia %}
       {% set index = loop.index %}
       <section id="mc{{ loop.index }}" class="categories">
         <h2 onclick="media_toogle(event, '{{ index }}')">{{ category.category }}</h2>
-        <div id="media{{ loop.index}}" class="media">
+        <div id="media{{ index }}" class="media">
           {% for media in category.media %}
-            <main>
+            <div class="main">
               <section class="describtion">
                 <table onclick="media_toogle(event, '{{ index }}')">
                   <tr>
@@ -68,14 +77,16 @@
 
               <section class="nav">
                 <form action="{{ url_for('multimedia.view', uuid = media.uuid, _anchor = 'mc' ~ index) }}" method="get">
+                  <input type="hidden" name="ref" value="{{ ref }}">
                   <input type="submit" value="Play">
                 </form>
               </section>
-            </main>
+            </div>
           {% endfor %}
         </div>
       </section>
     {% endfor %}
+    </main>
   </section>
 
   <script>

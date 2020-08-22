@@ -2,14 +2,15 @@ import psycopg2, psycopg2.extras
 from flask import g
 from config import app
 
-def get_directors():
+def get_directors(ref):
     data, directors = [ None, [] ]
 
     try:
         with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
               SELECT array_agg(DISTINCT director ORDER BY director) AS directors FROM minicloud_multimedia
-            """)
+              WHERE type = %s
+              """, [ref])
 
             data = cursor.fetchone()
 
@@ -22,14 +23,15 @@ def get_directors():
 
     return directors
 
-def get_actors():
+def get_actors(ref):
     data, actors = [ None, [] ]
 
     try:
         with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
               SELECT array_agg(DISTINCT actor ORDER BY actor ASC) AS actors FROM minicloud_multimedia, unnest(actors) AS actor
-            """)
+              WHERE type = %s
+              """, [ref])
 
             data = cursor.fetchone()
 

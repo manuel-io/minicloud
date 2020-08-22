@@ -15,7 +15,7 @@
 
 {% block section %}
   <section id="multimedia" class="view">
-    <h2 class="top"><a id="return" class="back" href="{{ url_for('multimedia.show') }}">Zurück</a></h2>
+    <h2 class="top"><a id="return" class="back" href="{{ url_for('multimedia.show', ref = ref) }}">Zurück</a></h2>
     <h2>{{ media.title }}</h2>
 
     <section class="media" style="position:relative;">
@@ -58,9 +58,8 @@
         </nav>
       {% endif %}
 
-      <form action="{{ url_for('multimedia.edit', uuid = media.uuid) }}" method="post">
+      <form action="{{ url_for('multimedia.edit', ref = ref, uuid = media.uuid) }}" method="post">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <input type="hidden" name="type" value="{{ media.type }}">
 
         <div class="group">
           <fieldset>
@@ -110,7 +109,7 @@
       </form>
 
       <nav>
-        <form action="{{ url_for('multimedia.delete', uuid = media.uuid) }}" method="post" onsubmit="handle_delete_check(event);">
+        <form action="{{ url_for('multimedia.delete', ref = ref, uuid = media.uuid) }}" method="post" onsubmit="handle_delete_check(event);">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <input type="submit" value="Delete">
         </form>

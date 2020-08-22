@@ -2,7 +2,41 @@ import psycopg2, psycopg2.extras, io, time, os, re
 from PIL import Image, ImageOps
 from flask import Blueprint, url_for, redirect, g, render_template, send_file, request, flash, send_from_directory, Response, abort
 from flask_login import UserMixin, login_required, current_user
+from dateutil import tz, parser
 from config import config, MIME_SUFFIX
+
+def format_task(task):
+    dbzone = config['general']['dbzone']
+    zone = config['general']['zone']
+    today = config['general']['today']
+    week = config['general']['week']
+    task['delayed'] = False
+
+    if task['process']:
+        task['process'] = parser.parse(task['process']).replace(tzinfo = dbzone).astimezone(zone).strftime("%-d %b %Y")
+
+    if task['done']:
+        task['done'] = parser.parse(task['done']).replace(tzinfo = dbzone).astimezone(zone).strftime("%-d %b %Y")
+
+    if task['due']:
+      delta = parser.parse(task['due']).replace(tzinfo = dbzone).astimezone(zone) - today
+      task['deadline'] = round(delta.total_seconds()/86400)
+      task['delayed'] = True if task['deadline'] < 0 else False
+      task['due'] = parser.parse(task['due']).replace(tzinfo = dbzone).astimezone(zone).strftime("%-d %b %Y")
+
+    return task
+
+@login_required
+def get_media_types():
+    return [ { 'name': 'Audiobooks', 'value': 'audiobooks' }
+           , { 'name': 'Audiotracks', 'value': 'audiotracks' }
+           , { 'name': 'Ballets', 'value': 'ballets' }
+           , { 'name': 'Documentaries', 'value': 'documentaries' }
+           , { 'name': 'Movies', 'value': 'movies' }
+           , { 'name': 'Musicals', 'value': 'musicals' }
+           , { 'name': 'Series', 'value': 'series' }
+           , { 'name': 'Videoclips', 'value': 'videoclips' }
+           ]
 
 @login_required
 def get_categories():

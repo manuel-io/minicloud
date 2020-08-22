@@ -7,7 +7,7 @@ from users import login_required, admin_required, current_user
 from config import app, config
 from pathlib import Path
 from minidlna import MiniDLNA
-from helpers import get_categories
+from helpers import get_media_types
 
 multimedia = Blueprint('multimedia', __name__)
 base = Path('/var/minicloud/multimedia')
@@ -46,10 +46,15 @@ def find_orphan_files(auth):
 @multimedia.route('/')
 @login_required
 def show():
+    ref = 'movies'
     auth = auths.generate(current_user.id)
     paths = find_minidlna_paths(auth)
-    all_directors = filters.get_directors()
-    all_actors = filters.get_actors()
+
+    if 'ref' in request.args.keys():
+        ref = request.args.get('ref').strip()
+
+    all_directors = filters.get_directors(ref)
+    all_actors = filters.get_actors(ref)
 
     directors = []
     if 'director' in request.args.keys():
@@ -64,10 +69,10 @@ def show():
             multimedia = []
 
             cursor.execute("""
-              SELECT DISTINCT ON (category) category, count(category) AS count,
-                json_agg(json_build_object('title', title, 'director', director, 'actors', actors, 'year', year, 'path', path, 'uuid', uuid, 'mime', mime, 'capture', capture) ORDER BY year, title ASC) AS media
-              FROM minicloud_multimedia WHERE actors @> %s AND ARRAY[director] @> %s GROUP BY category ORDER BY category ASC
-              """, [actors, directors])
+              SELECT DISTINCT ON (category) category, count(category) AS count, json_agg(json_build_object('title', title, 'director', director, 'actors', actors, 'year', year, 'path', path, 'uuid', uuid, 'mime', mime, 'capture', capture) ORDER BY year, title ASC) AS media
+              FROM minicloud_multimedia
+              WHERE actors @> %s AND ARRAY[director] @> %s AND type = %s GROUP BY category ORDER BY category ASC
+              """, [actors, directors, ref])
 
             for fetch in cursor.fetchall():
                 media = list(filter(lambda media: media['path'] in paths, fetch['media']))
@@ -84,6 +89,8 @@ def show():
                                   , config = config
                                   , all_directors = all_directors
                                   , all_actors = all_actors
+                                  , ref = ref
+                                  , media_types = get_media_types()
                                   )
 
         except Exception as e:
@@ -94,9 +101,13 @@ def show():
 @multimedia.route('/view/<uuid>')
 @login_required
 def view(uuid):
+    ref = 'movies'
     auth = auths.generate(current_user.id)
     dlna = find_minidlna_files(auth)
     proxy, media = [False, None]
+
+    if 'ref' in request.args.keys():
+        ref = request.args.get('ref').strip()
 
     try:
         with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
@@ -136,6 +147,7 @@ def view(uuid):
                                   , config = config
                                   , sources = sources
                                   , proxy = proxy
+                                  , ref = ref
                                   )
         else:
             raise Exception('no sources')
@@ -149,21 +161,32 @@ def view(uuid):
 @login_required
 @admin_required
 def indexing():
+    ref = 'movies'
     auth = auths.generate(current_user.id)
     dlna = find_orphan_files(auth)
+
+    if 'ref' in request.args.keys():
+        ref = request.args.get('ref').strip()
+
     return render_template( "multimedia/indexing.html"
                           , config = config
                           , items = dlna
-                          , categories = get_categories()
+                          , media_types = get_media_types()
+                          , ref = ref
                           )
 
 @multimedia.route('/add', methods = ["POST"])
 @login_required
 @admin_required
 def add():
+    ref = 'movies'
+
+    if 'ref' in request.args.keys():
+        ref = request.args.get('ref').strip()
+
     with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
         title = request.form['title']
-        lype = request.form['type']
+        ref = request.form['ref']
         url = request.form['url']
         path = request.form['path']
         size = request.form['size']
@@ -182,7 +205,7 @@ def add():
               INSERT INTO minicloud_multimedia
                 (category, type, title, description, path, mime, size, director, year) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
               """, [ category
-                   , lype
+                   , ref
                    , title
                    , description
                    , path
@@ -200,15 +223,18 @@ def add():
             flash(['Indexing failed'], 'error')
             g.db.rollback()
 
-    return redirect("/multimedia")
+    return redirect(url_for('multimedia.show', ref = ref))
 
 @multimedia.route('/edit/<uuid>', methods = ["POST"])
 @login_required
 @admin_required
 def edit(uuid):
+    ref = 'movies'
     title = request.form['title']
-    lype = request.form['type']
     year = request.form['year']
+
+    if 'ref' in request.args.keys():
+        ref = request.args.get('ref').strip()
 
     director = 'Generic'
     if 'director' in request.form.keys():
@@ -233,7 +259,6 @@ def edit(uuid):
               SET category = %s, type = %s, year = %s, title = %s, description = %s, director = %s, actors = %s
               WHERE uuid = %s
               """, [ category
-                   , lype
                    , year
                    , title
                    , description
@@ -249,12 +274,17 @@ def edit(uuid):
         g.db.rollback()
         app.logger.error('Edit in multimedia failed: %s' % str(e))
 
-    return redirect("/multimedia")
+    return redirect(url_for('multimedia.show', ref = ref))
 
 @multimedia.route('/delete/<uuid>', methods = ["POST"])
 @login_required
 @admin_required
 def delete(uuid):
+    ref = 'movies'
+
+    if 'ref' in request.args.keys():
+        ref = request.args.get('ref').strip()
+
     try:
         with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
@@ -268,7 +298,7 @@ def delete(uuid):
         g.db.rollback()
         app.logger.error('Deletion in multimedia failed: %s' % str(e))
 
-    return redirect("/multimedia")
+    return redirect(url_for('multimedia.show', ref = ref))
 
 @multimedia.route('/capture/<uuid>', methods = ["POST"])
 @login_required

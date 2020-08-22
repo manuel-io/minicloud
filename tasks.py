@@ -4,226 +4,201 @@ from dateutil import tz, parser
 from flask import Blueprint, g, request, render_template, url_for, redirect, flash, abort
 from users import login_required, admin_required, current_user
 from config import app, config
-from helpers import get_categories
+from helpers import get_categories, format_task
 
 tasks = Blueprint('tasks', __name__)
 
 @tasks.route('/')
 @login_required
 def show():
-    with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
-        utc = config['general']['utczone']
-        dbzone = config['general']['dbzone']
-        zone = config['general']['zone']
-        today = config['general']['today']
-        week = config['general']['week']
+    ref = 'pending'
+    today = config['general']['today']
+    week = config['general']['week']
+    tasks = []
 
-        try:
+    if 'ref' in request.args.keys():
+        ref = request.args.get('ref').strip()
+
+    try:
+        with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
-              SELECT q.category AS name, json_agg(json_build_object('id', id, 'uid', uid, 'status', status, 'title', title, 'due', due, 'done', done, 'process', process)) AS tasks FROM
-                (SELECT a.id, a.status, uid, category, title, due, done, process,
-                  CASE
-                    WHEN a.due IS NULL THEN false
-                    ELSE true
-                  END AS prefer
-                FROM minicloud_tasks AS a
-                  JOIN (
-                    VALUES ('processing', 1), ('pending', 2), ('completed', 3), ('deleted', 4)
-                  ) AS b (status, id) ON (a.status = b.status)
-                WHERE user_id = %s ORDER BY category DESC, prefer DESC, b.id ASC, a.created_at DESC
-              ) AS q GROUP BY name ORDER BY name DESC
-            """, [int(current_user.id)])
+              SELECT category AS name, json_agg(json_build_object('id', id, 'uid', uid, 'status', status, 'title', title, 'due', due, 'done', done, 'process', process) ORDER BY created_at ASC) AS tasks
+              FROM minicloud_tasks WHERE user_id = %s AND ARRAY[status] @> %s
+              GROUP BY category ORDER BY category ASC;
+            """, [int(current_user.id), [ref]])
 
-            print('>>>>', current_user.id)
             tasks = cursor.fetchall()
 
-            def fmt(task):
-                if task['process']:
-                    task['process'] = parser.parse(task['process']).replace(tzinfo = dbzone).astimezone(zone).strftime("%-d %b %Y")
+    except Exception as e:
+        app.logger.error('Show in tasks failed: %s' % str(e))
+        g.db.rollback()
 
-                if task['done']:
-                    task['done'] = parser.parse(task['done']).replace(tzinfo = dbzone).astimezone(zone).strftime("%-d %b %Y")
+    tasks = [{ 'name': category['name']
+             , 'tasks': [format_task(dict(task)) for task in category['tasks']]
+             } for category in tasks]
 
-                if task['due']:
-                    delta = parser.parse(task['due']).replace(tzinfo = dbzone).astimezone(zone) - today
-                    task['deadline'] = round(delta.total_seconds()/86400)
-                    task['delayed'] = True if task['deadline'] < 0 else False
-                    task['due'] = parser.parse(task['due']).replace(tzinfo = dbzone).astimezone(zone).strftime("%-d %b %Y")
+    return render_template( 'tasks/show.html'
+                          , tasks = tasks
+                          , categories = get_categories()
+                          , today = today.strftime('%-d %b %Y')
+                          , week = week
+                          , ref = ref
+                          )
 
-                return task
-
-            tasks = [{ 'name': category['name']
-                     , 'tasks': list(map(lambda task: fmt(dict(task)), category['tasks']))
-                     } for category in tasks]
-
-            return render_template( "tasks/show.html"
-                                  , tasks = tasks
-                                  , categories = get_categories()
-                                  , today = today.strftime('%-d %b %Y')
-                                  , week = week
-                                  )
-
-        except Exception as e:
-            app.logger.error('Show in tasks failed: %s' % str(e))
-            g.db.rollback()
-
-    abort(500)
-
-@tasks.route("/add", methods = ["POST"])
+@tasks.route('/add', methods = ['POST'])
 @login_required
 def add():
-    week = config['general']['week']
-    with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
-        title = request.form['title']
-        category = request.form['category']
-        zone = config['general']['zone'] #tz.gettz('Europa/Berlin')
-        deadline = request.form.get('due')
-        description = request.form.get('description')
-        due = None
+    zone = config['general']['zone']
+    title = request.form['title']
+    category = request.form['category']
+    deadline = request.form['deadline']
+    description = request.form['description']
+    due = None
 
-        if re.match(r'^\d{4}-\d{2}-\d{2}', deadline):
-            due = parser.parse(deadline).replace(tzinfo = zone)
+    if re.match(r'^\d{4}-\d{2}-\d{2}', deadline):
+        due = parser.parse(deadline).replace(tzinfo = zone)
 
-        try:
+    try:
+        with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
-                INSERT INTO minicloud_tasks
-                (user_id, title, category) VALUES (%s, %s, %s)
-                RETURNING id
-                """, [ int(current_user.id)
-                     , title
-                     , category
-                     ])
+              INSERT INTO minicloud_tasks (user_id, title, category, description)
+              VALUES (%s, %s, %s, %s)
+              RETURNING id
+              """, [int(current_user.id), title, category, description])
 
             index = cursor.fetchone()['id']
 
             if due:
                 cursor.execute("""
-                    UPDATE minicloud_tasks SET
-                    due = %s WHERE id = %s AND user_id = %s
-                    """, [due, index, int(current_user.id)])
+                  UPDATE minicloud_tasks
+                  SET due = %s WHERE id = %s AND user_id = %s
+                  """, [due, index, int(current_user.id)])
 
-            if description:
-                cursor.execute("""
-                    UPDATE minicloud_tasks SET
-                    description = %s WHERE id = %s AND user_id = %s
-                    """, [description, index, int(current_user.id)])
+        g.db.commit()
+        flash(['Task added'], 'info')
 
-            g.db.commit()
-            flash(['Task added'], 'info')
-
-        except Exception as e:
-            app.logger.error('Adding in tasks failed: %s' % str(e))
-            g.db.rollback()
-            flash(['Adding failed'], 'error')
+    except Exception as e:
+        app.logger.error('Adding in tasks failed: %s' % str(e))
+        g.db.rollback()
+        flash(['Adding failed'], 'error')
 
     return redirect(url_for('tasks.show'))
 
 @tasks.route("/edit/<uid>", methods = ["GET", "POST"])
 @login_required
 def edit(uid):
+    ref = 'pending'
     utc = config['general']['utczone']
     dbzone = config['general']['dbzone']
     zone = config['general']['zone']
+    task = None
 
-    if request.method == "GET":
+    if 'ref' in request.args.keys():
+        ref = request.args.get('ref').strip()
+
+    try:
         with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
               SELECT * FROM minicloud_tasks
               WHERE uid = %s AND user_id = %s LIMIT 1;
-            """, [uid, int(current_user.id)])
+              """, [uid, int(current_user.id)])
 
             task = dict(cursor.fetchone())
-            for status in config['tasks']['states']:
-                if status == task['status']:
-                    task['task_status'] = status
 
-                    if status == 'processing':
-                        task['task_datetime'] = task['process']
+        if not task:
+            raise Exception('Task not found')
 
-                    if status in ['completed', 'deleted']:
-                        task['task_datetime'] = task['done']
+    except Exception as e:
+        app.logger.error('Edit failed: %s' % str(e))
+        g.db.rollback();
+        flash(['Edit failed'], 'error')
+        return redirect(url_for('tasks.show', ref = ref))
 
-            if task['due']:
-                task['due'] = task['due'].replace(tzinfo = dbzone).astimezone(zone).strftime('%Y-%m-%d')
+    if request.method == 'GET':
+        if task['due']:
+            task['deadline'] = task['due'].replace(tzinfo = dbzone).astimezone(zone).strftime('%Y-%m-%d')
 
-        return render_template( "tasks/edit.html"
+        return render_template( 'tasks/edit.html'
                                , config = config
                                , task = task
                                , categories = get_categories()
+                               , ref = ref
                                )
 
-    if request.method == "POST":
-       
+    if request.method == 'POST':
         category = request.form['category']
         status = request.form['status']
-        old_status = request.form['task_status']
-        old_datetime = request.form['task_datetime']
         title = request.form['title']
-        deadline = request.form.get('due')
-        description = request.form.get('description')
+        deadline = request.form['deadline']
+        description = request.form['description']
         process, due, done = None, None, None
-
-        if status == old_status:
-            process = old_datetime if status == 'processing' else None
-            done = old_datetime if status in ['completed', 'deleted'] else None
-            if status in ['completed', 'deleted']: deadline = ''
-
-        else:
-            if status in ['completed', 'deleted']:
-                done = datetime.utcnow().replace(tzinfo = utc)
-                deadline = ''
-
-            if status in ['processing']:
-                process = datetime.utcnow().replace(tzinfo = utc)
 
         if re.match(r'^\d{4}-\d{2}-\d{2}', deadline):
             due = parser.parse(deadline).replace(tzinfo = zone)
-            
-        with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
-            try:
-                cursor.execute("""
-                  UPDATE minicloud_tasks SET
-                    status = %s, title = %s, category = %s, description = %s, due = %s, done = %s, process = %s
-                  WHERE uid = %s AND user_id = %s
-                """, [ status
-                     , title
-                     , category
-                     , description
-                     , due
-                     , done
-                     , process
-                     , uid
-                     , int(current_user.id)
-                     ])
 
-                g.db.commit()
-                flash(['Task modified'], 'info')
-            
-            except Exception as e:
-                app.logger.error('Edit in tasks failed: %s' % str(e))
-                g.db.rollback();
-                flash(['Edit failed'], 'error')
-        
-        return redirect(url_for('tasks.show'))
+        try:
+            with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
+                cursor.execute("""
+                  UPDATE minicloud_tasks
+                  SET title = %s, category = %s, description = %s, due = %s
+                  WHERE uid = %s AND user_id = %s
+                  """, [title, category, description, due, uid, int(current_user.id)])
+
+                if not status == task['status']:
+                    ref = status
+
+                    if status in ['completed', 'deleted']:
+                        done = datetime.utcnow().replace(tzinfo = utc)
+                        process = None
+                        deadline = None
+                        due = None
+
+                    if status in ['processing']:
+                        process = datetime.utcnow().replace(tzinfo = utc)
+                        done = None
+
+                    if status in ['pending']:
+                        done = None
+                        process = None
+
+                    cursor.execute("""
+                      UPDATE minicloud_tasks
+                      SET status = %s, due = %s, done = %s, process = %s
+                      WHERE uid = %s AND user_id = %s
+                      """, [status, due, done, process, uid, int(current_user.id)])
+
+            g.db.commit()
+            flash(['Task modified'], 'info')
+
+        except Exception as e:
+            app.logger.error('Edit in tasks failed: %s' % str(e))
+            g.db.rollback();
+            flash(['Edit failed'], 'error')
+
+        return redirect(url_for('tasks.show', ref = ref))
 
     abort(501)
 
 @tasks.route("/delete/<uid>", methods = ["POST"])
 @login_required
 def delete(uid):
-    with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
-        try:
+    ref = 'panding'
+    if 'ref' in request.args.keys():
+        ref = request.args.get('ref').strip()
+
+    try:
+        with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
               DELETE FROM minicloud_tasks
               WHERE user_id = %s and uid = %s
-            """, [int(current_user.id), uid])
+              """, [int(current_user.id), uid])
 
             g.db.commit()
             flash(['Task removed'], 'info')
 
-        except Exception as e:
-            app.logger.error('Deletion in tasks failed: %s' % str(e))
-            g.db.rollback()
-            flash(['Deletion failed'], 'error')
+    except Exception as e:
+        app.logger.error('Deletion in tasks failed: %s' % str(e))
+        g.db.rollback()
+        flash(['Deletion failed'], 'error')
 
-    return redirect(url_for('tasks.show'))
+    return redirect(url_for('tasks.show', ref = ref))

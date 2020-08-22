@@ -21,64 +21,72 @@
 
 {% block section %}
   <section id="tasks" class="show">
+    <nav>
+      {% for item in [ { 'name': 'Pending', 'value': 'pending' }
+                     , { 'name': 'Processing', 'value': 'processing' }
+                     , { 'name': 'Completed', 'value': 'completed' }
+                     , { 'name': 'Deleted', 'value': 'deleted' }
+                     ] %}
+        <form action="{{ url_for('tasks.show') }}" method="get">
+          <input type="hidden" name="ref" value="{{ item.value}}">
+          <button type="submit" class="{{ 'active' if ref == item.value }}">{{ item.name }}</button>
+        </form>
+      {% endfor %}
+    </nav>
+
+    <main>
     {% for category in tasks %}
       {% set index = loop.index %}
-
       <h2>{{ category.name }}</h2>
       <section id="tc{{ index }}" class="categories">
         {% for task in category.tasks %}
-
-          {% if task.status == 'completed' %}
-            {% set color = 'ontime' %}
-          {% elif task.status == 'deleted' %}
-            {% set color = 'deleted' %}
-          {% else %}
-            {% set color = 'pending' %}
-          {% endif %}
-
-          {% set color = 'delayed' if task.delayed else color %}
-
-          <div class="item {{ color }}">
-            <section>
-              <table class="{{ color }}">
-                <thead>
+          <main class="item">
+            <section class="describtion">
+              <table>
+                <tr>
+                  <td><p title="{{ task.title }}">Title:</p></td>
+                  <td><p title="{{ task.title }}">{{ task.title }}</p></td>
+                </tr>
+                <tr>
+                  <td><p title="{{ task.status }}">Status:</p></td>
+                  <td><p style="text-shadow:3px 0px 3px #99cc33,-3px 0px 3px #99cc33,6px 0px 6px #99cc33,-6px 0px 6px #99cc33;" title="{{ task.status }}">{{ task.status }}</p></td>
+                </tr>
+                {% if task.status == "completed" or task.status == "deleted" %}
                   <tr>
-                    <p>{{ task.title }}</p>
+                    <td colspan="2">done on {{ task.done }}</td>
                   </tr>
-                </thead>
-                <tbody>
+                {% endif %}
+                {% if task.status == "processing" %}
                   <tr>
-                    <td>{{ task.status }}</td>
+                    <td colspan="2">processing since {{task.process}}</td>
                   </tr>
-                  
-                  {% if task.status == "completed" or task.status == "deleted" %}
-                    <tr>
-                      <td>done on {{ task.done }}</td>
-                    </tr>
-                  {% endif %}
-    
-                  {% if task.status == "processing" %}
-                    <tr>
-                      <td>processing since {{task.process}}</td>
-                    </tr>
-                  {% endif %}
-    
-                  {% if task.due %}
-                    <tr>
-                      <td>due {{ task.due }}, {{ task.deadline }} days left</td>
-                    </tr>
-                  {% endif %}
-                </tbody>
+                {% endif %}
+                {% if task.due %}
+                  <tr>
+                    {% if task.delayed %}
+                      <td colspan="2">
+                        <p>
+                          <span>due {{ task.due }},</span>
+                          <span style="text-shadow:3px 0px 3px #de1f1f,-3px 0px 3px #de1f1f,6px 0px 6px #de1f1f,-6px 0px 6px #de1f1f;">{{ task.deadline }} days left</span>
+                        </p>
+                      </td>
+                    {% else %}
+                      <td colspan="2">due {{ task.due }}, {{ task.deadline }} days left</td>
+                    {% endif %}
+                  </tr>
+                {% endif %}
               </table>
             </section>
             <nav>
               <form action="{{ url_for('tasks.edit', uid = task.uid, _anchor = 'tc' ~ index) }}" method="get">
+                <input type="hidden" name="ref" value="{{ ref }}">
                 <input type="submit" value="Edit">
               </form>
             </nav>
-          </div>
+          </main>
         {% endfor %}
       </section>
     {% endfor %}
+    </main>
   </section>
 {% endblock %}

@@ -15,6 +15,7 @@ body,
 header,
 main,
 footer,
+nav,
 div,
 h1,
 h2,
@@ -191,8 +192,15 @@ body > main > section {
   overflow: hidden;
 }
 
+/*
 body > main > section > section,
 body > main > section > nav {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+*/
+
+body > main > section > section {
   margin-top: 5px;
   margin-bottom: 5px;
 }
@@ -300,6 +308,7 @@ img {
 
 form {
   display: inline;
+  background-color: transparent;
 }
 
 form > div {
@@ -325,7 +334,7 @@ audio, video {
   max-width: 100%;
 }
 
-#tasks > .categories,
+#tasks > main > section.categories,
 #gallery > .categories {
   display: flex;
   flex-direction: row;
@@ -333,19 +342,23 @@ audio, video {
   scrollbar-width: auto;
 }
 
-#tasks > .categories,
+#tasks > main section.categories,
 #gallery > .categories {
   margin-top: 5px;
   margin-bottom: 5px;
 }
 
-#tasks > .categories section,
+#tasks > main > section.categories section,
 #gallery > .categories section {
   margin-bottom: 5px;
 }
 
-#tasks > .categories > .item,
-#gallery > .categories > .item {
+#tasks > main > section.categories > .item {
+  min-width: 200px;
+}
+
+#tasks > main > section.categories > .item,
+#gallery > section.categories > .item {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -354,30 +367,27 @@ audio, video {
   box-sizing: border-box;
   margin: 5px;
   padding: 5px;
+  max-width: 300px;
 }
 
-#tasks > .categories > .item.deleted {
-  opacity: 0.5;
-}
-
-#tasks > .categories > .item table {
+#tasks > main > .categories > .item table {
   border: 1px solid #000;
   border-radius: 5px;
   padding: 5px;
   width: 100%;
 }
 
-#tasks > .categories > .item table.pending {
+#tasks > main > .categories > .item table.pending {
   background-color: #ef1;
   color: #000;
 }
 
-#tasks > .categories > .item table.ontime {
+#tasks > main .categories > .item table.ontime {
   background-color: #1fde1f;
   color: #000;
 }
 
-#tasks > .categories > .item  table.delayed {
+#tasks > main .categories > .item  table.delayed {
   background-color: #de1f1f;
   color: #fff;
 }
@@ -432,6 +442,14 @@ fieldset > label.checkbox {
   cursor: pointer;
 }
 
+textarea {
+  padding: 5px;
+  width: 100%;
+  border: 1px solid #333;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
 input[type=submit],
 input[type=text],
 input[type=number],
@@ -441,7 +459,7 @@ input[type=file],
 input[type=date] {
   padding: 5px;
   width: 100%;
-  border: 1px solid gray;
+  border: 1px solid #333;
   border-radius: 5px;
   box-sizing: border-box;
   -moz-appearance: none;
