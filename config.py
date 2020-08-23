@@ -9,6 +9,8 @@ app = Flask('minicloud')
 app.logger.addHandler(handler)
 app.logger.setLevel(logging.INFO)
 
+release = { 'major': 0, 'minor': 0, 'revision': 0 }
+
 utczone = tz.gettz('UTC')
 dbzone = tz.gettz('UTC')
 zone = tz.gettz('Europa/Berlin')

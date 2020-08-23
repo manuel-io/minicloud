@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/manuel-io/minicloud.svg?branch=master)](https://travis-ci.com/manuel-io/minicloud) 
+[![Build Status](https://travis-ci.com/manuel-io/minicloud.svg?branch=master)](https://travis-ci.com/manuel-io/minicloud)
 
 :warning: **This version is not fully tested**
 
@@ -11,6 +11,28 @@
                      python3-dev \
                      python3-venv \
                      python3-pip
+
+## Release numbering plan
+
+A release numbers consist of three parts, a major number, a minor number, and a
+revision number, each separated by a dot.
+
+* Major number:
+  A change in the major release number indicates a huge system change. Don't
+  consider an easy migration with a lower system number.
+
+* Minor number:
+  A change in the minor release number indicates new system features, UI/UX changes or a
+  change in the database schema. Consider reading the [migration log](share/Migration.md).
+
+* Revision number:
+  A change in the revision number indicates bug fixes and package
+  updates. It is always recommended updating to the latest revision number.
+
+The current release number can be printed out:
+
+    source bin/activate
+    python admtool.py minicloud --version
 
 ## Quick Start
 
@@ -43,7 +65,7 @@ complete environment by yourself.
     systemctl restart minidlna.service
 
 ## Dockerfile
-    
+
     git clone https://github.com/manuel-io/minicloud.git minicloud .
     docker build -t minicloud .
     docker run --network host -d -P --name cloud minicloud

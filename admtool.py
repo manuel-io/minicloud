@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import functools, argparse, codecs, psycopg2, psycopg2.extras, bcrypt, os, sys
-from config import get_db
+from config import get_db, release
 
 commands = []
 
@@ -20,6 +20,16 @@ def cmd(cmd):
     for cmd in commands:
         sys.stderr.write("  %s:\t%s\n" % (cmd['name'], cmd['desc']))
 
+
+@command('minicloud', 'System status variables')
+def minidloud(cmd):
+    parser = argparse.ArgumentParser(usage = '%s %s' % (sys.argv[0], cmd['name']), description = cmd['desc'])
+    parser.add_argument('--version', '-v',  help = 'Show system version', action = 'store_true')
+    args = parser.parse_args(sys.argv[2:]);
+
+    if args.version:
+        sys.stderr.write('%s.%s.%s\n' % (release['major'], release['minor'], release['revision']))
+
 @command('users', 'List system users')
 def auths(cmd):
     parser = argparse.ArgumentParser(usage = '%s %s' % (sys.argv[0], cmd['name']), description = cmd['desc'])
@@ -32,11 +42,12 @@ def auths(cmd):
         with db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
                 SELECT * FROM minicloud_users AS a
-                  LEFT JOIN minicloud_auths AS b ON (a.id = b.user_id)
+                LEFT JOIN minicloud_auths AS b ON (a.id = b.user_id)
                 WHERE a.name LIKE %s
                 """, [args.username])
 
             data = cursor.fetchall();
+
         for user in data:
             print('Username:', user['name'])
             print('E-Mail:', user['email'])
