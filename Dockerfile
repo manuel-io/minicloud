@@ -17,13 +17,14 @@ RUN echo 'root:minicloud' | chpasswd
 
 RUN mkdir /var/run/sshd
 RUN mkdir -p /var/minicloud/multimedia
-RUN mkdir -p /var/minicloud/multimedia/movies
-RUN mkdir -p /var/minicloud/multimedia/series
-RUN mkdir -p /var/minicloud/multimedia/clips
-RUN mkdir -p /var/minicloud/multimedia/videoclips
-RUN mkdir -p /var/minicloud/multimedia/tracks
+RUN mkdir -p /var/minicloud/multimedia/audiobooks
 RUN mkdir -p /var/minicloud/multimedia/audiotracks
-RUN mkdir -p /var/minicloud/multimedia/documentary
+RUN mkdir -p /var/minicloud/multimedia/ballets
+RUN mkdir -p /var/minicloud/multimedia/documentaries
+RUN mkdir -p /var/minicloud/multimedia/movies
+RUN mkdir -p /var/minicloud/multimedia/musicals
+RUN mkdir -p /var/minicloud/multimedia/series
+RUN mkdir -p /var/minicloud/multimedia/videoclips
 
 RUN locale-gen de_DE.UTF-8 en_US.UTF-8 en_GB.UTF-8
 RUN groupadd -g 9001 minicloud
