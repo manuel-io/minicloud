@@ -256,7 +256,7 @@ def edit(uuid):
         with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
               UPDATE minicloud_multimedia
-              SET category = %s, type = %s, year = %s, title = %s, description = %s, director = %s, actors = %s
+              SET category = %s, year = %s, title = %s, description = %s, director = %s, actors = %s
               WHERE uuid = %s
               """, [ category
                    , year
