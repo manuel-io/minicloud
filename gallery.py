@@ -43,7 +43,7 @@ def find_orphan_files(user_id):
         except Warning:
             g.db.rollback()
             # Log message e
-    
+
     with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
         for orphan in orphans:
             lo = g.db.lobject(orphan['lo'], 'rb')
@@ -109,18 +109,18 @@ def edit(uid):
               SELECT id, title, description, uid, category FROM minicloud_gallery
               WHERE user_id = %s AND uid = %s LIMIT 1
               """, [int(current_user.id), uid])
-                
+
             file = cursor.fetchone()
-    
+
         return render_template( "gallery/edit.html"
                               , config = config
                               , categories = get_categories()
                               , file = file
                               )
-                              
+
     if request.method == "POST":
-        title = request.form['title'] 
-        description = request.form['description'] 
+        title = request.form['title']
+        description = request.form['description']
         category = request.form['category']
 
         with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
@@ -138,7 +138,7 @@ def edit(uid):
                 app.logger.error('Edit in gallery failed: %s' % str(e))
                 g.db.rollback()
                 flash(['Edit failed'], 'error')
-        
+
         return redirect(url_for('gallery.show'))
 
     abort(501)
@@ -215,7 +215,7 @@ def thumbnail(uid):
         except Exception as e:
             app.logger.error('Thumbnail in gallery failed: %s' % str(e))
             g.db.rollback()
-        
+
     abort(500)
 
 def pillow_orientation(upload, mimetype):
@@ -238,10 +238,10 @@ def pillow_thumbnail(upload, mimetype):
         thumbnail = io.BytesIO()
         image = Image.open(io.BytesIO(upload))
         image.thumbnail((300, 300))
-        
+
         if mimetype == 'image/jpeg': image.save(thumbnail, format = "JPEG")
         if mimetype == 'image/png': image.save(thumbnail, format = "PNG")
-        
+
         return thumbnail.getvalue()
 
     except Warning:
@@ -273,23 +273,29 @@ def diashow():
 
 @gallery.route("/diashow/play/<uuid>", methods = ["GET"])
 def diashow_play(uuid):
-    with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
-        try:
+   diashow = None
+
+   try:
+        with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
               SELECT a.uuid, json_agg(json_build_object('uid', b.uid, 'title', b.title, 'description', b.description) ORDER BY b.updated_at ASC) AS files
-                FROM minicloud_diashow AS a
-                LEFT JOIN minicloud_gallery AS b ON (a.user_id = b.user_id AND a.category = b.category)
+              FROM minicloud_diashow AS a
+              INNER JOIN minicloud_gallery AS b ON (a.user_id = b.user_id AND a.category = b.category)
               WHERE a.uuid = %s GROUP BY (a.uuid) LIMIT 1;
               """, [uuid])
-            
+
             diashow = cursor.fetchone()
-            return render_template("gallery/diashow_play.html", diashow = diashow)
 
-        except Exception as e:
-            app.logger.error('Play in diashow failed: %s' % str(e))
-            g.db.rollback()
+            if not diashow:
+                flash(['No files found!'], 'error')
+                raise Exception('No files found')
 
-    abort(500)
+   except Exception as e:
+       app.logger.error('Play in diashow failed: %s' % str(e))
+       g.db.rollback()
+       return redirect(url_for('gallery.diashow'))
+
+   return render_template("gallery/diashow_play.html", diashow = diashow)
 
 @gallery.route("/diashow/<uuid>/download/<uid>", methods = ["GET"])
 def diashow_download(uuid, uid):
