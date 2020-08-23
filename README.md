@@ -78,7 +78,7 @@ The default password for the user minicloud is minicloud.
 
 #### Copy a file to the container
 
-    scp ~/movies/butenland-2020.mp4 minicloud@localhost:/var/minicloud/multimedia/documentary
+    scp ~/movies/butenland-2020.mp4 minicloud@localhost:/var/minicloud/multimedia/documentaries
 
 ## Environment variables
 
