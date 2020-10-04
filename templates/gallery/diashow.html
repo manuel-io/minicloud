@@ -15,7 +15,7 @@
 {% endblock %}
 
 {% block section %}
-  <section id="diashow" class="show">
+  <section id="diashow" class="content show">
     {% for diashow in diashows %}
       <section id="dc{{ loop.index }}" class="item">
         <a href="{{ url_for('gallery.diashow_play', uuid = diashow.uuid) }}">

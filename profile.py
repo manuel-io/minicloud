@@ -3,7 +3,7 @@ from psycopg2.errors import UniqueViolation
 from dateutil import tz, parser
 from flask import Blueprint, g, request, render_template, url_for, redirect, flash, send_file, abort
 from users import User, login_required, current_user
-from config import app, config, Config
+from config import app, Config
 from gallery import pillow_orientation, pillow_thumbnail
 
 profile = Blueprint('profile', __name__)

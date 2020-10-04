@@ -1,4 +1,5 @@
 import psycopg2, psycopg2.extras
+from functools import reduce
 from flask import g
 from config import app
 
@@ -8,8 +9,8 @@ def get_directors(ref):
     try:
         with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
-              SELECT array_agg(DISTINCT director ORDER BY director) AS directors FROM minicloud_multimedia
-              WHERE type = %s
+              SELECT array_agg(DISTINCT director ORDER BY director) AS directors
+              FROM minicloud_multimedia WHERE type = %s
               """, [ref])
 
             data = cursor.fetchone()
@@ -29,15 +30,16 @@ def get_actors(ref):
     try:
         with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
-              SELECT array_agg(DISTINCT actor ORDER BY actor ASC) AS actors FROM minicloud_multimedia, unnest(actors) AS actor
-              WHERE type = %s
+              SELECT count(actor) AS count, actor
+              FROM minicloud_multimedia, unnest(actors) AS actor
+              WHERE length(actor) > 0 AND type = %s
+              GROUP BY actor ORDER BY count DESC LIMIT 50
               """, [ref])
 
-            data = cursor.fetchone()
+            data = cursor.fetchall()
 
         if data:
-            if type(data['actors']) is list:
-                actors = data['actors']
+            actors = reduce(lambda acc, item: acc + [item['actor']], data, [])
 
     except Exception as e:
         app.logger.error('Filters get_actors failed: %s' % str(e))

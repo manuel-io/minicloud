@@ -1,6 +1,8 @@
 {% macro nav(target) %}
   {% if target == "show" %}
-    <button onclick="toggle('adduser');">New User</button>
+    <form onsubmit="event.preventDefault();">
+      <button onclick="toggle('adduser');">New User</button>
+    </form>
   {% endif %}
 {% endmacro %}
 

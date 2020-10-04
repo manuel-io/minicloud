@@ -1,0 +1,54 @@
+{% macro nav(target) %}
+  {% if target == 'show' and uid %}
+    <form action="{{ url_for('notes.show') }}" method="get">
+      <button type="submit">New paper</button>
+    </form>
+  {% endif %}
+  {% if target == 'show' %}
+    <form onsubmit="event.preventDefault();">
+      <button onclick="toggle('searchnotes');">Search</button>
+    </form>
+  {% endif %}
+{% endmacro %}
+
+{% macro header() %}
+  <input class="toggle" type="checkbox" name="searchnotes" />
+  <section id="searchnotes">
+    <form action="{{ url_for('notes.search') }}" method="post" onsubmit="handle_search_form(event);">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+       
+      <div class="group">      
+        <fieldset>
+          <label>Search:</label>
+          <input class="focus" type="text" name="search" required />
+        </fieldset>
+        
+        <fieldset>
+          <label>Tags:</label>
+          <div class="tags" onclick="tags_set_focus(event);">
+            <input type="hidden" name="tags">
+            <div class="newtag">
+              <input type="text" name="tag" onkeydown="tags_prevent_submit(event)" onkeyup="tags_handle_input(event, 'tags');">
+            </div>
+          </div>
+        </fieldset>
+        
+        <fieldset>
+          <input type="submit" value="Search">
+        </fieldset>
+      </div>
+    </form>
+
+    <section class="results group">
+      <section class="item template">
+        <div><p class="title"></p></div>
+        <div class="action">
+          <form action="{{ url_for('notes.show') }}" method="get">
+            <input type="hidden" name="uid" value="">
+            <input type="submit" value="Show">
+          </form>
+        </div>
+      </section>
+    </div>
+  </section>
+{% endmacro %}

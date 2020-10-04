@@ -1,8 +1,9 @@
 import psycopg2, psycopg2.extras
 from flask import Blueprint, url_for, redirect, g, render_template, request, flash, abort, make_response, jsonify
 from flask_login import login_required, current_user
-from config import app, config, MIME_SUFFIX
+from config import app
 from helpers import get_categories, get_stream
+from mimes import MIME_SUFFIX
 
 uploads = Blueprint('uploads', __name__)
 

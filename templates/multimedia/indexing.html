@@ -14,7 +14,7 @@
 {% endblock %}
 
 {% block section %}
-  <section id="multimedia" class="indexing">
+  <section id="multimedia" class="content indexing">
     <form action="{{ url_for('multimedia.add', ref = ref) }}" method="post">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <input type="hidden" name="size" value="">

@@ -15,7 +15,7 @@
 {% endblock %}
 
 {% block section %}
-  <section id="multimedia" class="show">
+  <section id="multimedia" class="content show">
     <nav>
       {% for item in media_types %}
         <form action="{{ url_for('multimedia.show') }}" method="get">
@@ -32,16 +32,18 @@
         <div id="media{{ index }}" class="media">
           {% for media in category.media %}
             <div class="main">
-              <section class="describtion">
+              <section class="description">
                 <table onclick="media_toogle(event, '{{ index }}')">
                   <tr>
                     <td><p title="{{ media.title }}">Title:</p></td>
                     <td><p title="{{ media.title }}">{{ media.title }}</p></td>
                   </tr>
+
                   <tr>
                     <td><p title="{{ media.director }}">Director:</p></td>
                     <td><p title="{{ media.director }}">{{ media.director }}</p></td>
                   </tr>
+
                   <tr>
                     <td><p title="{{ media.year }}">Year:</p></td>
                     <td><p title="{{ media.year }}">{{ media.year }}</p></td>
@@ -59,15 +61,13 @@
               </section>
 
               {% if media.actors %}
-              <section class="describtion">
+              <section class="description">
                 <table onclick="media_toogle(event, '{{ index }}')">
-                  <tr>
-                    <td colspan="2">
-                      {% for actor in media.actors %}
-                        <p>{{ actor }}</p>
-                      {% endfor %}
-                    </td>
-                  </tr>
+                  {% for actor in media.actors[0:4] %}
+                    <tr>
+                      <td><p>{{ actor }}</p></td>
+                    </tr>
+                  {% endfor %}
                 </table>
               </section>
               {% endif %}

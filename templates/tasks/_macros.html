@@ -1,6 +1,8 @@
 {% macro nav(target) %}
   {% if target == "show" %}
-    <button onclick="toggle('addtask');">New Task</button>
+    <form onsubmit="event.preventDefault();">
+      <button onclick="toggle('addtask');">New Task</button>
+    </form>
   {% endif %}
 {% endmacro %}
 
@@ -43,4 +45,5 @@
         </fieldset>
       </div>
     </form>
+  </section>
 {% endmacro %}

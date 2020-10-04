@@ -14,19 +14,37 @@
 {% endblock %}
 
 {% block section %}
-  <section id="multimedia" class="view">
+  <section id="multimedia" class="content view">
     <h2 class="top"><a id="return" class="back" href="{{ url_for('multimedia.show', ref = ref) }}">Zurück</a></h2>
     <h2>{{ media.title }}</h2>
+    <section class="description">
+      <table>
+        <tr>
+          <td><p title="{{ media.title }}">Title:</p></td>
+          <td><p title="{{ media.title }}">{{ media.title }}</p></td>
+        </tr>
+
+        <tr>
+          <td><p title="{{ media.director }}">Director:</p></td>
+          <td><p title="{{ media.director }}">{{ media.director }}</p></td>
+        </tr>
+
+        <tr>
+          <td><p title="{{ media.year }}">Year:</p></td>
+          <td><p title="{{ media.year }}">{{ media.year }}</p></td>
+        </tr>
+      </table>
+    </section>
 
     <section class="media" style="position:relative;">
-      {% if media.mime in config["ftypes"]["audio"] %}
+      {% if media.mime in mime_types.audio %}
         <audio id="audio" controls title="{{ media.title }}" title="{{ media.title }}" data-uuid="{{ media.uuid }}" data-last="">
           {% for source in sources %}
             <source src="{{ source.url }}" type="{{ source.mime }}" />
           {% endfor %}
         </audio>
 
-      {% elif media.mime in config["ftypes"]["video"] %}
+      {% elif media.mime in mime_types.video %}
 
         <video id="video" controls controlsList="fullscreen download" title="{{ media.title }}" data-uuid="{{ media.uuid }}" data-last="">
           {% for source in sources %}
@@ -35,10 +53,9 @@
         </video>
       {% endif %}
 
-      <input class="toggle" type="checkbox" name="capture">
       <section id="capture" class="dialog">
-        <main>
-          <canvas class="capture" onclick="close_dialog('capture');"></canvas>
+        <main onclick="close_dialog('capture');">
+          <canvas class="capture"></canvas>
           <form action="{{ url_for('multimedia.capture', uuid=media.uuid) }}" method="post" onsubmit="handle_capture_form(event);">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" name="canvas">
@@ -49,7 +66,7 @@
     </section>
 
     {% if current_user.admin %}
-      {% if media.mime in config["ftypes"]["video"] %}
+      {% if media.mime in mime_types.video %}
         <nav>
           <form method="post" onsubmit="handle_capture_dialog(event);">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -57,6 +74,21 @@
           </form>
         </nav>
       {% endif %}
+    {% endif %}
+
+    {% if media.actors %}
+      <section class="description">
+        <table>
+          {% for actor in media.actors %}
+            <tr>
+              <td><p>{{ actor }}</p></td>
+            </tr>
+          {% endfor %}
+        </table>
+      </section>
+    {% endif %}
+
+    {% if current_user.admin %}
 
       <form action="{{ url_for('multimedia.edit', ref = ref, uuid = media.uuid) }}" method="post">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -162,7 +194,7 @@
       }
     };
 
-    {% if media.mime in config.ftypes.audio %}
+    {% if media.mime in mime_types.audio %}
       let audio = document.getElementById('audio');
 
       {% if proxy %}
@@ -174,7 +206,7 @@
       audio.onplay = (e) => set_active(audio);
     {% endif %}
 
-    {% if media.mime in config.ftypes.video %}
+    {% if media.mime in mime_types.video %}
       let video = document.getElementById('video');
 
       {% if proxy %}

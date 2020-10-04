@@ -1,0 +1,82 @@
+{% extends "layout.html" %}
+{% from "_macros.html" import aside with context %}
+{% from "notes/_macros.html" import nav, header with context %}
+
+{% block aside %}
+  {{ aside() }}
+{% endblock %}
+
+{% block nav %}
+  {{ nav('show') }}
+{% endblock %}
+
+{% block header %}
+  {{ header() }}
+{% endblock %}
+
+{% block section %}
+  <section id="notes" class="content show">
+    <nav class="header">
+      <form action="{{ url_for('notes.show') }}" method="get">
+        <input type="hidden" name="uid" value="{{ previous }}">
+        <button {{ "disabled" if not previous }}>Back</button>
+      </form>
+      <form action="{{ url_for('notes.show') }}" method="get">
+        <input type="hidden" name="uid" value="{{ forward }}">
+        <button {{ "disabled" if not forward }}>Next</button>
+      </form>
+    </nav>
+
+    <main>
+      {% if uid %}
+        <form action="{{ url_for('notes.edit', uid = uid) }}" method="post">
+      {% else %}
+        <form action="{{ url_for('notes.save') }}" method="post">
+      {% endif %}
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+        <fieldset class="textarea">
+          <label>{{ today }}:</label>
+          <textarea name="description" required>{{ text }}</textarea>
+        </fieldset>
+
+        <fieldset>
+          <label>Tags:</label>
+          <div class="tags" onclick="tags_set_focus(event);">
+            <input type="hidden" name="tags">
+              {% if tags %}
+                {% for tag in tags %}
+                  <div class="tag">{{ tag }}</div>
+                {% endfor %}
+              {% endif %}
+            <div class="newtag">
+              <input type="text" name="tag" onkeydown="tags_prevent_submit(event)" onkeyup="tags_handle_input(event, 'tags');">
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <input type="submit" value="Save">
+        </fieldset>
+      </form>
+    </main>
+
+    <nav class="footer">
+      {% if uid %}
+        <form action="{{ url_for('notes.delete', uid = uid) }}" method="post" onsubmit="handle_delete_check(event);">
+      {% else %}
+        <form>
+      {% endif %}
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <input type="submit" value="Delete" {{ "disabled" if not uid }}>
+      </form>
+    </nav>
+  </section>
+
+  <script>
+//    window.onload = (e) => {
+//      let target = document.querySelector('#notes .tags');
+//      tags_set_input(target, 'tags');
+//    };
+  </script>
+{% endblock %}

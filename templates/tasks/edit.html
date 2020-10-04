@@ -20,7 +20,7 @@
 {% endblock %}
 
 {% block section %}
-  <section id="tasks">
+  <section id="tasks" class="content edit">
     <h2 class="top"><a id="return" class="back" href="{{ url_for('tasks.show', ref = ref) }}">Zurück</a></h2>
 
     <form action="{{ url_for('tasks.edit', uid = task.uid, ref = ref) }}" method="post">
@@ -30,8 +30,8 @@
         <fieldset>
           <label>State:</label>
           <select name="status" required>
-            {% for state in config.tasks.states %}
-              <option value="{{state}}" {{ "selected" if task.status == state }}>{{ state | title }}</option>
+            {% for item in task_types %}
+              <option value="{{ item.value }}" {{ "selected" if task.status == item.value }}>{{ item.name }}</option>
             {% endfor %}
           </select>
         </fieldset>

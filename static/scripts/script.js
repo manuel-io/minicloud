@@ -1,11 +1,11 @@
-let open_dialog = (x) => {
-  let input = document.querySelector(`input[name=${x}]`);
-  input.checked = true;
+let open_dialog = (element) => {
+  let dialog = document.querySelector(`section#${element}`);
+  dialog.style.display = 'block';
 };
 
-let close_dialog = (x) => {
-  let input = document.querySelector(`input[name=${x}]`);
-  input.checked = false;
+let close_dialog = (element) => {
+  let dialog = document.querySelector(`section#${element}`);
+  dialog.style.display = 'none';
 };
 
 let toggle = (x)  => {
@@ -23,6 +23,16 @@ let toggle = (x)  => {
 
   if (select) select.focus();
 };
+
+let user_toogle = (e, index) => {
+  e.preventDefault();
+  let user = document.querySelector(`#${index} > section.description`);
+
+  if (user.style.display == 'block') user.style.display = 'none';
+  else {
+    user.style.display = 'block'
+  }
+}
 
 let media_toogle = (e, index) => {
   e.preventDefault();
@@ -89,6 +99,30 @@ let send_upload = (url, data, ready, fail) => {
   request.send(data);
 };
 
+let send_post = (url, data, ready) => {
+  fetch(url, { method: 'POST'
+             , body: data
+             , headers: { 'X-Type': 'Ajax' }})
+
+    .then(response => {
+
+      if (!response.ok) {
+        throw Error(response.json());
+      } else {
+        return response.json();
+      }
+
+    }).then(data => {
+
+      if (ready) ready(data);
+
+    }).catch((data) => {
+
+      console.log(data);
+
+    });
+};
+
 let send_status = (url, ready) => {
   fetch(url, { headers: { 'X-Type': 'Ajax' }})
     .then(response => {
@@ -137,6 +171,31 @@ let handle_select_helper = (e) => {
   e.target.value = '0';
 };
 
+let handle_search_form = (e) => {
+  e.preventDefault();
+
+  send_post(e.target.getAttribute('action'), new FormData(e.target), (data) => {
+    let container = document.querySelector('#searchnotes section.results');
+    let template = document.querySelector('#searchnotes section.results > section.template');
+    let results = document.querySelectorAll('#searchnotes section.results > section.result');
+
+    if (results) [...results].forEach((result) => result.remove());
+
+    data.forEach((result) => {
+      let item = template.cloneNode(true);
+      let title = item.querySelector('.title');
+      let uid = item.querySelector('input[name=uid]');
+
+      title.textContent = `${result.today}: ...${result.description}`;
+      title.setAttribute('title', `${result.today}: ...${result.description}`);
+      uid.value = result.uid;
+      item.classList.remove('template');
+      item.classList.add('result');
+      container.appendChild(item);
+    });
+  });
+}
+
 let handle_uploads_form = (e) => {
   e.preventDefault();
   let data = new FormData(e.target);
@@ -150,7 +209,7 @@ let handle_capture_dialog = (e) => {
   e.preventDefault();
   let canvas = document.querySelector('canvas');
   let video = document.getElementById('video');
-  let scale = 300 / video.videoWidth;
+  let scale = 270 / video.videoWidth;
 
   canvas.width = video.videoWidth * scale;
   canvas.height = video.videoHeight * scale;

@@ -2,7 +2,7 @@ import psycopg2, psycopg2.extras
 from datetime import datetime
 from flask import g, Blueprint, request, make_response, jsonify
 from flask_login import login_required, current_user
-from config import app, dbzone, utczone
+from config import app, Config
 
 auths = Blueprint('auths', __name__)
 
@@ -84,8 +84,8 @@ def verify():
             raise Exception('%s invalid' % token)
 
         # Token is not older then 5min (300sec)
-        created_at = data['updated_at'].replace(tzinfo = dbzone).astimezone(utczone).timestamp()
-        current_time = datetime.utcnow().replace(tzinfo = utczone).timestamp()
+        created_at = data['updated_at'].replace(tzinfo=Config.UTCZONE).timestamp()
+        current_time = datetime.utcnow().replace(tzinfo=Config.UTCZONE).timestamp()
 
         if (current_time - created_at) > 300:
             raise Exception('%s expired' % token)

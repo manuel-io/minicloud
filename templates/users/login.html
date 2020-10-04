@@ -4,7 +4,9 @@
 {% endblock %}
 
 {% block nav %}
-  <button onclick="toggle('activation');">Activation / Reset</button>
+  <form onsubmit="event.preventDefault();">
+    <button onclick="toggle('activation');">Activation / Reset</button>
+  </form>
 {% endblock %}
 
 {% block header %}
@@ -15,7 +17,7 @@
       <div class="group">      
         <fieldset>
           <label>E-Mail:</label>
-          <input type="email" name="email" autocomplete="email" required>
+          <input class="focus" type="email" name="email" autocomplete="email" required>
         </fieldset>
   
         <fieldset>
@@ -50,7 +52,7 @@
       <div class="group">
         <fieldset>
           <label>Username:</label>
-          <input type="text" name="username" autocomplete="username" required>
+          <input type="text" name="username" autocomplete="username" autofocus required>
         </fieldset>
     
         <fieldset>

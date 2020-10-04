@@ -1,29 +1,39 @@
-import psycopg2, psycopg2.extras, uuid, re, io, glob, os.path, requests
+import psycopg2, psycopg2.extras, uuid, os, re, glob
 import auths, filters
-from datetime import datetime
-from dateutil import parser
-from flask import Blueprint, g, request, Response, render_template, url_for, redirect, jsonify, make_response, flash, send_file, send_from_directory, abort
+from flask import Blueprint, g, request, render_template, url_for, redirect, jsonify, make_response, flash, abort
 from users import login_required, admin_required, current_user
-from config import app, config
 from pathlib import Path
+from config import app
 from minidlna import MiniDLNA
 from helpers import get_media_types
+from mimes import MIME_TYPES
 
 multimedia = Blueprint('multimedia', __name__)
-base = Path('/var/minicloud/multimedia')
+searchpath = Path('/var/minicloud/multimedia')
 minidlna = os.environ['MINICLOUD_DLNA'] if 'MINICLOUD_DLNA' in os.environ else 'http://127.0.0.1:8290'
 minidlna_verify = False if 'MINICLOUD_DLNA_NOVERIFY' in os.environ else True
 minidlna_proxy_host = os.environ['MINICLOUD_DLNA_PROXY_HOST'] if 'MINICLOUD_DLNA_PROXY_HOST' in os.environ else None
 minidlna_proxy_port = os.environ['MINICLOUD_DLNA_PROXY_PORT'] if 'MINICLOUD_DLNA_PROXY_PORT' in os.environ else None
 
 def find_local_files():
-    return list(map(lambda path: str(path.relative_to(base)), list(base.rglob('*.*'))))
+    return list(map(lambda path: str(path.relative_to(searchpath)), list(searchpath.rglob('*.*'))))
 
 def find_minidlna_files(auth):
-    return MiniDLNA(minidlna, auth, minidlna_verify).files()
+    try:
+        return MiniDLNA(minidlna, auth, minidlna_verify).files()
+
+    except Exception as e:
+        app.logger.error('Error in find_minidlna_files: %s' % str(e))
+        flash(['Multimedia error'], 'error')
+        return []
 
 def find_minidlna_paths(auth):
-    return list(map(lambda item: item['path'], find_minidlna_files(auth)))
+    try:
+        return list(map(lambda item: item['path'], find_minidlna_files(auth)))
+
+    except Exception as e:
+        app.logger.error('Error in find_minidlna_paths: %s' % str(e))
+        return []
 
 def find_orphan_files(auth):
     dlna = find_minidlna_files(auth)
@@ -36,7 +46,7 @@ def find_orphan_files(auth):
                 catalogue.append(result['path'])
 
     except Exception as e:
-        pass
+        app.logger.error('Error in find_orphan_files: %s' % str(e))
 
     for item in dlna:
         if not item['path'] in catalogue: orphan.append(item)
@@ -86,7 +96,6 @@ def show():
 
             return render_template( "multimedia/show.html"
                                   , multimedia = multimedia
-                                  , config = config
                                   , all_directors = all_directors
                                   , all_actors = all_actors
                                   , ref = ref
@@ -141,11 +150,11 @@ def view(uuid):
             proxy = True;
 
         if len(sources) > 0:
-            return render_template( "multimedia/view.html"
+            return render_template( 'multimedia/view.html'
                                   , auth = auth
                                   , media = media
-                                  , config = config
                                   , sources = sources
+                                  , mime_types = MIME_TYPES
                                   , proxy = proxy
                                   , ref = ref
                                   )
@@ -154,6 +163,7 @@ def view(uuid):
 
     except Exception as e:
         app.logger.error('Multimedia (%s): %s' % (uuid, str(e)))
+        flash(['Multimedia view failed'], 'error')
 
     return redirect("/multimedia")
 
@@ -169,7 +179,6 @@ def indexing():
         ref = request.args.get('ref').strip()
 
     return render_template( "multimedia/indexing.html"
-                          , config = config
                           , items = dlna
                           , media_types = get_media_types()
                           , ref = ref

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import functools, argparse, codecs, psycopg2, psycopg2.extras, bcrypt, os, sys
-from config import get_db, release
+from config import Config
+from multimedia import find_minidlna_files
 
 commands = []
 
@@ -20,7 +21,6 @@ def cmd(cmd):
     for cmd in commands:
         sys.stderr.write("  %s:\t%s\n" % (cmd['name'], cmd['desc']))
 
-
 @command('minicloud', 'System status variables')
 def minidloud(cmd):
     parser = argparse.ArgumentParser(usage = '%s %s' % (sys.argv[0], cmd['name']), description = cmd['desc'])
@@ -28,33 +28,32 @@ def minidloud(cmd):
     args = parser.parse_args(sys.argv[2:]);
 
     if args.version:
-        sys.stderr.write('%s.%s.%s\n' % (release['major'], release['minor'], release['revision']))
+        sys.stderr.write('%s.%s.%s\n' % (Config.RELEASE['major'], Config.RELEASE['minor'], Config.RELEASE['revision']))
 
 @command('users', 'List system users')
 def auths(cmd):
     parser = argparse.ArgumentParser(usage = '%s %s' % (sys.argv[0], cmd['name']), description = cmd['desc'])
     parser.add_argument('--username', default = '%', metavar = 'USERNAME', help = 'Set username')
     args = parser.parse_args(sys.argv[2:]);
-    db = get_db()
+    db = Config.get_db()
     data = []
 
     try:
         with db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
-                SELECT * FROM minicloud_users AS a
-                LEFT JOIN minicloud_auths AS b ON (a.id = b.user_id)
-                WHERE a.name LIKE %s
-                """, [args.username])
+              SELECT * FROM minicloud_users AS a
+              WHERE a.name LIKE %s
+              """, [args.username])
 
             data = cursor.fetchall();
 
         for user in data:
-            print('Username:', user['name'])
-            print('E-Mail:', user['email'])
-            print('Disabled:', user['disabled'])
-            print('Activation key:', user['activation_key'])
-            print('Admin:', user['admin'])
-            print('Media:', user['media'])
+            sys.stdout.write('Username: %s\n' % user['name'])
+            sys.stdout.write('E-Mail: %s\n' % user['email'])
+            sys.stdout.write('Disabled: %s\n' % user['disabled'])
+            sys.stdout.write('Activation key: %s\n' % user['activation_key'])
+            sys.stdout.write('Admin: %s\n' % user['admin'])
+            sys.stdout.write('Media: %s\n' % user['media'])
 
     except Exception as e:
         sys.stderr.write('Error: %s\n' % e)
@@ -68,31 +67,31 @@ def setup(cmd):
     parser.add_argument('--email', default = 'minicloud@example.com', metavar = 'EMAIL', help = 'Set email')
     parser.add_argument('--password', default = 'minicloud', metavar = 'PASSWORD', help = 'Set password')
     args = parser.parse_args(sys.argv[2:]);
-    db = get_db()    
+    db = Config.get_db()
 
     hash = bcrypt.hashpw(args.password, bcrypt.gensalt())
-    
+
     try:
         with db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
                 INSERT INTO minicloud_users (name, email, password, admin)
                 VALUES (%s, %s, %s, %s)
                 """, [args.username, args.email, hash, True])
-    
+
         db.commit()
 
     except Exception as e:
         db.rollback()
         sys.stderr.write('Error: %s\n' % e)
-        
+
     db.close()
 
-@command('utool', 'Register mulimedia files')
+@command('utool', 'Update mulimedia entries')
 def utool(cmd):
     parser = argparse.ArgumentParser(usage = '%s %s' % (sys.argv[0], cmd['name']), description = cmd['desc'])
     parser.add_argument('csv', metavar = 'CSV FILE', help = 'CSV File')
     args = parser.parse_args(sys.argv[2:]);
-    db = get_db()    
+    db = Config.get_db()
 
     if not os.access(args.csv, os.R_OK):
         sys.stderr.write('Error: file %s is not readable\n' % args.csv)
@@ -111,13 +110,13 @@ def utool(cmd):
             try:
                 with db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
                     cursor.execute(query)
-                
+
                 db.commit()
-                
+
             except Exception as e:
                 db.rollback()
                 sys.stderr.write('Error: %s\n' % e)
-        
+
     db.close()
 
 if __name__ == '__main__':
@@ -126,7 +125,7 @@ if __name__ == '__main__':
         cmd = functools.reduce(lambda acc, val: val if val['name'] == 'command' else acc, commands, None)
         cmd['action'](cmd)
         exit(1)
-    
+
     cmd = functools.reduce(lambda acc, val: val if val['name'] == sys.argv[1] else acc, commands, None)
     if cmd and cmd['name'] == sys.argv[1]:
         cmd['action'](cmd)

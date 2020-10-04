@@ -1,32 +1,42 @@
 import psycopg2, psycopg2.extras, io, time, os, re
-from PIL import Image, ImageOps
-from flask import Blueprint, url_for, redirect, g, render_template, send_file, request, flash, send_from_directory, Response, abort
-from flask_login import UserMixin, login_required, current_user
+from flask import Blueprint, g, request, Response
+from flask_login import login_required, current_user
 from dateutil import tz, parser
-from config import config, MIME_SUFFIX
+from config import Config
+
+def format_registered(user):
+    utc = Config.UTCZONE
+    zone = Config.ZONE
+    user['registered'] = user['created_at'].replace(tzinfo=utc).astimezone(zone).strftime("%Y-%m-%d")
+    return user
 
 def format_task(task):
-    dbzone = config['general']['dbzone']
-    zone = config['general']['zone']
-    today = config['general']['today']
-    week = config['general']['week']
+    utc = Config.UTCZONE
+    zone = Config.ZONE
+    today = Config.TODAY
     task['delayed'] = False
 
     if task['process']:
-        task['process'] = parser.parse(task['process']).replace(tzinfo = dbzone).astimezone(zone).strftime("%-d %b %Y")
+        task['process'] = parser.parse(task['process']).replace(tzinfo=utc).astimezone(zone).strftime("%-d %b %Y")
 
     if task['done']:
-        task['done'] = parser.parse(task['done']).replace(tzinfo = dbzone).astimezone(zone).strftime("%-d %b %Y")
+        task['done'] = parser.parse(task['done']).replace(tzinfo=utc).astimezone(zone).strftime("%-d %b %Y")
 
     if task['due']:
-      delta = parser.parse(task['due']).replace(tzinfo = dbzone).astimezone(zone) - today
+      delta = parser.parse(task['due']).replace(tzinfo=utc).astimezone(zone) - today
       task['deadline'] = round(delta.total_seconds()/86400)
       task['delayed'] = True if task['deadline'] < 0 else False
-      task['due'] = parser.parse(task['due']).replace(tzinfo = dbzone).astimezone(zone).strftime("%-d %b %Y")
+      task['due'] = parser.parse(task['due']).replace(tzinfo=utc).astimezone(zone).strftime("%-d %b %Y")
 
     return task
 
-@login_required
+def get_task_types():
+    return [ { 'name': 'Pending', 'value': 'pending' }
+           , { 'name': 'Processing', 'value': 'processing' }
+           , { 'name': 'Completed', 'value': 'completed' }
+           , { 'name': 'Deleted', 'value': 'deleted' }
+           ]
+
 def get_media_types():
     return [ { 'name': 'Audiobooks', 'value': 'audiobooks' }
            , { 'name': 'Audiotracks', 'value': 'audiotracks' }
@@ -40,17 +50,23 @@ def get_media_types():
 
 @login_required
 def get_categories():
-    with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
-        cursor.execute("""
-            SELECT DISTINCT category FROM minicloud_gallery
+    categories = []
+    try:
+        with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
+            cursor.execute("""
+              SELECT DISTINCT category FROM minicloud_gallery
                 WHERE user_id = %s
-            UNION SELECT DISTINCT category FROM minicloud_tasks
+              UNION SELECT DISTINCT category FROM minicloud_tasks
                 WHERE user_id = %s
-            GROUP BY category ORDER BY category ASC;
-            """, [ int(current_user.id)
-                 , int(current_user.id) ])
+              GROUP BY category ORDER BY category ASC;
+              """, [ int(current_user.id), int(current_user.id) ])
 
-        return cursor.fetchall()
+            categories = cursor.fetchall()
+
+    except Exception as e:
+        raise e
+
+    return categories
 
 def get_stream(request, filename, oid, mime, size):
     try:

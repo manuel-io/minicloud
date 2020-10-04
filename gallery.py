@@ -2,8 +2,9 @@ import psycopg2, psycopg2.extras, io, time, os, re, functools
 from PIL import Image, ImageOps
 from flask import Blueprint, url_for, redirect, g, render_template, send_file, request, flash, abort
 from flask_login import login_required, current_user
-from config import app, config, MIME_SUFFIX
+from config import app
 from helpers import get_categories, get_stream
+from mimes import MIME_SUFFIX
 
 gallery = Blueprint('gallery', __name__)
 
@@ -89,7 +90,6 @@ def show():
         files = cursor.fetchall()
 
         return render_template( "gallery/show.html"
-                              , config = config
                               , files = files
                               , categories = get_categories()
                               )
@@ -113,7 +113,6 @@ def edit(uid):
             file = cursor.fetchone()
 
         return render_template( "gallery/edit.html"
-                              , config = config
                               , categories = get_categories()
                               , file = file
                               )

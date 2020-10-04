@@ -15,42 +15,74 @@
 {% endblock %}
 
 {% block section %}
-  <section id="users" class="show">
-    {% for user in users %}
-      <section id="uc{{ loop.index }}" class="item">
-        <a href="{{ url_for('users.edit', uuid = user.uuid, _anchor = 'uc' ~ loop.index) }}">
-          <div>
+  <section id="users" class="content show">
+    <nav>
+      {% for item in [ { 'name': 'Users', 'value': 'users' }
+                     , { 'name': 'Admins', 'value': 'admins' }
+                     ] %}
+        <form action="{{ url_for('users.show') }}" method="get">
+          <input type="hidden" name="ref" value="{{ item.value}}">
+          <button type="submit" class="{{ 'active' if ref == item.value }}">{{ item.name }}</button>
+        </form>
+      {% endfor %}
+    </nav>
+    <main>
+      {% for user in users %}
+        <section id="uc{{ loop.index }}" class="item">
+          <div class="toogle" onclick="user_toogle(event, 'uc{{ loop.index }}')">
             <p>{{ user.name }}</p>
           </div>
-        </a>
-        
-        <div>
-          <table>
-            <tr>
-              <td>Uploads:</td>
-              <td>{{ user.uploads_count }}</td>
-            </tr>
-            <tr>
-              <td>Tasks:</td>
-              <td>{{ user.tasks_count }}</td>
-            </tr>
-          </table>
-        </div>
-
-        <div class="action">
-          <form  action="{{ url_for('users.delete', uuid = user.uuid) }}" method="post" onsubmit="handle_delete_check(event);">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            {% if current_user.id == user.id %}
-              <input type="submit" value="Delete" disabled>
-            {% else %}
-              <input type="submit" value="Delete">
-            {% endif %}
-          </form>
-        </div>
-
-        <div style="display:none;">
-        </div>
-      </section>
-    {% endfor %}
+          
+          <div class="action">
+            <form  action="{{ url_for('users.edit', uuid = user.uuid, _anchor = 'uc' ~ loop.index) }}" method="get">
+              <input type="hidden" name="ref" value="{{ ref }}">
+              {% if current_user.id == user.id %}
+                <input type="submit" value="Edit" disabled>
+              {% else %}
+                <input type="submit" value="Edit">
+              {% endif %}
+            </form>
+          </div>
+  
+          <div class="action">
+            <form  action="{{ url_for('users.delete', uuid = user.uuid, ref = ref) }}" method="post" onsubmit="handle_delete_check(event);">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              {% if current_user.id == user.id %}
+                <input type="submit" value="Delete" disabled>
+              {% else %}
+                <input type="submit" value="Delete">
+              {% endif %}
+            </form>
+          </div>
+  
+          <section class="description">
+            <table>
+              <tr>
+                <td>Email</td>
+                <td>{{ user.email }}</td>
+              </tr>
+              <tr>
+                <td>Uploads</td>
+                <td>{{ user.uploads_count }}</td>
+              </tr>
+              <tr>
+                <td>Tasks</td>
+                <td>{{ user.tasks_count }}</td>
+              </tr>
+              <!--
+              <tr>
+                <td>Activation:</td>
+                <td>{{ user.activation_key }}</td>
+              </tr>
+              -->
+              <tr>
+                <td>Registered</td>
+                <td>{{ user.registered }}</td>
+              </tr>
+            </table>
+          </section>
+        </section>
+      {% endfor %}
+    </main>
   </section>
 {% endblock %}

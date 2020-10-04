@@ -1,3 +1,6 @@
+### 2020.10.04
+New Notes tool. See the updated [database schema](Migration.md)
+
 ### 2020.08.23
 Update dlna search folders in `/etc/minidlna.conf`
 

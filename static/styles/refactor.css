@@ -1,12 +1,233 @@
-body > main > section#gallery.show,
-body > main > section#login {
+/* Aside navigation element */
+body > aside {
+  position: relative;
+  flex-grow: 0;
+  flex-shrink: 0;
+  width: 40px;
+  max-width: 40px;
+  height: 100%;
+  max-height: 100%;
+}
+
+body > aside > div {
+  position: absolute;
+  z-index: 100;
+  display: flex;
+  flex-direction: row;
+  background-color: #333;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 0 20px 20px 0;
+  box-sizing: border-box;
+}
+
+body > aside nav fieldset input[type=submit]:valid {
+  background-color: #fff;
+  color: #000;
+}
+
+body > aside > div > nav {
+  flex-grow: 0;
+  flex-shrink: 0;
+  width: 0;
+  overflow: hidden;
+  overflow-y: auto;
+  cursor: pointer;
+}
+
+body > aside > div > nav > div {
+  width: 280px;
+}
+
+body > aside > div > section {
+  flex-grow: 0;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  max-width: 40px;
+  cursor: pointer;
+  background-color: #333;
+  color: #fff;
+}
+
+body > aside > div > section > p {
+  width: 30px;
+  height: 30px;
+  background-color: transparent;
+  background-image: url('../fontawesome/right.svg');
+  background-position: center center;
+  background-size: 25px 25px;
+  background-repeat: no-repeat;
+}
+
+body > aside > div > input:not(:checked) ~ nav {
+  transition: all 0s ease-out;
+}
+
+body > aside > div > input:checked ~ nav {
+  width: 280px;
+  transition: all 1s ease-out;
+}
+
+body > aside > div > input:not(:checked) ~ section > p {
+  transform: rotate(0deg);
+  transition: 0s ease-out;
+}
+
+body > aside > div > input:checked ~ section > p {
+  transform: rotate(-180deg);
+  transition: 1s ease-out;
+}
+
+/* Main content element */
+body > main {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  min-width: 300px;
+  min-height: 100%;
+  padding: 5px;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+body > main > footer,
+body > main > section,
+body > main > header {
+  flex-grow: 0;
+  flex-shrink: 0;
+}
+
+body > main > section.content {
+  flex-grow: 1;
+  flex-shrink: 0;
+}
+
+body > main > header > nav > form > button {
+  margin: 5px 2px 5px 2px;
+}
+
+body > main > header > nav > form:first-child > button {
+  margin-left: 0;
+}
+
+body > main > header > nav > form:last-child > button {
+  margin-right: 0;
+}
+
+body > aside nav fieldset,
+section#gallery section.categories > div.item,
+section#tasks section.categories > main.item {
+  margin: 5px;
+}
+
+h2.top,
+form > div.group,
+section#multimedia.view section.description,
+section#multimedia.show div.main > section,
+section#multimedia.show section.categories,
+fieldset {
+  margin: 5px 0 5px 0;
+  width: 100%;
+}
+
+section#tasks.show main.item nav,
+section#gallery.show div.item nav {
+  margin: 5px 0 0 0;
+}
+
+/* Border box */
+input[type=submit],
+input[type=text],
+input[type=number],
+input[type=email],
+input[type=password],
+input[type=file],
+input[type=date],
+textarea,
+body > main > header > nav > form > button,
+fieldset,
+fieldset, select,
+form > div,
+.tags, .tag,
+section#alert,
+section#progress,
+section#searchnotes section.results section.item,
+section#searchnotes section.results section.item > div,
+section#uploads.show section.item,
+section#uploads.show .item div,
+section#tasks section.categories table,
+section#tasks section.categories > .item,
+section#gallery section.categories > .item,
+section#diashow.show section.item,
+section#diashow.show section.item div,
+section#users.show section.item,
+section#users.show section.item div,
+section#users.show section.description,
+section#multimedia.show section.categories,
+section#multimedia.show div.main,
+section#multimedia.view section.description {
+  border: 1px solid #888;
+  border-radius: 5px;
+  box-sizing: border-box;
+  padding: 5px;
+}
+
+/* Using CSS Flex */
+section#gallery.show,
+section#login {
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
-body > main > section#multimedia.show,
-body > main > section#tasks.show {
+section#tasks section.categories,
+section#gallery section.categories {
+  display: flex;
+  flex-direction: row;
+  overflow-x: auto;
+}
+
+section#gallery section.categories section  {
+  flex-grow: 0;
+  flex-shrink: 0;
+  width: 150px;
+  height: 150px;
+  border-radius: 5px;
+  border: 1px solid #000;
+  background-position: center;
+  background-size: auto;
+}
+
+section#tasks.show section.categories table {
+  width: 100%;
+}
+
+section#tasks.show section.categories table.pending {
+  background-color: #ef1;
+  color: #000;
+}
+
+section#tasks.show section.categories table.ontime {
+  background-color: #1fde1f;
+  color: #000;
+}
+
+section#tasks.show section.categories table.delayed {
+  background-color: #de1f1f;
+  color: #fff;
+}
+
+/* Using CSS Grids */
+section#users.show,
+section#multimedia.show,
+section#tasks.show {
   display: grid;
   grid-template-columns: 1px auto 1px;
   grid-template-rows: 1px auto 1px 1fr 1px;
@@ -14,30 +235,47 @@ body > main > section#tasks.show {
   border-radius: 5px;
 }
 
-body > main > section#multimedia.show > nav,
-body > main > section#tasks.show > nav {
+section#notes.show {
+  display: grid;
+  grid-template-columns: 1px auto 1px auto 1px;
+  grid-template-rows: 1px auto 1px 1fr 1px auto 1px;
+  background-color: #333;
+  border-radius: 5px;
+}
+
+section#users.show > nav,
+section#multimedia.show > nav,
+section#tasks.show > nav {
   grid-column: 2 / 3;
   grid-row: 2 / 3;
   background-color: #333;
   box-sizing: border-box;
 }
 
-body > main > section#multimedia.show > nav button,
-body > main > section#tasks.show > nav button {
+section#notes.show > nav input[type=submit],
+section#notes.show > nav button,
+section#users.show > nav button,
+section#multimedia.show > nav button,
+section#tasks.show > nav button {
+  width: auto;
   color: #fff;
   background-color: #333;
   box-sizing: border-box;
   padding: 5px;
+  border-width: 0px;
 }
 
-body > main > section#multimedia.show > nav button.active,
-body > main > section#tasks.show > nav button.active {
+section#notes.show > nav input[type=submit].active,
+section#users.show > nav button.active,
+section#multimedia.show > nav button.active,
+section#tasks.show > nav button.active {
   color: #99cc33;
 }
 
-body > main > section#multimedia.show > main,
-body > main > section#tasks.show > main {
-  grid-column: 2 / 3;
+section#users.show > main,
+section#multimedia.show > main,
+section#tasks.show > main {
+  grid-column: 2 / 4;
   grid-row: 4 / 5;
   background-color: #fff;
   border-radius: 5px;
@@ -46,6 +284,400 @@ body > main > section#tasks.show > main {
   overflow: auto;
 }
 
+section#notes.show > nav.header {
+  grid-column: 2 / 3;
+  grid-row: 2 / 3;
+  background-color: #333;
+  border-radius: 5px;
+}
+
+section#notes.show > main {
+  grid-column: 2 / 5;
+  grid-row: 4 / 5;
+  background-color: #fff;
+  border-radius: 5px;
+  box-sizing: border-box;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+section#notes.show > nav.footer {
+  grid-column: 2 / 5;
+  grid-row: 6 / 7;
+  background-color: #333;
+  border-radius: 5px;
+  text-align: right;
+}
+
+section#notes.show > main fieldset {
+  flex-grow: 0;
+  flex-shrink: 0;
+}
+
+section#notes.show > main fieldset.textarea {
+  flex-grow: 1;
+  flex-shrink: 0;
+}
+
+section#notes.show > main textarea {
+  height: calc(100% - 19px);
+  min-height: 100px;
+}
+
+
+section#searchnotes section.results section.item,
+section#diashow.show section.item,
+section#users.show section.item,
+section#uploads.show section.item {
+  display: grid;
+  margin: 5px 0 5px 0;
+  overflow-x: auto;
+  align-items: center;
+  padding: 0;
+}
+
+section#searchnotes section.results section.item {
+  grid-template-columns: minmax(185px, 1fr) auto;
+  grid-template-rows: auto;
+}
+
+section#searchnotes section.results section.item p {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+section#uploads.show section.item {
+  grid-template-columns: minmax(185px, 1fr) 100px 100px auto;
+  grid-template-rows: auto;
+}
+
+section#diashow.show section.item {
+  grid-template-columns: minmax(185px, 1fr) auto;
+  grid-template-rows: auto;
+}
+
+section#users.show section.item {
+  grid-template-columns: minmax(185px, 1fr) auto auto;
+  grid-template-rows: auto auto;
+}
+
+section#multimedia.show section.categories {
+  cursor: pointer;
+}
+
+section#multimedia.show div.media {
+  display: none;
+  flex-direction: row;
+  justify-content: flex-start;
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+section#multimedia.show div.main {
+  flex-grow: 0;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 280px;
+  min-width: 280px;
+  margin: 5px;
+}
+
+section#users.show section.description table,
+section#multimedia.view section.description table,
+section#multimedia.show section.description table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+section#users.show .item > section.description table tr,
+section#multimedia.view section.description table tr,
+section#multimedia.show section.description table tr {
+  border-top: 1px solid #000;
+  border-bottom: 1px solid #000;
+}
+
+section#users.show .item > section.description table tr:first-child,
+section#multimedia.view section.description table tr:first-child,
+section#multimedia.show section.description table tr:first-child {
+  border-top: 0;
+}
+
+section#users.show .item > section.description table tr:last-child,
+section#multimedia.view section.description table tr:last-child,
+section#multimedia.show section.description table tr:last-child {
+  border-bottom: 0;
+}
+
+#users.show section.description table td:first-child,
+#multimedia.view section.description table td:first-child,
+#multimedia.show section.description table td:first-child {
+  text-align: left;
+  vertical-align: top;
+}
+
+#users.show section.description table td:last-child,
+#multimedia.view section.description table td:last-child,
+#multimedia.show section.description table td:last-child {
+  text-align: right;
+  vertical-align: top;
+}
+
+#multimedia.view section.description table td:nth-child(2) > p,
+#multimedia.show section.description table td:nth-child(2) > p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#multimedia.show section.description table td:nth-child(2) > p {
+  max-width: 200px;
+}
+
+section#users.show section.item > div {
+  grid-row: 1 / 2;
+}
+
+section#users.show section.item > div.toogle {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+section#users.show section.item > section.description {
+  display: none;
+  grid-column: 1 / 4;
+  grid-row: 2 / 3;
+  margin: 5px;
+  overflow: auto;
+}
+
+section#diashow.show section.item:nth-child(even),
+section#users.show section.item:nth-child(even),
+section#uploads.show section.item:nth-child(even) {
+  background-color: #f8f8ff;
+}
+
+section#users.show section.item:nth-child(even) > section.description {
+  background-color: #fff;
+}
+
+section#users.show section.item:nth-child(odd) > section.description {
+  background-color: #f8f8ff;
+}
+
+section#searchnotes section.results section.item div,
+section#diashow.show section.item div,
+section#users.show section.item div,
+section#uploads.show section.item div {
+  background-color: transparent;
+  border-width: 0;
+}
+
+section#diashow.show section.item div p,
+section#users.show section.item div p,
+section#uploads.show section.item div p {
+  background-color: transparent;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+section#uploads.show section.item div.mime p,
+section#uploads.show section.item div.size p {
+  text-align: right;
+}
+
+section#diashow.show section.item div.action,
+section#users.show section.item div.action,
+section#uploads.show section.item div.action {
+  justify-self: end;
+}
+
+/* Status info/alert */
+section#alert,
+section#progress {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  top: 10px;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  box-shadow: 0 10px 20px -5px #000;
+}
+
+section#alert {
+  width: 33.3%;
+  min-width: 300px;
+  cursor: pointer;
+}
+
+section#alert > div {
+  width: 100%;
+  margin: 5px 0 5px 0;
+  background-color: transparent;
+  text-align: center;
+}
+
+section#alert > div > noscript,
+section#alert > div > span,
+section#alert > div > p.error {
+  color: #de1f1f;
+}
+
+section#alert > div > p.alert,
+section#alert > div > p.info {
+  color: #99cc33;
+}
+
+/* Progressbar */
+section#progress {
+  display: none;
+  width: 55%;
+  min-width: 300px;
+}
+
+section#progress > div {
+  width: 100%;
+  height: 30px;
+  background-color: #99cc33;
+}
+
+section#progress > div > p {
+  position: absolute;
+  right: 20px;
+  line-height: 30px;
+  text-align: center;
+  background-color: transparent;
+}
+
+/* Disclaimer style */
+#disclaimer {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  margin: 5px 0 5px 0;
+}
+
+#disclaimer > div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#disclaimer > div:first-child {
+  width: 50px;
+}
+
+#disclaimer > div:first-child > img {
+  width: 32px;
+  height: 32px;
+}
+
+/* Cansvas dialog */
+.dialog {
+  position: absolute;
+  display: none;
+  box-shadow: 0 10px 20px -5px #000;
+  width: 280px;
+  background-color: #fff;
+  right: 10px;
+  bottom: 10px;
+  z-index: 500;
+}
+
+.dialog main {
+  padding: 5px;
+}
+
+.dialog main canvas {
+  width: 270px;
+  cursor: pointer;
+}
+
+/* Checkbox form element */
+fieldset > label.checkbox {
+  position: relative;
+  margin-left: 30px;
+  cursor: pointer;
+}
+
+fieldset > label.checkbox > p:before {
+  position: absolute;
+  margin-left: -25px;
+  width: 15px;
+  height: 15px;
+  border: 2px solid #333;
+  border-radius: 50%;
+  content: '';
+}
+
+fieldset > label.checkbox > input:checked + p:before {
+  background-image: url('../icons/cross.svg');
+  background-size: 10px 10px;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+
+/* List form element */
+fieldset div.optlist {
+  border: 1px solid #000;
+  border-radius: 5px;
+  padding: 5px;
+  box-sizing: border-box;
+  text-align: justify;
+}
+
+fieldset div.optlist > span {
+  display: inline-block;
+  border: 1px solid #fff;
+  border-radius: 5px;
+  margin: .4px;
+  padding: 4px;
+  cursor: pointer;
+  font-size: 90%;
+}
+
+fieldset div.optlist > span.active {
+  background-color: #f8f8ff;
+  border: 1px solid #888;
+}
+
+/* Tags form element */
+.tags {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  flex-wrap: wrap;
+  cursor: pointer;
+}
+
+.tag {
+  background-color: #f8f8ff;
+  margin: 5px;
+  color: #000;
+}
+
+input[name=tag]:valid {
+  border: 0;
+  outline: none;
+  box-shadow: none;
+  /* width: 15px; */
+  width: 100%;
+  font-weight: bold;
+  background-color: transparent;
+}
+
+/* SimpleLightbox style */
 button.slbCloseBtn {
   border-style: solid;
   border-width: 1px;
@@ -64,191 +696,5 @@ button.slbCloseBtn {
 .slbContentOuter,
 .slbWrap,
 .slbWrapOuter {
-  background-color: transparent;
-}
-
-body > main > section#multimedia.show > main .categories {
-  margin-top: 5px;
-  margin-bottom: 5px;
-  border: 1px solid #888;
-  border-radius: 5px;
-  padding: 5px;
-  box-sizing: border-box;
-  cursor: pointer;
-}
-
-body > main > section#multimedia.show > main .categoriess {
-  display: flex;
-  flex-direction: row;
-  overflow-x: auto;
-  scrollbar-width: auto;
-}
-
-body > main > section#multimedia.show > main .media {
-  display: none;
-  flex-direction: row;
-  justify-content: flex-start;
-  overflow-x: auto;
-  overflow-y: auto;
-}
-
-body > main > section#multimedia.show > main .main {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-start;
-  width: 300px;
-  min-width: 300px;
-  margin: 5px;
-  padding: 5px;
-  box-sizing: border-box;
-  border: 1px solid #000;
-  border-radius: 5px;
-}
-
-body > main > section#multimedia.show > main .main section {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 5px 0 5px 0;
-}
-
-body > main > section#multimedia.show > main .main section table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-#multimedia.show .main section table tr {
-  border-top: 1px solid #000;
-  border-bottom: 1px solid #000;
-}
-
-#multimedia.show .main section table tr:first-child {
-  border-top: 0;
-}
-
-#multimedia.show .main section table tr:last-child {
-  border-bottom: 0;
-}
-
-#multimedia.show .main section table td:first-child {
-  text-align: left;
-  vertical-align: top;
-}
-
-#multimedia.show .main section table td:last-child {
-  text-align: right;
-  vertical-align: top;
-}
-
-#multimedia.show .main section table td:nth-child(2) > p {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  width: 220px;
-  white-space: nowrap;
-  box-sizing: border-box;
-  padding: 0 0 0 10px;
-}
-
-section#users.show .item {
-  grid-template-columns: minmax(150px, 1fr) minmax(150px, 1fr) 100px;
-}
-
-section#uploads.show .item {
-  grid-template-columns: minmax(150px, 1fr) 150px 100px 100px;
-}
-
-section#diashow.show .item {
-  grid-template-columns: minmax(200px, 1fr) 100px;
-}
-
-section#diashow.show .item,
-section#users.show .item,
-section#uploads.show .item {
-  display: grid;
-  align-items: center;
-  border: 1px solid #000;
-  border-radius: 5px;
-  box-sizing: border-box;
-  margin: 5px 0 5px 0;
-  overflow-x: auto;
-}
-
-section#diashow.show .item:nth-child(even),
-section#users.show .item:nth-child(even),
-section#uploads.show .item:nth-child(even) {
-  background-color: rgba(200, 200, 255, .1);
-}
-
-section#diashow.show .item div,
-section#users.show .item div,
-section#uploads.show .item div {
-  background-color: transparent;
-  box-sizing: border-box;
-  padding: 5px;
-  text-overflow: ellipsis;
-}
-
-section#users.show .item div table {
-  display: block;
-  height: 29px;
-  overflow-y: auto; 
-}
-
-section#diashow.show .item div p,
-section#users.show .item div p,
-section#uploads.show .item div p {
-  box-sizing: border-box;
-  background-color: transparent;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-section#uploads.show .item div.mime p,
-section#uploads.show .item div.size p {
-  text-align: right;
-}
-
-section#diashow.show .item div.action,
-section#users.show .item div.action,
-section#uploads.show .item div.action {
-  justify-self: end;
-}
-
-.tags {
-  box-sizing: border-box;
-  border: 1px solid #000;
-  border-radius: 5px;
-  padding: 5px;
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: center;
-  flex-wrap: wrap;
-  cursor: pointer;
-}
-
-.tag {
-  box-sizing: border-box;
-  border: 1px solid #000;
-  border-radius: 5px;
-  background-color: rgba(200, 200, 255, .1);
-  padding: 5px;
-  margin: 5px;
-  color: #000;
-}
-
-.newtag {
-  box-sizing: border-box;
-  background-color: transparent;
-}
-
-input[name=tag]:valid {
-  border: 0;
-  outline: none;
-  font-size: 1em;
-  width: 15px;
-  font-weight: bold;
-  color: #000;
   background-color: transparent;
 }

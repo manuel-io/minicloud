@@ -1,7 +1,11 @@
 {% macro nav(target) %}
   {% if target == 'show' %}
-    <button onclick="toggle('addfile');">New File</button>
-    <button onclick="toggle('adddir');">New Directory</button>
+    <form onsubmit="event.preventDefault();">
+      <button onclick="toggle('addfile');">New File</button>
+    </form>
+    <form onsubmit="event.preventDefault();">
+      <button onclick="toggle('adddir');">New Directory</button>
+    </form>
   {% endif %}
 {% endmacro %}
 

@@ -1,7 +1,8 @@
 {% macro nav(target) %}
   {% if target == 'show' %}
-    <button onclick="toggle('showfilters');">Filters</button>
-
+    <form onsubmit="event.preventDefault();">
+      <button onclick="toggle('showfilters');">Filters</button>
+    </form>
     {% if current_user.admin %}
       <form action="{{ url_for('multimedia.indexing') }}" method="get">
         <input type="hidden" name="ref" value="{{ ref }}">
@@ -40,7 +41,7 @@
         </fieldset>
 
         <fieldset>
-          <label>Cast:</label>
+          <label>Cast / Crew:</label>
           <input type="hidden" name="actors">
           <div class="optlist">
             {% for actor in all_actors %}

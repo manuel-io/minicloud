@@ -3,8 +3,8 @@ from datetime import datetime
 from dateutil import tz, parser
 from flask import Blueprint, g, request, render_template, url_for, redirect, flash, abort
 from users import login_required, admin_required, current_user
-from config import app, config
-from helpers import get_categories, format_task
+from config import app, Config
+from helpers import get_categories, get_task_types, format_task
 
 tasks = Blueprint('tasks', __name__)
 
@@ -12,8 +12,8 @@ tasks = Blueprint('tasks', __name__)
 @login_required
 def show():
     ref = 'pending'
-    today = config['general']['today']
-    week = config['general']['week']
+    today = Config.TODAY
+    week = Config.WEEK
     tasks = []
 
     if 'ref' in request.args.keys():
@@ -25,7 +25,7 @@ def show():
               SELECT category AS name, json_agg(json_build_object('id', id, 'uid', uid, 'status', status, 'title', title, 'due', due, 'done', done, 'process', process) ORDER BY created_at ASC) AS tasks
               FROM minicloud_tasks WHERE user_id = %s AND ARRAY[status] @> %s
               GROUP BY category ORDER BY category ASC;
-            """, [int(current_user.id), [ref]])
+              """, [int(current_user.id), [ref]])
 
             tasks = cursor.fetchall()
 
@@ -40,6 +40,7 @@ def show():
     return render_template( 'tasks/show.html'
                           , tasks = tasks
                           , categories = get_categories()
+                          , task_types = get_task_types()
                           , today = today.strftime('%-d %b %Y')
                           , week = week
                           , ref = ref
@@ -48,7 +49,8 @@ def show():
 @tasks.route('/add', methods = ['POST'])
 @login_required
 def add():
-    zone = config['general']['zone']
+    utc = Config.UTCZONE
+    zone = Config.ZONE
     title = request.form['title']
     category = request.form['category']
     deadline = request.form['deadline']
@@ -56,22 +58,20 @@ def add():
     due = None
 
     if re.match(r'^\d{4}-\d{2}-\d{2}', deadline):
-        due = parser.parse(deadline).replace(tzinfo = zone)
+        due = parser.parse(deadline).replace(tzinfo=zone).astimezone(utc)
 
     try:
         with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
               INSERT INTO minicloud_tasks (user_id, title, category, description)
-              VALUES (%s, %s, %s, %s)
-              RETURNING id
+              VALUES (%s, %s, %s, %s) RETURNING id
               """, [int(current_user.id), title, category, description])
 
             index = cursor.fetchone()['id']
 
             if due:
                 cursor.execute("""
-                  UPDATE minicloud_tasks
-                  SET due = %s WHERE id = %s AND user_id = %s
+                  UPDATE minicloud_tasks SET due = %s WHERE id = %s AND user_id = %s
                   """, [due, index, int(current_user.id)])
 
         g.db.commit()
@@ -88,9 +88,8 @@ def add():
 @login_required
 def edit(uid):
     ref = 'pending'
-    utc = config['general']['utczone']
-    dbzone = config['general']['dbzone']
-    zone = config['general']['zone']
+    utc = Config.UTCZONE
+    zone = Config.ZONE
     task = None
 
     if 'ref' in request.args.keys():
@@ -116,12 +115,12 @@ def edit(uid):
 
     if request.method == 'GET':
         if task['due']:
-            task['deadline'] = task['due'].replace(tzinfo = dbzone).astimezone(zone).strftime('%Y-%m-%d')
+            task['deadline'] = task['due'].replace(tzinfo=utc).astimezone(zone).strftime('%Y-%m-%d')
 
         return render_template( 'tasks/edit.html'
-                               , config = config
                                , task = task
                                , categories = get_categories()
+                               , task_types = get_task_types()
                                , ref = ref
                                )
 
@@ -134,7 +133,7 @@ def edit(uid):
         process, due, done = None, None, None
 
         if re.match(r'^\d{4}-\d{2}-\d{2}', deadline):
-            due = parser.parse(deadline).replace(tzinfo = zone)
+            due = parser.parse(deadline).replace(tzinfo=zone).astimezone(utc)
 
         try:
             with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
@@ -148,13 +147,14 @@ def edit(uid):
                     ref = status
 
                     if status in ['completed', 'deleted']:
-                        done = datetime.utcnow().replace(tzinfo = utc)
+                        done = datetime.utcnow().replace(tzinfo=utc)
                         process = None
                         deadline = None
                         due = None
 
                     if status in ['processing']:
-                        process = datetime.utcnow().replace(tzinfo = utc)
+                        process = datetime.utcnow().replace(tzinfo=utc)
+                        print('TZINFO', process.tzinfo)
                         done = None
 
                     if status in ['pending']:

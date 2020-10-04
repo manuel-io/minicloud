@@ -15,7 +15,7 @@
 {% endblock %}
 
 {% block section %}
-  <section id="uploads" class="show">
+  <section id="uploads" class="content show">
     {% if parent %}
       <h2 class="top"><a class="back" href="{{ url_for('uploads.show', parent = backref) }}">Zurück</a></h2>
     {% endif %}

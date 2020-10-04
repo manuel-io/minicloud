@@ -3,12 +3,13 @@ import psycopg2, psycopg2.extras, bcrypt, io, os, urllib.request, ssl
 from flask import flash, g, render_template, request, url_for, redirect, abort
 from flask_wtf.csrf import CSRFProtect
 from flask_login import LoginManager, login_user, logout_user, current_user
-from config import app, get_db, Config
+from config import app, Config
 from users import User, users, login_required
 from uploads import uploads
 from gallery import gallery
 from tasks import tasks
 from profile import profile
+from notes import notes
 from multimedia import multimedia
 from auths import auths, revoke
 
@@ -16,6 +17,7 @@ app.register_blueprint(users, url_prefix='/users')
 app.register_blueprint(uploads, url_prefix='/uploads')
 app.register_blueprint(gallery, url_prefix='/gallery')
 app.register_blueprint(tasks, url_prefix='/tasks')
+app.register_blueprint(notes, url_prefix='/notes')
 app.register_blueprint(profile, url_prefix='/profile')
 app.register_blueprint(multimedia, url_prefix='/multimedia')
 app.register_blueprint(auths, url_prefix='/auths')
@@ -34,7 +36,7 @@ def close_db(e = None):
 
 @app.before_request
 def before_request():
-    g.db = get_db()
+    g.db = Config.get_db()
 
 # Handle login required
 @app.errorhandler(401)

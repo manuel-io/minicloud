@@ -15,10 +15,10 @@
 {% endblock %}
 
 {% block section %}
-  <section id="users">
-    <h2 class="top"><a id="return" class="back" href="{{ url_for('users.show') }}">Zurück</a></h2>
+  <section id="users" class="content edit">
+    <h2 class="top"><a id="return" class="back" href="{{ url_for('users.show', ref = ref) }}">Zurück</a></h2>
 
-    <form action="{{ url_for('users.edit', uuid = user.uuid) }}" method="post">
+    <form action="{{ url_for('users.edit', uuid = user.uuid, ref = ref) }}" method="post">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
          
       <div class="group">      

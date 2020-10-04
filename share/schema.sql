@@ -81,6 +81,21 @@ CREATE INDEX minicloud_tasks_uid_idx ON minicloud_tasks (uid);
 CREATE INDEX minicloud_tasks_user_id_idx ON minicloud_tasks (user_id);
 CREATE INDEX minicloud_tasks_category_idx ON minicloud_tasks (lower(category));
 
+CREATE TABLE minicloud_notes (
+id BIGSERIAL UNIQUE PRIMARY KEY,
+uid VARCHAR(16) NOT NULL DEFAULT lpad(md5(random()::text), 16),
+user_id BIGINT NOT NULL REFERENCES minicloud_users(id) ON DELETE CASCADE,
+description TEXT NOT NULL,
+tags TEXT[] NOT NULL DEFAULT '{}',
+created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+updated_at TIMESTAMP NOT NULL,
+UNIQUE (user_id, uid)
+);
+
+CREATE INDEX minicloud_notes_uid_idx ON minicloud_notes (uid);
+CREATE INDEX minicloud_notes_user_id_idx ON minicloud_notes (user_id);
+CREATE INDEX minicloud_notes_search_idx ON minicloud_notes USING GIN (to_tsvector('simple', description));
+
 CREATE TABLE minicloud_diashow (
 id BIGSERIAL UNIQUE PRIMARY KEY,
 uid VARCHAR(16) NOT NULL DEFAULT lpad(md5(random()::text), 16),
@@ -143,6 +158,10 @@ BEGIN
   RETURN NEW;
 END;
 $$ language 'plpgsql';
+
+CREATE TRIGGER minicloud_updated_notes_trigger BEFORE
+INSERT OR UPDATE ON minicloud_notes
+FOR EACH ROW EXECUTE PROCEDURE minicloud_updated_at_task();
 
 CREATE TRIGGER minicloud_updated_uploads_trigger BEFORE
 INSERT OR UPDATE ON minicloud_uploads
