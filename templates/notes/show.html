@@ -33,11 +33,11 @@
       {% else %}
         <form action="{{ url_for('notes.save') }}" method="post">
       {% endif %}
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <h2>{{ today }}</h2>
         <fieldset class="textarea">
-          <label>{{ today }}:</label>
-          <textarea name="description" required>{{ text }}</textarea>
+          <label>Notation:</label>
+          <textarea name="description" autofocus required>{{ text }}</textarea>
         </fieldset>
 
         <fieldset>

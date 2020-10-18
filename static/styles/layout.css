@@ -59,10 +59,17 @@ body {
   flex-direction: row;
 }
 
-a {
+a, a:hover, a:visited, a:active, a:focus {
   text-decoration: none;
-  font-weight: bold;
+  font-weight: normal;
   background-color: transparent;
+  cursor: pointer;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+a.back {
+  font-weight: bold;
 }
 
 a.back::before {

@@ -129,7 +129,7 @@ year INT NOT NULL,
 capture TEXT,
 created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 updated_at TIMESTAMP NOT NULL,
-UNIQUE (title, year, mime),
+UNIQUE (category, title, year, mime),
 UNIQUE (path, mime)
 );
 
@@ -137,6 +137,7 @@ CREATE INDEX minicloud_multimedia_category_idx ON minicloud_multimedia (lower(ca
 CREATE INDEX minicloud_multimedia_type_idx ON minicloud_multimedia (lower(type));
 CREATE INDEX minicloud_multimedia_uuid_idx ON minicloud_multimedia (uuid);
 CREATE INDEX minicloud_multimedia_director_idx ON minicloud_multimedia (director);
+CREATE INDEX minicloud_multimedia_actors_idx ON minicloud_multimedia (actors);
 CREATE INDEX minicloud_multimedia_title_idx ON minicloud_multimedia (title);
 CREATE INDEX minicloud_multimedia_year_idx ON minicloud_multimedia (year);
 

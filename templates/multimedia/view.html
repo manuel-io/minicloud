@@ -26,7 +26,7 @@
 
         <tr>
           <td><p title="{{ media.director }}">Director:</p></td>
-          <td><p title="{{ media.director }}">{{ media.director }}</p></td>
+          <td><a href="{{ url_for('multimedia.show', ref = ref, director = media.director) }}"><p title="{{ media.director }}">{{ media.director }}</p></a></td>
         </tr>
 
         <tr>
@@ -81,7 +81,9 @@
         <table>
           {% for actor in media.actors %}
             <tr>
-              <td><p>{{ actor }}</p></td>
+              <td>
+                <a href="{{ url_for('multimedia.show', ref = ref, actors = actor) }}" target="_blank"><p>{{ actor }}</p></a>
+              </td>
             </tr>
           {% endfor %}
         </table>

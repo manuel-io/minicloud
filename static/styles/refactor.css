@@ -121,10 +121,20 @@ body > main > header > nav > form:last-child > button {
   margin-right: 0;
 }
 
-body > aside nav fieldset,
-section#gallery section.categories > div.item,
+/* body > aside nav fieldset, */
+section#gallery section.categories > main.item,
 section#tasks section.categories > main.item {
   margin: 5px;
+}
+
+section#gallery section.categories > main.item:first-child,
+section#tasks section.categories > main.item:first-child {
+  margin-left: 0;
+}
+
+section#gallery section.categories > main.item:last-child,
+section#tasks section.categories > main.item:last-child {
+  margin-right: 0;
 }
 
 h2.top,
@@ -162,9 +172,11 @@ section#searchnotes section.results section.item,
 section#searchnotes section.results section.item > div,
 section#uploads.show section.item,
 section#uploads.show .item div,
-section#tasks section.categories table,
-section#tasks section.categories > .item,
-section#gallery section.categories > .item,
+/*section#tasks section.categories table,*/
+/* section#tasks .item > section, */
+section#tasks.show section.categories > .item,
+section#tasks.show section.categories > .item > section,
+section#gallery.show section.categories > .item,
 section#diashow.show section.item,
 section#diashow.show section.item div,
 section#users.show section.item,
@@ -197,31 +209,48 @@ section#gallery section.categories {
 section#gallery section.categories section  {
   flex-grow: 0;
   flex-shrink: 0;
-  width: 150px;
-  height: 150px;
+  width: 168px;
+  height: 168px;
   border-radius: 5px;
   border: 1px solid #000;
+  box-sizing: border-box;
   background-position: center;
   background-size: auto;
+}
+
+section#gallery .item,
+section#tasks .item {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+section#gallery .item > section,
+section#tasks .item > section {
+  flex-grow: 1;
+  flex-shrink: 0;
+}
+
+section#gallery .item > nav,
+section#tasks .item > nav {
+  flex-grow: 0;
+  flex-shrink: 0;
 }
 
 section#tasks.show section.categories table {
   width: 100%;
 }
 
-section#tasks.show section.categories table.pending {
-  background-color: #ef1;
-  color: #000;
+section#tasks.show section.categories table p {
+  white-space: nowrap;
 }
 
-section#tasks.show section.categories table.ontime {
-  background-color: #1fde1f;
-  color: #000;
+section#tasks.show section.categories table span.status {
+  text-shadow: 3px 0px 3px #99cc33, -3px 0px 3px #99cc33, 6px 0px 6px #99cc33, -6px 0px 6px #99cc33;
 }
 
-section#tasks.show section.categories table.delayed {
-  background-color: #de1f1f;
-  color: #fff;
+section#tasks.show section.categories table span.delayed {
+  text-shadow: 3px 0px 3px #de1f1f, -3px 0px 3px #de1f1f, 6px 0px 6px #de1f1f, -6px 0px 6px #de1f1f;
 }
 
 /* Using CSS Grids */
@@ -275,7 +304,7 @@ section#tasks.show > nav button.active {
 section#users.show > main,
 section#multimedia.show > main,
 section#tasks.show > main {
-  grid-column: 2 / 4;
+  grid-column: 2 / 3;
   grid-row: 4 / 5;
   background-color: #fff;
   border-radius: 5px;
@@ -419,6 +448,7 @@ section#multimedia.show section.description table tr:last-child {
 #multimedia.show section.description table td:first-child {
   text-align: left;
   vertical-align: top;
+  width: 30%;
 }
 
 #users.show section.description table td:last-child,
@@ -426,6 +456,7 @@ section#multimedia.show section.description table tr:last-child {
 #multimedia.show section.description table td:last-child {
   text-align: right;
   vertical-align: top;
+  width: 70%;
 }
 
 #multimedia.view section.description table td:nth-child(2) > p,
@@ -438,7 +469,7 @@ section#multimedia.show section.description table tr:last-child {
 }
 
 #multimedia.show section.description table td:nth-child(2) > p {
-  max-width: 200px;
+  max-width: 195px;
 }
 
 section#users.show section.item > div {

@@ -12,8 +12,10 @@ tasks = Blueprint('tasks', __name__)
 @login_required
 def show():
     ref = 'pending'
-    today = Config.TODAY
-    week = Config.WEEK
+    utc = Config.UTCZONE
+    zone = Config.ZONE
+    today = datetime.utcnow().replace(tzinfo=utc).astimezone(zone)
+    week = today.strftime('%V')
     tasks = []
 
     if 'ref' in request.args.keys():
@@ -41,7 +43,7 @@ def show():
                           , tasks = tasks
                           , categories = get_categories()
                           , task_types = get_task_types()
-                          , today = today.strftime('%-d %b %Y')
+                          , today = today.strftime('%-d. %B %Y, %H:%M')
                           , week = week
                           , ref = ref
                           )

@@ -1,5 +1,13 @@
+### 2020.10.18
+Modified unique constraints
+
+    ALTER TABLE minicloud_multimedia DROP CONSTRAINT minicloud_multimedia_title_mime_key;
+    ALTER TABLE minicloud_multimedia DROP CONSTRAINT minicloud_multimedia_title_year_mime_key;
+    ALTER TABLE minicloud_multimedia ADD CONSTRAINT minicloud_multimedia_category_title_year_mime_key UNIQUE (category, title, year, mime);
+    CREATE INDEX minicloud_multimedia_actors_idx ON minicloud_multimedia (actors);
+
 ### 2020.10.04
-New Notes tool. See the updated [database schema](Migration.md)
+New Notes tool. See the updated [database schema](schema.sql)
 
 ### 2020.08.23
 Update dlna search folders in `/etc/minidlna.conf`

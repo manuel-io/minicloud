@@ -33,7 +33,7 @@
           {% for media in category.media %}
             <div class="main">
               <section class="description">
-                <table onclick="media_toogle(event, '{{ index }}')">
+                <table>
                   <tr>
                     <td><p title="{{ media.title }}">Title:</p></td>
                     <td><p title="{{ media.title }}">{{ media.title }}</p></td>
@@ -41,7 +41,7 @@
 
                   <tr>
                     <td><p title="{{ media.director }}">Director:</p></td>
-                    <td><p title="{{ media.director }}">{{ media.director }}</p></td>
+                    <td><a href="{{ url_for('multimedia.show', ref = ref, director = media.director) }}"><p title="{{ media.director }}">{{ media.director }}</p></a></td>
                   </tr>
 
                   <tr>
@@ -62,10 +62,12 @@
 
               {% if media.actors %}
               <section class="description">
-                <table onclick="media_toogle(event, '{{ index }}')">
+                <table>
                   {% for actor in media.actors[0:4] %}
                     <tr>
-                      <td><p>{{ actor }}</p></td>
+                      <td>
+                        <a href="{{ url_for('multimedia.show', ref = ref, actors = actor) }}"><p>{{ actor }}</p></a>
+                      </td>
                     </tr>
                   {% endfor %}
                 </table>

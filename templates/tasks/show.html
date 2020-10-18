@@ -35,58 +35,67 @@
     </nav>
 
     <main>
-    {% for category in tasks %}
-      {% set index = loop.index %}
-      <h2>{{ category.name }}</h2>
-      <section id="tc{{ index }}" class="categories">
-        {% for task in category.tasks %}
-          <main class="item">
-            <section class="describtion">
-              <table>
-                <tr>
-                  <td><p title="{{ task.title }}">Title:</p></td>
-                  <td><p title="{{ task.title }}">{{ task.title }}</p></td>
-                </tr>
-                <tr>
-                  <td><p title="{{ task.status }}">Status:</p></td>
-                  <td><p style="text-shadow:3px 0px 3px #99cc33,-3px 0px 3px #99cc33,6px 0px 6px #99cc33,-6px 0px 6px #99cc33;" title="{{ task.status }}">{{ task.status }}</p></td>
-                </tr>
-                {% if task.status == "completed" or task.status == "deleted" %}
+      {% for category in tasks %}
+        {% set index = loop.index %}
+        <h2>{{ category.name }}</h2>
+        <section id="tc{{ index }}" class="categories">
+          {% for task in category.tasks %}
+            <main class="item">
+              <section class="describtion">
+                <table>
                   <tr>
-                    <td colspan="2">done on {{ task.done }}</td>
+                    <td><p title="{{ task.title }}">Title:</p></td>
+                    <td><p title="{{ task.title }}">{{ task.title }}</p></td>
                   </tr>
-                {% endif %}
-                {% if task.status == "processing" %}
+
                   <tr>
-                    <td colspan="2">processing since {{task.process}}</td>
+                    <td><p title="{{ task.status }}">Status:</p></td>
+                    <td><p><span class="status">{{ task.status }}</span></p></td>
                   </tr>
-                {% endif %}
-                {% if task.due %}
-                  <tr>
-                    {% if task.delayed %}
-                      <td colspan="2">
-                        <p>
-                          <span>due {{ task.due }},</span>
-                          <span style="text-shadow:3px 0px 3px #de1f1f,-3px 0px 3px #de1f1f,6px 0px 6px #de1f1f,-6px 0px 6px #de1f1f;">{{ task.deadline }} days left</span>
-                        </p>
-                      </td>
-                    {% else %}
-                      <td colspan="2">due {{ task.due }}, {{ task.deadline }} days left</td>
-                    {% endif %}
-                  </tr>
-                {% endif %}
-              </table>
-            </section>
-            <nav>
-              <form action="{{ url_for('tasks.edit', uid = task.uid, _anchor = 'tc' ~ index) }}" method="get">
-                <input type="hidden" name="ref" value="{{ ref }}">
-                <input type="submit" value="Edit">
-              </form>
-            </nav>
-          </main>
-        {% endfor %}
-      </section>
-    {% endfor %}
+
+                  {% if task.status == "completed" or task.status == "deleted" %}
+                    <tr>
+                      <td colspan="2"><p>done on {{ task.done }}</p></td>
+                    </tr>
+                  {% endif %}
+
+                  {% if task.status == "processing" %}
+                    <tr>
+                      <td colspan="2"><p>processing since {{task.process}}</p></td>
+                    </tr>
+                  {% endif %}
+
+                  {% if task.due %}
+                    <tr>
+                      {% if task.delayed %}
+                        <td colspan="2">
+                          <p>
+                            <span>due {{ task.due }},</span>
+                            <span class="delayed">{{ task.deadline }} days left</span>
+                          </p>
+                        </td>
+                      {% else %}
+                        <td colspan="2">
+                          <p>
+                            <span>due {{ task.due }},</span>
+                            <span class="ontime">{{ task.deadline }} days left</span>
+                          </p></td>
+                      {% endif %}
+                    </tr>
+                  {% endif %}
+                </table>
+              </section>
+
+              <nav>
+                <form action="{{ url_for('tasks.edit', uid = task.uid, _anchor = 'tc' ~ index) }}" method="get">
+                  <input type="hidden" name="ref" value="{{ ref }}">
+                  <input type="submit" value="Edit">
+                </form>
+              </nav>
+            </main>
+          {% endfor %}
+        </section>
+      {% endfor %}
     </main>
   </section>
 {% endblock %}

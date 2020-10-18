@@ -121,7 +121,7 @@ def view(uuid):
     try:
         with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
-              SELECT a.id AS id, a.uuid AS uuid, category, title, description, director, actors, path, year, mime, media AS status FROM minicloud_multimedia AS a
+              SELECT a.id AS id, a.uuid AS uuid, category, type, title, description, director, actors, path, year, mime, media AS status FROM minicloud_multimedia AS a
               LEFT JOIN minicloud_users AS b ON (b.id = %s)
               WHERE a.uuid = %s LIMIT 1
               """, [int(current_user.id), uuid])
@@ -132,6 +132,7 @@ def view(uuid):
             raise Exception('not found');
 
         sources = list(filter(lambda item: item['path'] == media['path'], dlna))
+        ref = media['type']
         app.logger.info('Multimedia %s' % media['path'])
 
         if minidlna_proxy_host:

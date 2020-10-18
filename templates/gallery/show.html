@@ -21,17 +21,17 @@
       <h2>{{ category.name }}</h2>
       <section id="gc{{ index }}" class="categories gc{{ index }}">
         {% for file in category.files %}
-          <div class="item">
+          <main class="item">
             <a href="{{ url_for('gallery.download', uid = file.uid) }}" title="{{ file.title }}">
-            <section style="background-image: url('{{ url_for('gallery.thumbnail', uid = file.uid) }}');">
-            </section>
+              <section style="background-image: url('{{ url_for('gallery.thumbnail', uid = file.uid) }}');"></section>
             </a>
+
             <nav>
               <form action="{{ url_for('gallery.edit', uid = file.uid, _anchor = 'gc' ~ index) }}" method="get">
                 <input type="submit" value="Edit">
               </form>
             </nav>
-          </div>
+          </main>
         {% endfor %}
       </section>
 

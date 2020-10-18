@@ -1,6 +1,7 @@
 import psycopg2, psycopg2.extras, io, time, os, re
 from flask import Blueprint, g, request, Response
 from flask_login import login_required, current_user
+from datetime import datetime
 from dateutil import tz, parser
 from config import Config
 
@@ -13,7 +14,7 @@ def format_registered(user):
 def format_task(task):
     utc = Config.UTCZONE
     zone = Config.ZONE
-    today = Config.TODAY
+    today = datetime.utcnow().replace(tzinfo=utc).astimezone(zone)
     task['delayed'] = False
 
     if task['process']:
