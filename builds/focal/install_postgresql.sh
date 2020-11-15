@@ -8,4 +8,4 @@ su postgres -c '/usr/lib/postgresql/12/bin/pg_ctl -D /var/minicloud/postgresql s
 
 su postgres -c '/usr/lib/postgresql/12/bin/initdb --locale=C.UTF-8 --encoding=UTF-8 -D /var/minicloud/postgresql'
 su postgres -c '/usr/lib/postgresql/12/bin/postgres -D /var/minicloud/postgresql -p 5432 &'
-slepp 10
+sleep 10
