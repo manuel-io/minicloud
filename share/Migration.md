@@ -1,3 +1,10 @@
+### 2020.11.15
+Move `minicloud.sock` to `/var/minicloud/service`
+
+    mkdir -p /var/minicloud/service
+    chown minicloud:minicloud /var/minicloud/service
+    chmod a+rx /var/minicloud/service
+
 ### 2020.10.18
 Modified unique constraints
 
