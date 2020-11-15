@@ -1,5 +1,3 @@
-# example config file using a subdomain of `example.com`
-
 server {
   listen 80;
   listen [::]:80;
@@ -21,7 +19,7 @@ server {
     include uwsgi_params;
     uwsgi_read_timeout 600s;
     uwsgi_send_timeout 300s;
-    uwsgi_pass unix:/home/minicloud/minicloud.sock;
+    uwsgi_pass unix:/var/minicloud/service/minicloud.sock;
   }
 }
 

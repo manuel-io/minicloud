@@ -1,0 +1,73 @@
+#!/bin/sh
+
+PATH="/home/minicloud/bin"
+DAEMON="/home/minicloud/bin/uwsgi --ini /home/minicloud/minicloud.ini"
+NAME="minicloud"
+DESC="Minicloud Webservice"
+PIDFILE="/var/run/minicloud.pid"
+TZ="Europe/Berlin"
+
+start_minicloud() {
+  status_minicloud > /dev/null 2>&1
+  if [ ! $? -eq 0 ]
+  then
+    echo 'Failed (running)' > /dev/stderr
+    return 1
+  fi
+
+  PID=`$DAEMON > /dev/null 2>&1 & echo $!`
+  if [ -z $PID ]
+  then
+    echo 'Failed' > /dev/stderr
+    return 1
+  else
+    echo $PID > $PIDFILE
+    echo 'Started' > /dev/stderr
+    return 0
+  fi
+}
+
+stop_minicloud() {
+  if [ -f $PIDFILE ]
+  then
+    PID=`/bin/cat $PIDFILE`
+    /bin/kill -SIGTERM $PID
+    /bin/rm -f $PIDFILE
+    echo "Stopped (${PID})" > /dev/stderr
+    return 0
+  else
+    echo 'Not found' > /dev/stderr
+    return 1
+  fi
+}
+
+status_minicloud() {
+  if [ -f $PIDFILE ]
+  then
+    PID=`/bin/cat $PIDFILE`
+    STATUS=`/bin/ps axf | /usr/bin/grep "${PID}"`
+    if [ -z "`/bin/ps axf | /usr/bin/grep \"${PID}\" | /usr/bin/grep -v grep`" ]; then
+      echo 'Process dead (Found PIDFILE)' > /dev/stderr
+      return 1
+    else
+      echo $STATUS > /dev/stderr
+      echo 'Running' > /dev/stderr
+      return 0
+    fi
+  else
+    echo 'Not found' > /dev/stderr
+    return 0
+  fi
+}
+
+case "$1" in
+  start)
+    start_minicloud
+  ;;
+  stop)
+    stop_minicloud
+  ;;
+  status)
+    status_minicloud
+  ;;
+esac
