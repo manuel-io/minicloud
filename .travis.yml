@@ -12,8 +12,8 @@ services:
   - docker
 
 before_install:
-  - docker build -t minicloud builds/focal
-  - docker run --network host -d -P --name cloud minicloud:latest
+  - docker build -t minicloud_focal builds/focal
+  - docker run --network host -d -P --name cloud_on_focal minicloud_focal
 
 script:
   - curl -I localhost/login 2> /dev/null | grep '501'
