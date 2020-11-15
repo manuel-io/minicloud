@@ -18,6 +18,8 @@ COPY minicloud.init /etc/init.d/minicloud
 
 RUN chmod u+x /entrypoint.sh
 RUN chmod u+x /etc/init.d/minicloud
+
+RUN echo /install.sh
 RUN /bin/bash /install.sh
 
 EXPOSE 22
