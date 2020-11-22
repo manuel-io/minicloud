@@ -1,11 +1,5 @@
-language: python
+language: generic
 os: linux
-
-jobs:
-  include:
-    - os: linux
-      python: 3.8
-      env: BUILDENV=focal
 
 branches:
   only:
@@ -14,21 +8,18 @@ branches:
 services:
   - docker
 
-before_install:
+before_script:
   - sudo /etc/init.d/postgresql stop
   - sudo /etc/init.d/ssh stop
   - docker build -t minicloud_focal build/focal
-
-install:
-  - docker run --network host -dP --name cloud_on_focal minicloud_focal
+  - docker build -t minicloud_centos8 build/centos8
 
 script:
-  - sleep 60
-  - docker ps
-  - docker ps -a
-  - docker exec cloud_on_focal sh -c "id -a"
-  - curl -I localhost/login 2> /dev/null | grep '501'
-  - curl -I localhost:8290 2> /dev/null | grep '401'
+  /bin/bash build/focal/run.sh
+  /bin/bash build/centos8/run.sh
+
+after_script:
+  - echo 'Finished'
 
 addons:
   apt:
