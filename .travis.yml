@@ -18,7 +18,7 @@ before_install:
   - docker build -t minicloud_focal build/focal
 
 install:
-  - docker run --network host -d -P --privileged --name cloud_on_focal minicloud_focal
+  - docker run --network host --name cloud_on_focal minicloud_focal
 
 script:
   - sleep 60

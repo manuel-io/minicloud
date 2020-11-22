@@ -16,8 +16,8 @@ COPY install_nginx.sh /
 COPY install_minidlna.sh /
 COPY minicloud.init /etc/init.d/minicloud
 
-RUN chmod u+x /entrypoint.sh
-RUN chmod u+x /etc/init.d/minicloud
+RUN chmod u+rx /entrypoint.sh
+RUN chmod u+rx /etc/init.d/minicloud
 
 RUN cat /install.sh
 RUN /bin/bash /install.sh
@@ -26,4 +26,4 @@ EXPOSE 22
 EXPOSE 80
 EXPOSE 8290
 
-ENTRYPOINT ["/entrypoint.sh"]
+CMD ["/bin/bash", "/entrypoint.sh"]
