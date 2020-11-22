@@ -1,6 +1,5 @@
 language: python
 os: linux
-dist: focal
 
 jobs:
   include:
