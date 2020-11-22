@@ -15,8 +15,8 @@ before_script:
   - docker build -t minicloud_centos8 build/centos8
 
 script:
-  /bin/bash build/focal/run.sh
-  /bin/bash build/centos8/run.sh
+  - /bin/bash build/focal/run.sh
+  - /bin/bash build/centos8/run.sh
 
 after_script:
   - echo 'Finished'
