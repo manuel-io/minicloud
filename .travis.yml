@@ -22,6 +22,7 @@ install:
 
 script:
   - sleep 30
+  - docker ps
   - curl -I localhost/login 2> /dev/null | grep '501'
   - curl -I localhost:8290 2> /dev/null | grep '401'
 
