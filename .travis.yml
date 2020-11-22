@@ -16,6 +16,7 @@ services:
 
 before_install:
   - sudo /etc/init.d/postgresql stop
+  - sudo /etc/init.d/ssh stop
   - docker build -t minicloud_focal build/focal
 
 install:
