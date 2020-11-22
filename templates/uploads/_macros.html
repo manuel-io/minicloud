@@ -18,9 +18,10 @@
       <input type="hidden" name="backref" value="{{ backref }}">
        
       <div class="group">      
-        <fieldset>
+        <fieldset class="error">
           <label>Select a file</label>
-          <input class="focus" name="uploads" type="file" multiple required>
+          <input class="focus" name="uploads" type="file" size="5242880" files multiple required>
+          <p class="error">Each file of max. 5MiB</p>
         </fieldset>
         
         <fieldset>
@@ -38,9 +39,10 @@
       <input type="hidden" name="backref" value="{{ backref }}">
        
       <div class="group">      
-        <fieldset>
+        <fieldset class="error">
           <label>Title</label>
           <input class="focus" name="title" type="text" required>
+          <p class="error">A name for the directory</p>
         </fieldset>
         
         <fieldset>

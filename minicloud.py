@@ -167,8 +167,8 @@ def logout():
 # Callback to reload the user object
 @login_manager.user_loader
 def load_user(index):
-    with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
-        try:
+    try:
+        with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
               SELECT id, name, uuid, admin, disabled FROM minicloud_users
               WHERE id = %s ORDER BY id ASC LIMIT 1;
@@ -177,9 +177,9 @@ def load_user(index):
             data = cursor.fetchone()
             return User(int(data['id']), data['name'], data['admin'])
 
-        except Exception as e:
-            app.logger.error('User object failed: %s' % str(e))
-            g.db.rollback()
+    except Exception as e:
+        app.logger.error('User object failed: %s' % str(e))
+        g.db.rollback()
 
     return None
 

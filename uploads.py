@@ -53,8 +53,8 @@ def file_add():
     count = 0
     uploads = request.files.getlist('uploads')
     parent = request.form['parent']
-    parent = int(parent) if parent and parent.isnumeric() else None
     backref = request.form['backref']
+    parent = int(parent) if parent and parent.isnumeric() else None
     backref = int(backref) if backref and backref.isnumeric() else None
 
     for upload in uploads:
@@ -63,8 +63,12 @@ def file_add():
         content = upload.read()
         size = len(content)
 
-        with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
-            try:
+        if size > 5242880:
+            app.logger.error('Maximum file size exceeded %s' % str(size))
+            continue
+
+        try:
+            with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
                 cursor.execute("""
                   INSERT INTO minicloud_uploads (user_id, reference, backref, type, title, size, mime)
                   VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id
@@ -93,17 +97,19 @@ def file_add():
                 lo.close()
                 count = count + 1
 
-            except Exception as e:
-                app.logger.error('Adding file in uploads failed: %s' % str(e))
-                g.db.rollback()
+        except Exception as e:
+            app.logger.error('Adding file in uploads failed: %s' % str(e))
+            g.db.rollback()
 
     messages.append('%s of %s files uploaded' % (count, len(uploads)))
 
     if ajax:
-        return make_response(jsonify(messages), 200)
+        if count < len(uploads): return make_response(jsonify(messages), 400)
+        else: return make_response(jsonify(messages), 200)
 
     else:
-        flash(messages, 'info')
+        if count < len(uploads): flash(messages, 'error')
+        else: flash(messages, 'info')
         return redirect(url_for('uploads.show', parent=parent))
 
 @uploads.route("/download/<uid>", methods = ['GET'])

@@ -81,17 +81,19 @@ let send_upload = (url, data, ready, fail) => {
     if (request.readyState == 4) {
       if (request.status == 200) {
         response = JSON.parse(request.responseText);
-
         progress.style.display = 'none';
         bar.style.width = '0%';
 
         alert_update(response, []);
         if (ready) ready(response);
+      }
 
-      } else {
-        // console.log('error');
-        if (fail) fail();
-
+      if (request.status == 400) {
+        response = JSON.parse(request.responseText);
+        progress.style.display = 'none';
+        bar.style.width = '0%';
+        alert_update([], response);
+        if (ready) ready(response);
       }
     }
   };
@@ -201,7 +203,7 @@ let handle_uploads_form = (e) => {
   let data = new FormData(e.target);
   let url = e.target.getAttribute('action');
   send_upload(url, data, (resp) => {
-    window.location.reload(true);
+    window.setTimeout((e) => window.location.reload(true), 1500);
   });
 };
 
@@ -344,4 +346,17 @@ let tags_handle_input = (e, name) => {
   }
 };
 
-window.onload = (e) => {};
+window.onload = (e) => {
+  let inputs = document.querySelectorAll('form fieldset.error input');
+  inputs.forEach((input) => {
+    input.classList.remove('required');
+    input.oninvalid = (e) => {
+      e.preventDefault();
+      input.classList.add('required');
+      /* Set focus on first invalid field in the form */
+      let invalid = input.form.querySelector('form fieldset.error input.required:invalid');
+      invalid.focus();
+    };
+  });
+};
+

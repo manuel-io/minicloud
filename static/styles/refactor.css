@@ -422,6 +422,7 @@ section#multimedia.view section.description table,
 section#multimedia.show section.description table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 section#users.show .item > section.description table tr,
@@ -466,10 +467,6 @@ section#multimedia.show section.description table tr:last-child {
   white-space: nowrap;
   width: 100%;
   box-sizing: border-box;
-}
-
-#multimedia.show section.description table td:nth-child(2) > p {
-  max-width: 195px;
 }
 
 section#users.show section.item > div {

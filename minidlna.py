@@ -1,6 +1,3 @@
-#!/usr/bin/python3
-# -*- coding: utf-8 -*-
-
 import requests
 from xml.dom.minidom import parseString
 from pathlib import Path

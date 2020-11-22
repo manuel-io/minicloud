@@ -178,11 +178,21 @@ fieldset input:invalid {
   box-shadow: none;
 }
 
-fieldset input:invalid:focus {
+fieldset input:invalid:focus,
+fieldset input.required:invalid {
   outline: 0;
   box-shadow: none;
   border-color: #de1f1f;
   border-width: 2px;
+}
+
+fieldset input + p.error {
+  display: none;
+}
+
+fieldset input.required:invalid + p.error {
+  display: block;
+  color: #de1f1f;
 }
 
 fieldset select {
