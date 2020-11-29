@@ -11,25 +11,25 @@
         <input type="submit" value="Gallery">
       </form>
     </fieldset>
-    
+
     <fieldset>
       <form action="/tasks" method="get">
         <input type="submit" value="Tasks">
       </form>
     </fieldset>
-    
+
     <fieldset>
       <form action="/notes" method="get">
         <input type="submit" value="Notes">
       </form>
     </fieldset>
-    
+
     <fieldset>
       <form action="/multimedia" method="get">
         <input type="submit" value="Multimedia">
       </form>
     </fieldset>
-    
+
     <fieldset>
       <form action="/profile" method="get">
         <input type="submit" value="Profile">
@@ -43,7 +43,7 @@
         </form>
       </fieldset>
     {% endif %}
-    
+
     <fieldset>
       <form action="/logout" method="post">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -53,20 +53,25 @@
   </div>
 {% endmacro %}
 
+{% macro lightbox() %}
+  <link href="{{ url_for('static', filename='libs/lightbox/simpleLightbox.min.css') }}" media="all" rel="stylesheet" type="text/css">
+  <script src="{{ url_for('static', filename='libs/lightbox/simpleLightbox.min.js') }}"></script>
+{% endmacro %}
+
 {% macro tinymce() %}
-<script src="{{url_for('static', filename='scripts/tinymce/tinymce.min.js')}}"></script>
-<script>
-  tinymce.init({ selector: 'textarea'
-               , height: 150
-               , visual: false
-               , plugins: ['autolink paste table lists link codesample']
-               , menubar: 'edit format insert view'
-               , toolbar: 'formatselect | bold italic | alignleft aligncenter alignright | bullist  | outdent indent'
-               , menu: { edit: { title: "Edit", items: "undo redo" }
-                       , format: { title: "Format", items: "bold italic underline strikethrough"}
-                       , insert: { title: "Insert", items: "inserttable codesample"}
-                       , view: { title: "View", items: "fullscreen"}
-                       }
-               });
+  <script src="{{ url_for('static', filename='libs/tinymce/tinymce.min.js') }}"></script>
+  <script>
+    tinymce.init({ selector: 'textarea'
+                 , height: 150
+                 , visual: false
+                 , plugins: ['autolink paste table lists link codesample']
+                 , menubar: 'edit format insert view'
+                 , toolbar: 'formatselect | bold italic | alignleft aligncenter alignright | bullist | outdent indent'
+                 , menu: { edit: {title: 'Edit', items: 'undo redo'}
+                         , format: {title: 'Format', items: 'bold italic underline strikethrough'}
+                         , insert: {title: 'Insert', items: 'inserttable codesample'}
+                         , view: {title: 'View', items: 'fullscreen'}
+                         }
+                 });
 </script>
 {% endmacro %}

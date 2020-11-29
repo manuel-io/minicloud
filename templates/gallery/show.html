@@ -1,6 +1,11 @@
 {% extends "layout.html" %}
-{% from "_macros.html" import aside, upload with context %}
+{% from "_macros.html" import aside, lightbox with context %}
 {% from "gallery/_macros.html" import nav, header with context %}
+
+{% block head %}
+  {{ super() }}
+  {{ lightbox() }}
+{% endblock %}
 
 {% block aside %}
   {{ aside() }}

@@ -15,7 +15,7 @@
 
 {% block section %}
   <section id="profile" class="content show">
-    <form action="/profile" method="post">
+    <form action="{{ url_for('profile.show') }}" method="post">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
       <div class="group">
@@ -37,7 +37,7 @@
       </div>
     </form>
 
-    <form action="/profile/password" method="post">
+    <form action="{{ url_for('profile.password') }}" method="post">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
       <div class="group">

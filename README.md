@@ -101,12 +101,6 @@ The default password for the user minicloud is minicloud.
 SimpleLightbox (https://github.com/andreknieriem/simplelightbox) is licensed
 under the MIT License (MIT)
 
-## Font Awesome
-
-Graphic files under static/fontawsame are a product of the Font Awesome
-library (https://fontawesome.com/) and distributed under the Creative Commons
-Attribution BY 4.0 International license (https://fontawesome.com/license/free)
-
 ## Lato Font
 
 The main font in the default

@@ -1,3 +1,38 @@
+### 2020.11.29
+All timestamps were converted to default utc
+
+    ALTER TABLE minicloud_auths ALTER COLUMN updated_at TYPE TIMESTAMP WITHOUT TIME ZONE;
+    ALTER TABLE minicloud_auths ALTER COLUMN created_at TYPE TIMESTAMP WITHOUT TIME ZONE;
+    ALTER TABLE minicloud_auths ALTER COLUMN created_at SET DEFAULT (now() AT TIME ZONE 'utc');
+
+    ALTER TABLE minicloud_diashow ALTER COLUMN updated_at TYPE TIMESTAMP WITHOUT TIME ZONE;
+    ALTER TABLE minicloud_diashow ALTER COLUMN created_at TYPE TIMESTAMP WITHOUT TIME ZONE;
+    ALTER TABLE minicloud_diashow ALTER COLUMN created_at SET DEFAULT (now() AT TIME ZONE 'utc');
+
+    ALTER TABLE minicloud_gallery ALTER COLUMN updated_at TYPE TIMESTAMP WITHOUT TIME ZONE;
+    ALTER TABLE minicloud_gallery ALTER COLUMN created_at TYPE TIMESTAMP WITHOUT TIME ZONE;
+    ALTER TABLE minicloud_gallery ALTER COLUMN created_at SET DEFAULT (now() AT TIME ZONE 'utc');
+
+    ALTER TABLE minicloud_multimedia ALTER COLUMN updated_at TYPE TIMESTAMP WITHOUT TIME ZONE;
+    ALTER TABLE minicloud_multimedia ALTER COLUMN created_at TYPE TIMESTAMP WITHOUT TIME ZONE;
+    ALTER TABLE minicloud_multimedia ALTER COLUMN created_at SET DEFAULT (now() AT TIME ZONE 'utc');
+
+    ALTER TABLE minicloud_notes ALTER COLUMN updated_at TYPE TIMESTAMP WITHOUT TIME ZONE;
+    ALTER TABLE minicloud_notes ALTER COLUMN created_at TYPE TIMESTAMP WITHOUT TIME ZONE;
+    ALTER TABLE minicloud_notes ALTER COLUMN created_at SET DEFAULT (now() AT TIME ZONE 'utc');
+
+    ALTER TABLE minicloud_tasks ALTER COLUMN updated_at TYPE TIMESTAMP WITHOUT TIME ZONE;
+    ALTER TABLE minicloud_tasks ALTER COLUMN created_at TYPE TIMESTAMP WITHOUT TIME ZONE;
+    ALTER TABLE minicloud_tasks ALTER COLUMN created_at SET DEFAULT (now() AT TIME ZONE 'utc');
+
+    ALTER TABLE minicloud_uploads ALTER COLUMN updated_at TYPE TIMESTAMP WITHOUT TIME ZONE;
+    ALTER TABLE minicloud_uploads ALTER COLUMN created_at TYPE TIMESTAMP WITHOUT TIME ZONE;
+    ALTER TABLE minicloud_uploads ALTER COLUMN created_at SET DEFAULT (now() AT TIME ZONE 'utc');
+
+    ALTER TABLE minicloud_users ALTER COLUMN updated_at TYPE TIMESTAMP WITHOUT TIME ZONE;
+    ALTER TABLE minicloud_users ALTER COLUMN created_at TYPE TIMESTAMP WITHOUT TIME ZONE;
+    ALTER TABLE minicloud_users ALTER COLUMN created_at SET DEFAULT (now() AT TIME ZONE 'utc');
+
 ### 2020.11.15
 Move `minicloud.sock` to `/var/minicloud/service`
 

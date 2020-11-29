@@ -8,8 +8,8 @@ admin BOOLEAN NOT NULL DEFAULT false,
 disabled BOOLEAN NOT NULL DEFAULT false,
 media TEXT,
 activation_key VARCHAR(32),
-created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-updated_at TIMESTAMP NOT NULL
+created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL
 );
 
 CREATE INDEX minicloud_users_uuid_idx ON minicloud_users (uuid);
@@ -26,8 +26,8 @@ type INT NOT NULL,
 title TEXT NOT NULL,
 size BIGINT NOT NULL,
 mime TEXT NOT NULL,
-created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-updated_at TIMESTAMP NOT NULL,
+created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
 UNIQUE (user_id, title, reference),
 UNIQUE (user_id, uid)
 );
@@ -49,8 +49,8 @@ description TEXT,
 thumbnail_data bytea NOT NULL,
 thumbnail_size BIGINT NOT NULL,
 thumbnail_mime TEXT NOT NULL,
-created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-updated_at TIMESTAMP NOT NULL,
+created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
 UNIQUE (user_id, title, category),
 UNIQUE (uploads_id, title, category),
 UNIQUE (user_id, uid)
@@ -68,10 +68,10 @@ status TEXT NOT NULL DEFAULT 'pending',
 title TEXT NOT NULL,
 description TEXT,
 category TEXT NOT NULL DEFAULT 'Default',
-due TIMESTAMP,
-done TIMESTAMP,
-process TIMESTAMP,
-created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+due TIMESTAMP WITHOUT TIME ZONE,
+done TIMESTAMP WITHOUT TIME ZONE,
+process TIMESTAMP WITHOUT TIME ZONE,
+created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
 updated_at TIMESTAMP NOT NULL,
 UNIQUE (user_id, title, category),
 UNIQUE (user_id, uid)
@@ -87,8 +87,8 @@ uid VARCHAR(16) NOT NULL DEFAULT lpad(md5(random()::text), 16),
 user_id BIGINT NOT NULL REFERENCES minicloud_users(id) ON DELETE CASCADE,
 description TEXT NOT NULL,
 tags TEXT[] NOT NULL DEFAULT '{}',
-created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-updated_at TIMESTAMP NOT NULL,
+created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
 UNIQUE (user_id, uid)
 );
 
@@ -102,8 +102,8 @@ uid VARCHAR(16) NOT NULL DEFAULT lpad(md5(random()::text), 16),
 uuid VARCHAR(32) NOT NULL UNIQUE DEFAULT lpad(md5(random()::text), 32),
 user_id BIGINT NOT NULL REFERENCES minicloud_users(id) ON DELETE CASCADE,
 category TEXT NOT NULL,
-created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-updated_at TIMESTAMP NOT NULL,
+created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
 UNIQUE (user_id, category),
 UNIQUE (user_id, uid)
 );
@@ -127,8 +127,8 @@ director TEXT NOT NULL DEFAULT 'Generic',
 actors TEXT[] NOT NULL DEFAULT '{}',
 year INT NOT NULL,
 capture TEXT,
-created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-updated_at TIMESTAMP NOT NULL,
+created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
 UNIQUE (category, title, year, mime),
 UNIQUE (path, mime)
 );
@@ -147,15 +147,15 @@ uid VARCHAR(16) NOT NULL DEFAULT lpad(md5(random()::text), 16),
 user_id BIGINT NOT NULL REFERENCES minicloud_users(id) ON DELETE CASCADE,
 token VARCHAR(32) NOT NULL UNIQUE DEFAULT lpad(md5(random()::text), 32),
 xtimes INT NOT NULL DEFAULT 1,
-created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-updated_at TIMESTAMP NOT NULL,
+created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
 UNIQUE (user_id, uid)
 );
 
 CREATE OR REPLACE FUNCTION minicloud_updated_at_task()
 RETURNS TRIGGER AS $$
 BEGIN
-  NEW.updated_at = now();
+  NEW.updated_at = now() AT TIME ZONE 'utc';
   RETURN NEW;
 END;
 $$ language 'plpgsql';

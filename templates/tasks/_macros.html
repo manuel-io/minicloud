@@ -7,26 +7,27 @@
 {% endmacro %}
 
 {% macro header() %}
-  <input class="toggle" type="checkbox" name="addtask" />
+  <input class="toggle" type="checkbox" name="addtask">
   <section id="addtask">
-    <form action="/tasks/add" method="post">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <form action="{{ url_for('tasks.add') }}" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <h2>{{ today }}</h2>
        
       <div class="group">      
-        <fieldset>
+        <fieldset class="error">
           <label>Title:</label>
-          <input class="focus" type="text" name="title" required />
+          <input class="focus" type="text" name="title" required>
+          <p class="error">A precise title</p>
         </fieldset>
   
         <fieldset>
           <label>Deadline:</label>
-          <input type="date" name="deadline" />
+          <input type="date" name="deadline">
         </fieldset>
         
         <fieldset>
           <label>Category:</label>
-          <input type="text" name="category" value="Week {{ week }}" required />
+          <input type="text" name="category" value="Week {{ week }}" required>
           <select class="helper" onchange="handle_select_helper(event);">
             <option value="0" selected disabled>Select category ...</option>
             {% for option in categories %}

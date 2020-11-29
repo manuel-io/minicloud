@@ -32,7 +32,7 @@
           <div class="toogle" onclick="user_toogle(event, 'uc{{ loop.index }}')">
             <p>{{ user.name }}</p>
           </div>
-          
+
           <div class="action">
             <form  action="{{ url_for('users.edit', uuid = user.uuid, _anchor = 'uc' ~ loop.index) }}" method="get">
               <input type="hidden" name="ref" value="{{ ref }}">
@@ -43,7 +43,7 @@
               {% endif %}
             </form>
           </div>
-  
+
           <div class="action">
             <form  action="{{ url_for('users.delete', uuid = user.uuid, ref = ref) }}" method="post" onsubmit="handle_delete_check(event);">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -54,7 +54,7 @@
               {% endif %}
             </form>
           </div>
-  
+
           <section class="description">
             <table>
               <tr>

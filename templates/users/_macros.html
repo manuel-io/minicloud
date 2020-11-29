@@ -11,25 +11,27 @@
   <section id="adduser">
     <form action="{{ url_for('users.add') }}" method="post">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-       
-      <div class="group">      
-        <fieldset>
+
+      <div class="group">
+        <fieldset class="error">
           <label>Username:</label>
-          <input class="focus" type="text" name="username" autocomplete="username" pattern="[a-z0-9_+-]+" required>
+          <input class="focus" type="text" name="username" autocomplete="username" required>
+          <p class="error">A unique username</p>
         </fieldset>
-  
-        <fieldset>
+
+        <fieldset class="error">
           <label>E-Mail:</label>
           <input type="email" name="email" autocomplete="email" required>
+          <p class="error">A valid contact address</p>
         </fieldset>
-  
+
         <fieldset>
           <label class="checkbox">
             <input type="checkbox" name="admin">
             <p>Give this user admin privileges</p>
           </label>
         </fieldset>
-        
+
         <fieldset>
           <input type="submit" value="New Users">
         </fieldset>

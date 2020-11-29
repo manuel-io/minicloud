@@ -11,12 +11,14 @@ services:
 before_script:
   - sudo /etc/init.d/postgresql stop
   - sudo /etc/init.d/ssh stop
-  - docker build -t minicloud_focal build/focal
   - docker build -t minicloud_centos8 build/centos8
+  - docker build -t minicloud_buster build/buster
+  - docker build -t minicloud_focal build/focal
 
 script:
-  - /bin/bash build/focal/run.sh
   - /bin/bash build/centos8/run.sh
+  - /bin/bash build/buster/run.sh
+  - /bin/bash build/focal/run.sh
 
 after_script:
   - echo 'Finished'
