@@ -15,7 +15,7 @@
 The simplest way to start is [building a docker
 container](https://github.com/manuel-io/minicloud#dockerfile) and accessing it
 directly or using a reverse proxy like nginx. Otherwise you have to build the
-complete environment by yourself. A documentation how to do that on a [ubuntu
+complete environment by yourself. A documentation how to do that on an [ubuntu
 like system is included](docs/CONFIG.md). You may also take a look at the
 construction process of a [docker container](build/focal/Dockerfile).
 
