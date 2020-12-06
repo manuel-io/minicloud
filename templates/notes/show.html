@@ -21,6 +21,7 @@
         <input type="hidden" name="uid" value="{{ previous }}">
         <button {{ "disabled" if not previous }}>Back</button>
       </form>
+
       <form action="{{ url_for('notes.show') }}" method="get">
         <input type="hidden" name="uid" value="{{ forward }}">
         <button {{ "disabled" if not forward }}>Next</button>
@@ -33,11 +34,25 @@
       {% else %}
         <form action="{{ url_for('notes.save') }}" method="post">
       {% endif %}
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <h2>{{ today }}</h2>
-        <fieldset class="textarea">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <h2>{{ today }}</h2>
+
+      <div class="group">
+        <fieldset class="textarea error">
           <label>Notation:</label>
           <textarea name="description" autofocus required>{{ text }}</textarea>
+          <p class="error">Fill out this field</p>
+        </fieldset>
+
+        <fieldset>
+          <label>Category:</label>
+          <input type="text" name="category" value="{{ category }}" required>
+          <select class="helper" onchange="handle_select_helper(event);">
+            <option value="0" selected disabled>Select category ...</option>
+            {% for option in categories %}
+              <option>{{ option.category }}</option>
+            {% endfor %}
+          </select>
         </fieldset>
 
         <fieldset>
@@ -58,6 +73,7 @@
         <fieldset>
           <input type="submit" value="Save">
         </fieldset>
+      </div>
       </form>
     </main>
 

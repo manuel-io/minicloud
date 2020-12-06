@@ -55,12 +55,14 @@ def get_categories():
     try:
         with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
-              SELECT DISTINCT category FROM minicloud_gallery
-                WHERE user_id = %s
-              UNION SELECT DISTINCT category FROM minicloud_tasks
-                WHERE user_id = %s
-              GROUP BY category ORDER BY category ASC;
-              """, [ int(current_user.id), int(current_user.id) ])
+            SELECT DISTINCT category FROM minicloud_gallery
+              WHERE user_id = %s
+            UNION SELECT DISTINCT category FROM minicloud_tasks
+              WHERE user_id = %s
+            UNION SELECT DISTINCT category FROM minicloud_notes
+              WHERE user_id = %s
+            GROUP BY category ORDER BY category ASC;
+            """, [int(current_user.id), int(current_user.id),  int(current_user.id)])
 
             categories = cursor.fetchall()
 

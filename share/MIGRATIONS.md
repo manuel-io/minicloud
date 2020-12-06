@@ -1,3 +1,8 @@
+### 2020.12.06
+Add column `category` to the notes tool
+
+    ALTER TABLE minicloud_notes ADD COLUMN category TEXT NOT NULL DEFAULT 'Default';
+
 ### 2020.11.29
 All timestamps were converted to default utc
 

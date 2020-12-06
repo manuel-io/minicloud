@@ -348,13 +348,14 @@ let tags_handle_input = (e, name) => {
 
 window.onload = (e) => {
   let inputs = document.querySelectorAll('form fieldset.error input');
-  inputs.forEach((input) => {
+  let textareas = document.querySelectorAll('form fieldset.error textarea');
+  [...inputs, ...textareas].forEach((input) => {
     input.classList.remove('required');
     input.oninvalid = (e) => {
       e.preventDefault();
       input.classList.add('required');
       /* Set focus on first invalid field in the form */
-      let invalid = input.form.querySelector('form fieldset.error input.required:invalid');
+      let invalid = input.form.querySelector('form fieldset.error > .required:invalid');
       invalid.focus();
     };
   });

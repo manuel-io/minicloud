@@ -18,9 +18,10 @@
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
        
       <div class="group">      
-        <fieldset>
+        <fieldset class="error">
           <label>Search:</label>
           <input class="focus" type="text" name="search" required />
+          <p class="error">Fill out this field</p>
         </fieldset>
         
         <fieldset>

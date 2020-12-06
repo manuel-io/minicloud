@@ -3,6 +3,7 @@ from datetime import datetime
 from flask import Blueprint, g, request, render_template, url_for, redirect, flash, abort, make_response, jsonify
 from users import User, login_required, current_user
 from config import app, Config
+from helpers import get_categories
 
 notes = Blueprint('notes', __name__)
 
@@ -17,6 +18,7 @@ def show():
     previous = None
     forward = None
     text = ''
+    category = 'Default'
     tags = []
 
     if 'uid' in request.args.keys():
@@ -26,8 +28,8 @@ def show():
         if uid:
             with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
                 cursor.execute("""
-                  SELECT * FROM minicloud_notes WHERE user_id = %s AND uid = %s
-                  """, [current_user.id, uid])
+                SELECT * FROM minicloud_notes WHERE user_id = %s AND uid = %s
+                """, [current_user.id, uid])
 
                 note = cursor.fetchone()
                 if note:
@@ -35,22 +37,23 @@ def show():
                     today = last.replace(tzinfo=utc).astimezone(zone).strftime('%-d. %B %Y, %H:%M')
                     uid = note['uid']
                     text = note['description']
+                    category = note['category']
                     tags = note['tags']
 
         with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
-              SELECT * FROM minicloud_notes WHERE user_id = %s
-              AND created_at < %s ORDER BY created_at DESC LIMIT 1
-              """, [current_user.id, last])
+            SELECT * FROM minicloud_notes WHERE user_id = %s
+            AND created_at < %s ORDER BY created_at DESC LIMIT 1
+            """, [current_user.id, last])
 
             data1 = cursor.fetchone()
             if data1: previous = data1['uid']
 
         with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
-              SELECT * FROM minicloud_notes WHERE user_id = %s
-              AND created_at > %s ORDER BY created_at ASC LIMIT 1
-              """, [current_user.id, last])
+            SELECT * FROM minicloud_notes WHERE user_id = %s
+            AND created_at > %s ORDER BY created_at ASC LIMIT 1
+            """, [current_user.id, last])
 
             data2 = cursor.fetchone()
             if data2: forward = data2['uid']
@@ -63,6 +66,8 @@ def show():
                           , today = today
                           , uid = uid
                           , text = text
+                          , category = category
+                          , categories = get_categories()
                           , tags = tags
                           , previous = previous
                           , forward = forward
@@ -116,6 +121,7 @@ def search():
 @login_required
 def save():
     description = request.form['description']
+    category = request.form['category']
     tags = []
     if 'tags' in request.form.keys():
         tags = [ tag.strip() for tag in request.form.get('tags').split(',') if len(tag.strip()) > 0 ]
@@ -123,8 +129,9 @@ def save():
     try:
         with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
-              INSERT INTO minicloud_notes (user_id, description, tags) VALUES (%s, %s, %s) RETURNING uid
-              """, [ current_user.id, description, tags ])
+            INSERT INTO minicloud_notes (user_id, description, category, tags)
+            VALUES (%s, %s, %s, %s) RETURNING uid
+            """, [current_user.id, description, category, tags])
 
             g.db.commit()
             uid = cursor.fetchone()['uid']
@@ -142,6 +149,7 @@ def save():
 @login_required
 def edit(uid):
     description = request.form['description']
+    category = request.form['category']
     tags = []
     if 'tags' in request.form.keys():
         tags = [ tag.strip() for tag in request.form.get('tags').split(',') if len(tag.strip()) > 0 ]
@@ -149,9 +157,9 @@ def edit(uid):
     try:
         with g.db.cursor(cursor_factory = psycopg2.extras.DictCursor) as cursor:
             cursor.execute("""
-              UPDATE minicloud_notes SET description = %s, tags = %s
-              WHERE user_id = %s AND uid = %s
-              """, [ description, tags, current_user.id, uid ])
+            UPDATE minicloud_notes SET description = %s, category = %s, tags = %s
+            WHERE user_id = %s AND uid = %s
+            """, [description, category, tags, current_user.id, uid])
 
             g.db.commit()
             flash(['Paper updated'], 'info')

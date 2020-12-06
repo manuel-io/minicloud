@@ -168,16 +168,17 @@ input[type=submit].info {
   background-color: #99cc33;
 }
 
-fieldset input:valid {
-  outline: 0;
-  box-shadow: none;
-}
 
+fieldset textarea:valid,
+fieldset textarea:invalid,
+fieldset input:valid,
 fieldset input:invalid {
   outline: 0;
   box-shadow: none;
 }
 
+fieldset textarea:invalid:focus,
+textarea textarea.required:invalid,
 fieldset input:invalid:focus,
 fieldset input.required:invalid {
   outline: 0;
@@ -186,10 +187,12 @@ fieldset input.required:invalid {
   border-width: 2px;
 }
 
+fieldset textarea + p.error,
 fieldset input + p.error {
   display: none;
 }
 
+fieldset textarea.required:invalid + p.error,
 fieldset input.required:invalid + p.error {
   display: block;
   color: #de1f1f;
