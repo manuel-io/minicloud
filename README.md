@@ -1,74 +1,64 @@
 [![Build Status](https://travis-ci.com/manuel-io/minicloud.svg?branch=master)](https://travis-ci.com/manuel-io/minicloud)
 
-:warning: **This version is not fully tested**
-
-![Gallery](share/preview/minicloud1.png)
+:warning: **Still not a release, things may change**
 
 ## Requirements
 
-    sudo apt install git \
-                     libpq-dev \
-                     python3-dev \
-                     python3-venv \
-                     python3-pip
+    apt install git \
+                libpq-dev \
+                python3-dev \
+                python3-venv \
+                python3-pip
+
+## Quick Start
+
+The simplest way to start is [building a docker
+container](https://github.com/manuel-io/minicloud#dockerfile) and accessing it
+directly or using a reverse proxy like nginx. Otherwise you have to build the
+complete environment by yourself. A documentation how to do that on a [ubuntu
+like system is included](docs/CONFIG.md). You may also take a look at the
+construction process of a [docker container](build/focal/Dockerfile).
+
+    apt-get install postgresql \
+                    nginx-full \
+                    rsyslog \
+                    minidlna
+
+    ...
+
+    systemctl restart postgresql.service
+    systemctl restart nginx.service
+    systemctl restart rsyslog.service
+    systemctl restart minidlna.service
+    systemctl restart minicloud.service
 
 ## Release numbering plan
 
 A release numbers consist of three parts, a major number, a minor number, and a
 revision number, each separated by a dot.
 
-* Major number:
-  A change in the major release number indicates a huge system change. Don't
-  consider an easy migration with a lower system number.
+* Major number: A change in the major release number indicates a huge system
+  change. Don't consider an easy migration with a lower system number.
 
-* Minor number:
-  A change in the minor release number indicates new system features, UI/UX changes or a
-  change in the database schema. Consider reading the [migration log](share/Migration.md).
+* Minor number: A change in the minor release number indicates new system
+  features, UI/UX changes or a change in the database schema. Consider reading
+  the [migration log](share/MIGRATIONS.md).
 
-* Revision number:
-  A change in the revision number indicates bug fixes and package
-  updates. It is always recommended updating to the latest revision number.
+* Revision number: A change in the revision number indicates bug fixes and
+  package updates. It is always recommended updating to the latest revision
+  number.
 
 The current release number can be printed out:
 
     source bin/activate
     python admtool.py minicloud --version
 
-## Quick Start
-
-The simplest way to start is building a docker container and accessing it
-directly or using a reverse proxy like nginx. Otherwise you have to build the
-complete environment by yourself.
-
-    sudo groupadd -g 9001 minicloud
-    useradd -u 9001 -g 9001 -d /home/minicloud -m -s /bin/bash minicloud
-    sudo -u postgres createuser -P -d minicloud
-    sudo -u postgres createdb -T template0 -l 'en_US.UTF-8' -E 'UTF-8' -O minicloud minicloud
-
-    su - minicloud
-    cd ~
-
-    git clone https://github.com/manuel-io/minicloud.git /home/minicloud
-    python3 -m venv /home/minicloud
-
-    psql < /home/minicloud/share/schema.sql
-
-    cp /home/minicloud/share/minicloud.service /etc/systemd/system/minicloud.service
-    cp /home/minicloud/share/minicloud.nginx /etc/nginx/sites-available/minicloud
-
-...
-
-    systemctl restart postgresql.service
-    systemctl restart nginx.service
-    systemctl restart rsyslog.service
-    systemctl restart minicloud.service
-    systemctl restart minidlna.service
-
 ## Dockerfile
 
-    git clone https://github.com/manuel-io/minicloud.git minicloud .
-    docker build -t minicloud .
-    docker run --network host -d -P --name cloud minicloud
+    cd minicloud
+    git clone https://github.com/manuel-io/minicloud.git .
+    docker build -t minicloud build/focal
+    docker run --network host -d -P --name cloud_on_focal minicloud_focal
 
 #### Inspect the container
 
@@ -103,7 +93,6 @@ under the MIT License (MIT)
 
 ## Lato Font
 
-The main font in the default
-design is from the Lato font
-family and licensed under SIL Open Font License 1.1
+The main font in the default design is from the Lato font family and licensed
+under SIL Open Font License 1.1
 (https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL)
